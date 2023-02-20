@@ -1,0 +1,20 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/client-web/src/**",
+                "${workspaceFolder}/server-side/src/**",
+                "${EMSDK}/upstream/emscripten/system/include/**"
+            ],
+            "defines": [
+                "__GNUC__=3",
+                "Py_BUILD_CORE"
+            ],
+            "compilerPath": "/usr/bin/clang++",
+            "cStandard": "c17",
+            "cppStandard": "c++17"
+        }
+    ],
+    "version": 4
+}
