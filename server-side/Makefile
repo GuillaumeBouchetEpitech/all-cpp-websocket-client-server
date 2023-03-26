@@ -96,15 +96,12 @@ RM=			rm -rf
 #
 ## RULE(S)
 
-all:
-	@$(MAKE) --no-print-directory application
+all:	application
 
 ensureFolders:
 	@mkdir -p $(DIR_TARGET)
 
-application:
-	@$(MAKE) --no-print-directory ensureFolders
-	@$(MAKE) --no-print-directory $(OBJ)
+application:	ensureFolders $(OBJ)
 	@echo ' ---> building $(LOG_INFO) "application"'
 	@mkdir -p `dirname $(NAME_APPLICATION)`
 	@$(CXX) $(CXXFLAGS) $(OBJ) -o $(NAME_APPLICATION) $(LDFLAGS)
@@ -128,13 +125,10 @@ include $(shell test -d $(DIR_OBJ) && find $(DIR_OBJ) -name "*.dep")
 clean:
 	$(RM) $(DIR_OBJ)
 
-fclean:
-	@$(MAKE) --no-print-directory clean
+fclean:	clean
 	$(RM) $(NAME_APPLICATION)
 
-re:
-	@$(MAKE) --no-print-directory fclean
-	@$(MAKE) --no-print-directory all
+re:	fclean all
 
 .PHONY:	\
 	all \

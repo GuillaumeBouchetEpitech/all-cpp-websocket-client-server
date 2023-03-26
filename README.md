@@ -20,7 +20,7 @@ Client-server example
   * compress the opened files (when possible)
   * cache in-memory (hash map)
 * accept and reply to HTTP request (GET)
-  * handle any custom request9s
+  * handle any custom requests
     * used to reply the "web-socket-config.json"
   * retrieve the requested file from the cache
     * reply the compressed payload (when available and supported)
@@ -31,11 +31,10 @@ Client-server example
 * accept connection and broadcast new user
 * read messages and broadcast to all users
 * handle disconnection and broadcast as lost user
-* could be used as an example of (efficient?) thread safe session manager
-* and example of (efficient?) thread safe session manager is included
-  * one `shared mutex` is used
-    * multiple read with `shared lock(s)`
-    * unique write with `unique lock(s)`
+* a thread safe session manager is included
+  * a `shared mutex` is used
+    * multiple read will rely on `shared lock(s)`
+    * unique write will rely on `unique lock(s)`
 
 
 # Dependencies

@@ -74,7 +74,10 @@ LDFLAGS+=	$(BUILD_FLAG)
 LDFLAGS+=	-lwebsocket.js
 LDFLAGS+=	-s TOTAL_MEMORY=128Mb
 LDFLAGS+=	-s WASM=1
-LDFLAGS+=	-s EXPORTED_RUNTIME_METHODS=cwrap,allocateUTF8,_free
+LDFLAGS+= -s BINARYEN_IGNORE_IMPLICIT_TRAPS=1
+# LDFLAGS+= -s DISABLE_DEPRECATED_FIND_EVENT_TARGET_BEHAVIOR=0
+LDFLAGS+= -s EXPORTED_FUNCTIONS="['_free']"
+LDFLAGS+= -s EXPORTED_RUNTIME_METHODS="['cwrap','_malloc','stringToUTF8','lengthBytesUTF8','UTF8ToString','allocateUTF8']"
 
 ifeq ($(build_mode),debug)
 
@@ -93,15 +96,12 @@ RM=			rm -rf
 #
 ## RULE(S)
 
-all:
-	@$(MAKE) --no-print-directory application
+all:	application
 
 ensureFolders:
 	@mkdir -p $(DIR_TARGET)
 
-application:
-	@$(MAKE) --no-print-directory ensureFolders
-	@$(MAKE) --no-print-directory $(OBJ)
+application:	ensureFolders $(OBJ)
 	@echo ' ---> building $(LOG_INFO) "application"'
 	@mkdir -p `dirname $(NAME_APPLICATION)`
 	@$(CXX) $(CXXFLAGS) $(OBJ) -o $(NAME_APPLICATION) $(LDFLAGS)
@@ -125,13 +125,10 @@ include $(shell test -d $(DIR_OBJ) && find $(DIR_OBJ) -name "*.dep")
 clean:
 	$(RM) $(DIR_OBJ)
 
-fclean:
-	@$(MAKE) --no-print-directory clean
+fclean:  clean
 	$(RM) $(NAME_APPLICATION)
 
-re:
-	@$(MAKE) --no-print-directory fclean
-	@$(MAKE) --no-print-directory all
+re: fclean all
 
 .PHONY:	\
 	all \
