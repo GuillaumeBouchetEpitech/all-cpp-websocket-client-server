@@ -77,7 +77,8 @@ LDFLAGS+=	-s WASM=1
 LDFLAGS+= -s BINARYEN_IGNORE_IMPLICIT_TRAPS=1
 # LDFLAGS+= -s DISABLE_DEPRECATED_FIND_EVENT_TARGET_BEHAVIOR=0
 LDFLAGS+= -s EXPORTED_FUNCTIONS="['_free']"
-LDFLAGS+= -s EXPORTED_RUNTIME_METHODS="['cwrap','_malloc','stringToUTF8','lengthBytesUTF8','UTF8ToString','allocateUTF8']"
+# LDFLAGS+= -s EXPORTED_RUNTIME_METHODS="['cwrap','_malloc','stringToUTF8','lengthBytesUTF8','UTF8ToString','allocateUTF8']"
+LDFLAGS+= -s EXPORTED_RUNTIME_METHODS="['cwrap','stringToUTF8','lengthBytesUTF8','UTF8ToString','allocateUTF8']"
 
 ifeq ($(build_mode),debug)
 

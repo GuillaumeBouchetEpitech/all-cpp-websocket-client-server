@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include "../IWebSocketSession.hpp"
+
 #include "boostHeaders.hpp"
 
 #include <list>
@@ -18,12 +20,10 @@ struct SendBuffer {
 };
 
 // Echoes back all received WebSocket messages
-class WebSocketSession : public std::enable_shared_from_this<WebSocketSession> {
-  websocket::stream<beast::tcp_stream> _ws;
-  beast::flat_buffer _buffer;
-  TcpListener& _mainTcpListener;
-
-  std::list<SendBuffer> _buffersToSend;
+class WebSocketSession
+  : public IWebSocketSession
+  , public std::enable_shared_from_this<WebSocketSession>
+{
 
 public:
   void* userData = nullptr;
@@ -31,23 +31,26 @@ public:
 public:
   // Take ownership of the socket
   explicit WebSocketSession(
-    tcp::socket&& inSocket, TcpListener& inMainTcpListener);
+    boost::asio::ip::tcp::socket&& inSocket, TcpListener& inMainTcpListener);
 
   // Get on the correct executor
-  void run();
+  void run() override;
 
-  void write(const char* data, std::size_t length);
+  void write(const char* data, std::size_t length) override;
 
 private:
   // Start the asynchronous operation
   void _onRun();
-
   void _onAccept(beast::error_code ec);
-
   void _doRead();
-
   void _onRead(beast::error_code ec, std::size_t bytes_transferred);
+  void _onWrite(beast::error_code ec, std::size_t bytes_transferred);
 
 private:
-  void _onWrite(beast::error_code ec, std::size_t bytes_transferred);
+  websocket::stream<beast::tcp_stream> _ws;
+  beast::flat_buffer _buffer;
+  TcpListener& _mainTcpListener;
+
+  std::list<SendBuffer> _buffersToSend;
+
 };

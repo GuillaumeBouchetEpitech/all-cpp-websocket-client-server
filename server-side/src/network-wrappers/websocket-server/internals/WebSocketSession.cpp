@@ -32,8 +32,12 @@ SendBuffer::SendBuffer(const char* inData, std::size_t inSize) : size(inSize) {
 
 // Take ownership of the socket
 WebSocketSession::WebSocketSession(
-  tcp::socket&& inSocket, TcpListener& inMainTcpListener)
-  : _ws(std::move(inSocket)), _mainTcpListener(inMainTcpListener) {}
+  boost::asio::ip::tcp::socket&& inSocket,
+  TcpListener& inMainTcpListener
+)
+  : _ws(std::move(inSocket))
+  , _mainTcpListener(inMainTcpListener)
+{}
 
 // Get on the correct executor
 void
@@ -92,11 +96,13 @@ WebSocketSession::_onRun() {
 void
 WebSocketSession::_onAccept(beast::error_code ec) {
 
-  if (ec)
+  if (ec) {
     return fail(ec, "accept");
+  }
 
-  if (_mainTcpListener._onConnectionCallback)
+  if (_mainTcpListener._onConnectionCallback) {
     _mainTcpListener._onConnectionCallback(shared_from_this());
+  }
 
   // Read a message
   _doRead();
@@ -125,8 +131,13 @@ WebSocketSession::_onRead(beast::error_code ec, std::size_t bytes_transferred) {
   if (ec)
     return fail(ec, "read");
 
-  if (_mainTcpListener._onMessageCallback)
-    _mainTcpListener._onMessageCallback(shared_from_this(), _buffer);
+  if (_mainTcpListener._onMessageCallback) {
+    const auto& subBuffer = _buffer.data();
+    const char* dataPtr = static_cast<const char*>(subBuffer.data());
+    const std::size_t dataLength = subBuffer.size();
+
+    _mainTcpListener._onMessageCallback(shared_from_this(), dataPtr, dataLength);
+  }
 
   // Clear the buffer
   _buffer.consume(_buffer.size());

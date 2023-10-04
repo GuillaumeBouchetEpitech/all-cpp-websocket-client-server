@@ -1,6 +1,10 @@
 
 #include "HttpFileServer.hpp"
 
+#include <boost/beast/http/status.hpp>
+#include <boost/beast/http/verb.hpp>
+#include <boost/beast/core/ostream.hpp>
+
 #include <iostream>
 
 HttpFileServer::HttpFileServer(
@@ -9,46 +13,47 @@ HttpFileServer::HttpFileServer(
   uint16_t inHttpPort,
   uint32_t inTotalThreads)
 : _fileManager(inBasePath)
-, _httpServer(net::ip::make_address(inIpAddress), inHttpPort, inTotalThreads)
-{}
+{
+  _httpServer = AbstractHttpServer::create(inIpAddress, inHttpPort, inTotalThreads);
+}
 
 HttpFileServer::~HttpFileServer()
 {
-  _httpServer.stop();
+  _httpServer->stop();
 }
 
 void
 HttpFileServer::start() {
-  _httpServer.setOnConnectionCallback(
+  _httpServer->setOnConnectionCallback(
     [this](
-      const http::request<http::dynamic_body>& request,
-      http::response<http::dynamic_body>& response) {
+      const http_callbacks::request& request,
+      http_callbacks::response& response) {
       response.version(request.version());
       response.keep_alive(false);
 
       switch (request.method()) {
-      case http::verb::get:
+      case boost::beast::http::verb::get:
         _onGetRequest(request, response);
         break;
 
       default:
         // We return responses indicating an error if
         // we do not recognize the request method.
-        response.result(http::status::bad_request);
-        response.set(http::field::content_type, "text/plain");
-        beast::ostream(response.body())
+        response.result(boost::beast::http::status::bad_request);
+        response.set(boost::beast::http::field::content_type, "text/plain");
+        boost::beast::ostream(response.body())
           << "Invalid request-method '" << std::string(request.method_string())
           << "'";
         break;
       }
     });
 
-  _httpServer.start();
+  _httpServer->start();
 }
 
 void
 HttpFileServer::stop() {
-  _httpServer.stop();
+  _httpServer->stop();
 }
 
 
@@ -60,10 +65,10 @@ void HttpFileServer::setCustomHandler(const CustomHandler& handler)
 
 void
 HttpFileServer::_onGetRequest(
-  const http::request<http::dynamic_body>& request,
-  http::response<http::dynamic_body>& response) {
-  response.result(http::status::ok);
-  response.set(http::field::server, "Beast");
+  const http_callbacks::request& request,
+  http_callbacks::response& response) {
+  response.result(boost::beast::http::status::ok);
+  response.set(boost::beast::http::field::server, "Beast");
 
   const std::string finalPath(request.target().begin(), request.target().end());
 
@@ -75,8 +80,8 @@ HttpFileServer::_onGetRequest(
 
     // cached file was found
 
-    response.set(http::field::content_type, cache->type);
-    response.set(http::field::last_modified, cache->lastModified);
+    response.set(boost::beast::http::field::content_type, cache->type);
+    response.set(boost::beast::http::field::last_modified, cache->lastModified);
 
     // cached file is compressed
 
@@ -84,9 +89,9 @@ HttpFileServer::_onGetRequest(
 
       // response payload will be compressed
 
-      response.set(http::field::content_encoding, "gzip");
+      response.set(boost::beast::http::field::content_encoding, "gzip");
 
-      beast::ostream(response.body()) << cache->compressed;
+      boost::beast::ostream(response.body()) << cache->compressed;
 
       const std::size_t payloadSize = response.payload_size()
                                         ? response.payload_size().get()
@@ -102,7 +107,7 @@ HttpFileServer::_onGetRequest(
 
       // response payload will not be compressed
 
-      beast::ostream(response.body()) << cache->fileContent;
+      boost::beast::ostream(response.body()) << cache->fileContent;
 
       const std::size_t payloadSize = response.payload_size()
                                         ? response.payload_size().get()
@@ -118,9 +123,9 @@ HttpFileServer::_onGetRequest(
 
     // cached file was not found
 
-    response.result(http::status::not_found);
-    response.set(http::field::content_type, "text/plain");
-    beast::ostream(response.body()) << "File not found\r\n";
+    response.result(boost::beast::http::status::not_found);
+    response.set(boost::beast::http::field::content_type, "text/plain");
+    boost::beast::ostream(response.body()) << "File not found\r\n";
 
     std::cout << "[HTTP] GET 404 " << request.target() << std::endl;
   }
@@ -129,7 +134,7 @@ HttpFileServer::_onGetRequest(
 bool
 HttpFileServer::_isGzipCompressionPossible(
   const FileCacheResult& cache,
-  const http::request<http::dynamic_body>& request) {
+  const http_callbacks::request& request) {
 
   // cache file compressed?
   if (cache.compressionRatio <= 0.0f)

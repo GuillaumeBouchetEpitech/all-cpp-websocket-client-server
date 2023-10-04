@@ -1,19 +1,19 @@
 
 #pragma once
 
+#include "network-wrappers/websocket-server/IWebSocketSession.hpp"
+
 #include <functional>
 #include <vector>
 // #include <mutex>
 #include <shared_mutex>
 // #include <thread>
 
-class WebSocketSession;
-
 class WebSocketSessionManager {
 
 private:
-  using Session = std::vector<std::shared_ptr<WebSocketSession>>;
-  Session _allSessions;
+  using Sessions = std::vector<std::shared_ptr<IWebSocketSession>>;
+  Sessions _allSessions;
 
   mutable std::shared_mutex _mutex;
 
@@ -27,8 +27,8 @@ public:
   virtual ~WebSocketSessionManager() = default;
 
 public:
-  void addSession(std::shared_ptr<WebSocketSession> inWsSession);
-  void removeSession(std::shared_ptr<WebSocketSession> inWsSession);
+  void addSession(std::shared_ptr<IWebSocketSession> inWsSession);
+  void removeSession(std::shared_ptr<IWebSocketSession> inWsSession);
   void forEachSession(
-    const std::function<void(std::shared_ptr<WebSocketSession>)>& inCallback);
+    const std::function<void(std::shared_ptr<IWebSocketSession>)>& inCallback);
 };

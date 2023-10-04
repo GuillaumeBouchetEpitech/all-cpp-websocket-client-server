@@ -1,7 +1,8 @@
 
 #pragma once
 
-#include "network-wrappers/http-server/HttpServer.hpp"
+#include "network-wrappers/http-server/AbstractHttpServer.hpp"
+#include "network-wrappers/http-server/callbacks.hpp"
 
 #include "file-manager/FileManager.hpp"
 
@@ -10,8 +11,8 @@ class HttpFileServer {
 public:
   using CustomHandler = std::function<bool(
     const std::string&,
-    const http::request<http::dynamic_body>&,
-    http::response<http::dynamic_body>&)>;
+    const http_callbacks::request&,
+    http_callbacks::response&)>;
 
 public:
   HttpFileServer(
@@ -29,16 +30,16 @@ public:
 
 private:
   void _onGetRequest(
-    const http::request<http::dynamic_body>& request,
-    http::response<http::dynamic_body>& response);
+    const http_callbacks::request& request,
+    http_callbacks::response& response);
 
   static bool _isGzipCompressionPossible(
     const FileCacheResult& cache,
-    const http::request<http::dynamic_body>& request);
+    const http_callbacks::request& request);
 
 private:
   FileManager _fileManager;
-  HttpServer _httpServer;
+  std::unique_ptr<AbstractHttpServer> _httpServer;
 
   CustomHandler _customHandler;
 

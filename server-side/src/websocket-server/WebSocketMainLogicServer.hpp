@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "network-wrappers/websocket-server/WebSocketServer.hpp"
+#include "network-wrappers/websocket-server/AbstractWebSocketServer.hpp"
 
 #include "session-manager/WebSocketSessionManager.hpp"
 
@@ -10,7 +10,7 @@
 
 class WebSocketMainLogicServer {
 private:
-  WebSocketServer _webSocketServer;
+  std::unique_ptr<AbstractWebSocketServer> _webSocketServer;
   WebSocketSessionManager _sessionManager;
 
   int32_t _lastPlayerId = 1;

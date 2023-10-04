@@ -34,9 +34,9 @@ SRC+=	\
 	$(wildcard \
 		$(DIR_SRC)/*.cpp \
 		$(DIR_SRC)/network-wrappers/http-server/*.cpp \
-		$(DIR_SRC)/network-wrappers/http-server/internal/*.cpp \
+		$(DIR_SRC)/network-wrappers/http-server/internals/*.cpp \
 		$(DIR_SRC)/network-wrappers/websocket-server/*.cpp \
-		$(DIR_SRC)/network-wrappers/websocket-server/internal/*.cpp \
+		$(DIR_SRC)/network-wrappers/websocket-server/internals/*.cpp \
 		$(DIR_SRC)/https-server/*.cpp \
 		$(DIR_SRC)/https-server/file-manager/*.cpp \
 		$(DIR_SRC)/websocket-server/*.cpp \
@@ -85,7 +85,7 @@ LDFLAGS += -pthread
 # LDFLAGS += -lssl
 # LDFLAGS += -lcrypto
 LDFLAGS += -lz # libzlib
-LDFLAGS += -lboost_system # libboost-system1.67-dev
+# LDFLAGS += -lboost_system # libboost-system1.67-dev
 
 
 RM=			rm -rf

@@ -4,9 +4,9 @@
 #include <memory>
 
 HttpServer::HttpServer(
-  boost::asio::ip::address const inAddress, const uint16_t inPort,
+  const std::string& inIpAddress, const uint16_t inPort,
   const uint32_t inTotalThreads /*= 1*/)
-  : _ioc(inTotalThreads), _acceptor(_ioc, {inAddress, inPort}), _socket(_ioc),
+  : _ioc(inTotalThreads), _acceptor(_ioc, {net::ip::make_address(inIpAddress), inPort}), _socket(_ioc),
     _totalThreads(inTotalThreads) {
   if (inTotalThreads == 0)
     throw std::runtime_error("total thread(s) must be > 0");
@@ -15,18 +15,7 @@ HttpServer::HttpServer(
 HttpServer::~HttpServer() { stop(); }
 
 void
-HttpServer::_doAccept() {
-  _acceptor.async_accept(_socket, [this](beast::error_code ec) {
-    if (!ec)
-      std::make_shared<HttpConnection>(std::move(_socket))
-        ->setOnConnectionCallback(_onConnectionCallback)
-        .start();
-    _doAccept();
-  });
-}
-
-void
-HttpServer::setOnConnectionCallback(OnConnectionCallback onConnectionCallback) {
+HttpServer::setOnConnectionCallback(const http_callbacks::OnConnection& onConnectionCallback) {
   _onConnectionCallback = onConnectionCallback;
 }
 
@@ -58,4 +47,15 @@ HttpServer::stop() {
     if (_allThreads[index].joinable())
       _allThreads[index].join();
   _allThreads.clear();
+}
+
+void
+HttpServer::_doAccept() {
+  _acceptor.async_accept(_socket, [this](beast::error_code ec) {
+    if (!ec)
+      std::make_shared<HttpConnection>(std::move(_socket))
+        ->setOnConnectionCallback(_onConnectionCallback)
+        .start();
+    _doAccept();
+  });
 }

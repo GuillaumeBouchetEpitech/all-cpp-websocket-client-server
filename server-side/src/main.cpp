@@ -2,7 +2,23 @@
 #include "https-server/HttpFileServer.hpp"
 #include "websocket-server/WebSocketMainLogicServer.hpp"
 
+#include <boost/beast/core/ostream.hpp>
+
 #include <iostream>
+
+namespace {
+
+std::string _buildWebSocketUrl(const std::string_view ipAddress, uint16_t port)
+{
+  std::stringstream sstr;
+  sstr << "{";
+  sstr << " \"webSocketUrl\":";
+  sstr << " \"ws://" << ipAddress << ":" << std::to_string(port) << "/\"";
+  sstr << " }";
+  return sstr.str();
+}
+
+}
 
 int
 main(int argc, char* argv[]) {
@@ -34,19 +50,19 @@ main(int argc, char* argv[]) {
   //
 
   const std::string_view webSocketConfigPath = "/web-socket-config.json";
-  const std::string webSocketConfigPayload = "{ \"webSocketUrl\": \"ws://" + ipAddress + ":" + std::to_string(wsPort) + "/\" }";
+  const std::string webSocketConfigPayload = _buildWebSocketUrl(ipAddress, wsPort);
 
   auto customHandler = [&webSocketConfigPath, &webSocketConfigPayload](
     const std::string& path,
-    const http::request<http::dynamic_body>& request,
-    http::response<http::dynamic_body>& response)
+    const http_callbacks::request& request,
+    http_callbacks::response& response)
   {
     static_cast<void>(request); // unused
 
     if (path == webSocketConfigPath)
     {
-      response.set(http::field::content_type, "application/json");
-      beast::ostream(response.body()) << webSocketConfigPayload;
+      response.set(boost::beast::http::field::content_type, "application/json");
+      boost::beast::ostream(response.body()) << webSocketConfigPayload;
       return true;
     }
     return false;

@@ -7,7 +7,7 @@ WebSocketSessionManager::WebSocketSessionManager() {
 
 void
 WebSocketSessionManager::addSession(
-  std::shared_ptr<WebSocketSession> inWsSession) {
+  std::shared_ptr<IWebSocketSession> inWsSession) {
   std::unique_lock uniqueLock(_mutex); // only one write at a time
 
   _allSessions.push_back(inWsSession);
@@ -15,7 +15,7 @@ WebSocketSessionManager::addSession(
 
 void
 WebSocketSessionManager::removeSession(
-  std::shared_ptr<WebSocketSession> inWsSession) {
+  std::shared_ptr<IWebSocketSession> inWsSession) {
   std::unique_lock uniqueLock(_mutex); // only one write at a time
 
   for (std::size_t index = 0; index < _allSessions.size(); ++index)
@@ -34,7 +34,7 @@ WebSocketSessionManager::removeSession(
 
 void
 WebSocketSessionManager::forEachSession(
-  const std::function<void(std::shared_ptr<WebSocketSession>)>& inCallback) {
+  const std::function<void(std::shared_ptr<IWebSocketSession>)>& inCallback) {
   std::shared_lock sharedLock(_mutex); // allow multiple read at the same time
 
   for (std::size_t index = 0; index < _allSessions.size(); ++index) {

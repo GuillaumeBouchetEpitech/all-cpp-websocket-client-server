@@ -1,18 +1,20 @@
 
 #include "WebSocketMainLogicServer.hpp"
 
-#include "network-wrappers/websocket-server/internal/WebSocketSession.hpp"
+#include "network-wrappers/websocket-server/IWebSocketSession.hpp"
 
 #include <iostream>
+#include <sstream>
 
 WebSocketMainLogicServer::WebSocketMainLogicServer(
   const std::string& inIpAddress, uint16_t inPort,
-  uint32_t inTotalThreads)
-  : _webSocketServer(net::ip::make_address(inIpAddress), inPort, inTotalThreads) {
+  uint32_t inTotalThreads
+) {
   _allPlayersData.reserve(1024);
 
-  _webSocketServer.setOnConnectionCallback(
-    [this](std::shared_ptr<WebSocketSession> inNewWsSession) {
+  _webSocketServer = AbstractWebSocketServer::create(inIpAddress, inPort, inTotalThreads);
+  _webSocketServer->setOnConnectionCallback(
+    [this](std::shared_ptr<IWebSocketSession> inNewWsSession) {
       std::cout << "[WS] new client" << std::endl;
 
       //
@@ -27,7 +29,7 @@ WebSocketMainLogicServer::WebSocketMainLogicServer(
       const std::string messageToSend = sstr.str();
 
       _sessionManager.forEachSession(
-        [&messageToSend](std::shared_ptr<WebSocketSession> currWsSession) {
+        [&messageToSend](std::shared_ptr<IWebSocketSession> currWsSession) {
           currWsSession->write(messageToSend.data(), messageToSend.size());
         });
 
@@ -45,14 +47,12 @@ WebSocketMainLogicServer::WebSocketMainLogicServer(
       inNewWsSession->userData = newPlayerData.get();
     });
 
-  _webSocketServer.setOnMessageCallback(
+  _webSocketServer->setOnMessageCallback(
     [this](
-      std::shared_ptr<WebSocketSession> inWsSession,
-      const beast::flat_buffer& buffer) {
-      const auto& subBuffer = buffer.data();
-      const char* dataPtr = static_cast<const char*>(subBuffer.data());
+      std::shared_ptr<IWebSocketSession> inWsSession,
+      const char* dataPtr, std::size_t dataLength) {
 
-      std::string_view messageReceived(dataPtr, subBuffer.size());
+      std::string_view messageReceived(dataPtr, dataLength);
 
       const PlayerData* currPlayerData =
         static_cast<PlayerData*>(inWsSession->userData);
@@ -72,7 +72,7 @@ WebSocketMainLogicServer::WebSocketMainLogicServer(
 
         _sessionManager.forEachSession(
           [&messageToSend,
-           inWsSession](std::shared_ptr<WebSocketSession> currWsSession) {
+           inWsSession](std::shared_ptr<IWebSocketSession> currWsSession) {
             if (inWsSession != currWsSession)
               currWsSession->write(messageToSend.data(), messageToSend.size());
           });
@@ -92,8 +92,8 @@ WebSocketMainLogicServer::WebSocketMainLogicServer(
       }
     });
 
-  _webSocketServer.setOnDisconnectionCallback(
-    [this](std::shared_ptr<WebSocketSession> inDisconnectedWsSession) {
+  _webSocketServer->setOnDisconnectionCallback(
+    [this](std::shared_ptr<IWebSocketSession> inDisconnectedWsSession) {
       std::cout << "[WS] client disconnected" << std::endl;
 
       PlayerData* currPlayerData =
@@ -129,7 +129,7 @@ WebSocketMainLogicServer::WebSocketMainLogicServer(
       const std::string messageToSend = sstr.str();
 
       _sessionManager.forEachSession(
-        [&messageToSend](std::shared_ptr<WebSocketSession> currWsSession) {
+        [&messageToSend](std::shared_ptr<IWebSocketSession> currWsSession) {
           currWsSession->write(messageToSend.data(), messageToSend.size());
         });
     });
@@ -139,10 +139,10 @@ WebSocketMainLogicServer::~WebSocketMainLogicServer() { stop(); }
 
 void
 WebSocketMainLogicServer::start() {
-  _webSocketServer.start();
+  _webSocketServer->start();
 }
 
 void
 WebSocketMainLogicServer::stop() {
-  _webSocketServer.stop();
+  _webSocketServer->stop();
 }
