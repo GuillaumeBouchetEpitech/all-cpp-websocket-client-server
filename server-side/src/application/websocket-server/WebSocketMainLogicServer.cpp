@@ -7,12 +7,11 @@
 #include <sstream>
 
 WebSocketMainLogicServer::WebSocketMainLogicServer(
-  const std::string& inIpAddress, uint16_t inPort,
-  uint32_t inTotalThreads
-) {
+  const std::string& inIpAddress, uint16_t inPort, uint32_t inTotalThreads) {
   _allPlayersData.reserve(1024);
 
-  _webSocketServer = AbstractWebSocketServer::create(inIpAddress, inPort, inTotalThreads);
+  _webSocketServer =
+    AbstractWebSocketServer::create(inIpAddress, inPort, inTotalThreads);
   _webSocketServer->setOnConnectionCallback(
     [this](std::shared_ptr<IWebSocketSession> inNewWsSession) {
       std::cout << "[WS] new client" << std::endl;
@@ -49,9 +48,8 @@ WebSocketMainLogicServer::WebSocketMainLogicServer(
 
   _webSocketServer->setOnMessageCallback(
     [this](
-      std::shared_ptr<IWebSocketSession> inWsSession,
-      const char* dataPtr, std::size_t dataLength) {
-
+      std::shared_ptr<IWebSocketSession> inWsSession, const char* dataPtr,
+      std::size_t dataLength) {
       std::string_view messageReceived(dataPtr, dataLength);
 
       const PlayerData* currPlayerData =

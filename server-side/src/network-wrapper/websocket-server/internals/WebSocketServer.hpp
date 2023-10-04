@@ -1,7 +1,6 @@
 
 #pragma once
 
-
 #include "../AbstractWebSocketServer.hpp"
 
 #include "TcpListener.hpp"
@@ -25,9 +24,12 @@ public:
   ~WebSocketServer();
 
 public:
-  void setOnConnectionCallback(const ws_callbacks::OnConnection& onConnectionCallback) override;
-  void setOnDisconnectionCallback(const ws_callbacks::OnDisconnection& onDisconnectionCallback) override;
-  void setOnMessageCallback(const ws_callbacks::OnMessage& onMessageCallback) override;
+  void setOnConnectionCallback(
+    const ws_callbacks::OnConnection& onConnectionCallback) override;
+  void setOnDisconnectionCallback(
+    const ws_callbacks::OnDisconnection& onDisconnectionCallback) override;
+  void setOnMessageCallback(
+    const ws_callbacks::OnMessage& onMessageCallback) override;
 
 public:
   void start() override;
@@ -43,5 +45,4 @@ private:
 
   // Sessions allSessions;
   // allSessions.reserve(1024);
-
 };

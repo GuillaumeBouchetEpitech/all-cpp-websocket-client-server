@@ -6,8 +6,9 @@
 HttpServer::HttpServer(
   const std::string& inIpAddress, const uint16_t inPort,
   const uint32_t inTotalThreads /*= 1*/)
-  : _ioc(inTotalThreads), _acceptor(_ioc, {net::ip::make_address(inIpAddress), inPort}), _socket(_ioc),
-    _totalThreads(inTotalThreads) {
+  : _ioc(inTotalThreads),
+    _acceptor(_ioc, {net::ip::make_address(inIpAddress), inPort}),
+    _socket(_ioc), _totalThreads(inTotalThreads) {
   if (inTotalThreads == 0)
     throw std::runtime_error("total thread(s) must be > 0");
 }
@@ -15,7 +16,8 @@ HttpServer::HttpServer(
 HttpServer::~HttpServer() { stop(); }
 
 void
-HttpServer::setOnConnectionCallback(const http_callbacks::OnConnection& onConnectionCallback) {
+HttpServer::setOnConnectionCallback(
+  const http_callbacks::OnConnection& onConnectionCallback) {
   _onConnectionCallback = onConnectionCallback;
 }
 

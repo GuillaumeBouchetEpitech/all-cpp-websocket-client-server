@@ -15,7 +15,8 @@ fail(beast::error_code ec, char const* what) {
 
 } // namespace
 
-TcpListener::TcpListener(net::io_context& ioc, boost::asio::ip::tcp::endpoint endpoint)
+TcpListener::TcpListener(
+  net::io_context& ioc, boost::asio::ip::tcp::endpoint endpoint)
   : _ioc(ioc), _acceptor(ioc), _endpoint(endpoint) {}
 
 //
@@ -37,7 +38,8 @@ TcpListener::setOnDisconnectionCallback(
 }
 
 void
-TcpListener::setOnMessageCallback(const ws_callbacks::OnMessage& onMessageCallback) {
+TcpListener::setOnMessageCallback(
+  const ws_callbacks::OnMessage& onMessageCallback) {
   _onMessageCallback = onMessageCallback;
 }
 
@@ -105,7 +107,8 @@ TcpListener::_doAccept() {
 }
 
 void
-TcpListener::_onAccept(beast::error_code ec, boost::asio::ip::tcp::socket socket) {
+TcpListener::_onAccept(
+  beast::error_code ec, boost::asio::ip::tcp::socket socket) {
 
   if (ec) {
     fail(ec, "accept");

@@ -32,12 +32,8 @@ SendBuffer::SendBuffer(const char* inData, std::size_t inSize) : size(inSize) {
 
 // Take ownership of the socket
 WebSocketSession::WebSocketSession(
-  boost::asio::ip::tcp::socket&& inSocket,
-  TcpListener& inMainTcpListener
-)
-  : _ws(std::move(inSocket))
-  , _mainTcpListener(inMainTcpListener)
-{}
+  boost::asio::ip::tcp::socket&& inSocket, TcpListener& inMainTcpListener)
+  : _ws(std::move(inSocket)), _mainTcpListener(inMainTcpListener) {}
 
 // Get on the correct executor
 void
@@ -136,7 +132,8 @@ WebSocketSession::_onRead(beast::error_code ec, std::size_t bytes_transferred) {
     const char* dataPtr = static_cast<const char*>(subBuffer.data());
     const std::size_t dataLength = subBuffer.size();
 
-    _mainTcpListener._onMessageCallback(shared_from_this(), dataPtr, dataLength);
+    _mainTcpListener._onMessageCallback(
+      shared_from_this(), dataPtr, dataLength);
   }
 
   // Clear the buffer

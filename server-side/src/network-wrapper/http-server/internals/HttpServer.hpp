@@ -24,7 +24,8 @@ public:
   HttpServer& operator=(HttpServer&& other) = delete;
 
 public:
-  void setOnConnectionCallback(const http_callbacks::OnConnection& onRequestCallback);
+  void setOnConnectionCallback(
+    const http_callbacks::OnConnection& onRequestCallback);
 
 public:
   void start();
@@ -42,5 +43,4 @@ private:
 private:
   http_callbacks::OnConnection _onConnectionCallback = nullptr;
   std::vector<std::thread> _allThreads;
-
 };

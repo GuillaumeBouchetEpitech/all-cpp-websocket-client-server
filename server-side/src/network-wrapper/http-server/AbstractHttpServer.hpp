@@ -14,7 +14,8 @@ public:
   AbstractHttpServer& operator=(AbstractHttpServer&& other) = delete;
 
 public:
-  virtual void setOnConnectionCallback(const http_callbacks::OnConnection& onRequestCallback) = 0;
+  virtual void setOnConnectionCallback(
+    const http_callbacks::OnConnection& onRequestCallback) = 0;
 
 public:
   virtual void start() = 0;
@@ -24,5 +25,4 @@ public:
   static std::unique_ptr<AbstractHttpServer> create(
     const std::string& inIpAddress, uint16_t inPort,
     uint32_t inTotalThreads = 1);
-
 };

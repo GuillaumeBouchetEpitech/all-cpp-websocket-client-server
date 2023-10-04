@@ -3,7 +3,8 @@
 
 #include "internals/HttpServer.hpp"
 
-std::unique_ptr<AbstractHttpServer> AbstractHttpServer::create(
+std::unique_ptr<AbstractHttpServer>
+AbstractHttpServer::create(
   const std::string& inIpAddress, uint16_t inPort,
   uint32_t inTotalThreads /*= 1*/
 ) {

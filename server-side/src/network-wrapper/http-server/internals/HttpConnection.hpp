@@ -1,7 +1,6 @@
 
 #pragma once
 
-
 #include "../callbacks.hpp"
 
 #include "./boostHeaders.hpp"
@@ -13,7 +12,8 @@ public:
   HttpConnection(boost::asio::ip::tcp::socket socket);
 
 public:
-  HttpConnection& setOnConnectionCallback(const http_callbacks::OnConnection& inOnConnectionCallback);
+  HttpConnection& setOnConnectionCallback(
+    const http_callbacks::OnConnection& inOnConnectionCallback);
 
 public:
   // Initiate the asynchronous operations associated with the connection.
@@ -52,5 +52,4 @@ private:
   net::steady_timer _deadline{_socket.get_executor(), std::chrono::seconds(60)};
 
   http_callbacks::OnConnection _onConnectionCallback;
-
 };

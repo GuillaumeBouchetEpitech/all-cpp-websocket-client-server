@@ -20,10 +20,8 @@ struct SendBuffer {
 };
 
 // Echoes back all received WebSocket messages
-class WebSocketSession
-  : public IWebSocketSession
-  , public std::enable_shared_from_this<WebSocketSession>
-{
+class WebSocketSession : public IWebSocketSession,
+                         public std::enable_shared_from_this<WebSocketSession> {
 
 public:
   void* userData = nullptr;
@@ -52,5 +50,4 @@ private:
   TcpListener& _mainTcpListener;
 
   std::list<SendBuffer> _buffersToSend;
-
 };

@@ -8,8 +8,8 @@
 
 namespace {
 
-std::string _buildWebSocketUrl(const std::string_view ipAddress, uint16_t port)
-{
+std::string
+_buildWebSocketUrl(const std::string_view ipAddress, uint16_t port) {
   std::stringstream sstr;
   sstr << "{";
   sstr << " \"webSocketUrl\":";
@@ -18,7 +18,7 @@ std::string _buildWebSocketUrl(const std::string_view ipAddress, uint16_t port)
   return sstr.str();
 }
 
-}
+} // namespace
 
 int
 main(int argc, char* argv[]) {
@@ -50,17 +50,16 @@ main(int argc, char* argv[]) {
   //
 
   const std::string_view webSocketConfigPath = "/web-socket-config.json";
-  const std::string webSocketConfigPayload = _buildWebSocketUrl(ipAddress, wsPort);
+  const std::string webSocketConfigPayload =
+    _buildWebSocketUrl(ipAddress, wsPort);
 
   auto customHandler = [&webSocketConfigPath, &webSocketConfigPayload](
-    const std::string& path,
-    const http_callbacks::request& request,
-    http_callbacks::response& response)
-  {
+                         const std::string& path,
+                         const http_callbacks::request& request,
+                         http_callbacks::response& response) {
     static_cast<void>(request); // unused
 
-    if (path == webSocketConfigPath)
-    {
+    if (path == webSocketConfigPath) {
       response.set(boost::beast::http::field::content_type, "application/json");
       boost::beast::ostream(response.body()) << webSocketConfigPayload;
       return true;
@@ -81,12 +80,14 @@ main(int argc, char* argv[]) {
   //
 
   std::cout << "servers started" << std::endl;
-  std::cout << " -> link: \"http://" << ipAddress << ":" << httpPort << "/\"" << std::endl;
+  std::cout << " -> link: \"http://" << ipAddress << ":" << httpPort << "/\""
+            << std::endl;
 
   //
   // loop forever...
   // that could be where a shell would be setup...
-  // ...or anything else allowing any kind of user input(s) (admin commands, etc.)
+  // ...or anything else allowing any kind of user input(s) (admin commands,
+  // etc.)
   //
 
   while (true)

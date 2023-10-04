@@ -6,8 +6,7 @@ HttpConnection::HttpConnection(boost::asio::ip::tcp::socket socket)
 
 HttpConnection&
 HttpConnection::setOnConnectionCallback(
-  const http_callbacks::OnConnection& inOnConnectionCallback
-) {
+  const http_callbacks::OnConnection& inOnConnectionCallback) {
   _onConnectionCallback = inOnConnectionCallback;
   return *this;
 }

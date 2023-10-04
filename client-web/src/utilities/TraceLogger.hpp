@@ -61,17 +61,17 @@ template <> TraceLogger& TraceLogger::operator<<<double>(double data);
 #endif
 
 // one line logging macro
-#define D_LOG_OUT(streamMsg)                                \
-  {                                                       \
-    helpers::TraceLogger tmpLogger;                       \
+#define D_LOG_OUT(streamMsg)                                  \
+  {                                                           \
+    helpers::TraceLogger tmpLogger;                           \
     tmpLogger << "LOG OUT " << D_LOG_OUT_PREFIX << streamMsg; \
-    tmpLogger.dumpOut();                                  \
+    tmpLogger.dumpOut();                                      \
   }
 
 // one line logging macro
-#define D_LOG_ERR(streamMsg)                                \
-  {                                                       \
-    helpers::TraceLogger tmpLogger;                       \
+#define D_LOG_ERR(streamMsg)                                  \
+  {                                                           \
+    helpers::TraceLogger tmpLogger;                           \
     tmpLogger << "LOG ERR " << D_LOG_OUT_PREFIX << streamMsg; \
-    tmpLogger.dumpErr();                                  \
+    tmpLogger.dumpErr();                                      \
   }

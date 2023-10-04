@@ -5,9 +5,9 @@
 
 #include "boostHeaders.hpp"
 
+#include <functional>
 #include <memory>
 #include <vector>
-#include <functional>
 
 class AbstractWebSocketSession;
 class WebSocketSession;
@@ -20,8 +20,10 @@ public:
   TcpListener(net::io_context& ioc, boost::asio::ip::tcp::endpoint endpoint);
 
 public:
-  void setOnConnectionCallback(const ws_callbacks::OnConnection& onConnectionCallback);
-  void setOnDisconnectionCallback(const ws_callbacks::OnDisconnection& onDisconnectionCallback);
+  void setOnConnectionCallback(
+    const ws_callbacks::OnConnection& onConnectionCallback);
+  void setOnDisconnectionCallback(
+    const ws_callbacks::OnDisconnection& onDisconnectionCallback);
   void setOnMessageCallback(const ws_callbacks::OnMessage& onMessageCallback);
 
 public:
@@ -42,5 +44,4 @@ private:
   ws_callbacks::OnConnection _onConnectionCallback;
   ws_callbacks::OnDisconnection _onDisconnectionCallback;
   ws_callbacks::OnMessage _onMessageCallback;
-
 };

@@ -13,5 +13,4 @@ public:
 public:
   virtual void run() = 0;
   virtual void write(const char* data, std::size_t length) = 0;
-
 };
