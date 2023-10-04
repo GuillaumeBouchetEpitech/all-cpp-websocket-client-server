@@ -1,2 +1,1 @@
-
-export * from "./isWasmSupported";
+export * from './isWasmSupported';

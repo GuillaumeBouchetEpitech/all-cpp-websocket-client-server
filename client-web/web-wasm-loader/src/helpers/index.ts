@@ -1,2 +1,1 @@
-
-export * from "./scriptLoadingUtility";
+export * from './scriptLoadingUtility';
