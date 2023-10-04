@@ -56,7 +56,7 @@ echo "#"
 echo ""
 
 cd ./client-web/web-wasm-loader
-npm install
+bun install
 npm run build
 cd $CURRENT_DIR
 
