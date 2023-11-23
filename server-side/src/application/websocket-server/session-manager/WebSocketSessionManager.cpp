@@ -1,41 +1,66 @@
 
 #include "WebSocketSessionManager.hpp"
 
+namespace {
+
+template<typename T>
+bool _no_realloc_erase(std::vector<T>& inContainer, const T& inValue)
+{
+  auto it = std::find(inContainer.begin(), inContainer.end(), inValue);
+  if (it == inContainer.end()) {
+    return false;
+  }
+
+  // the value to remove from the container was found
+
+  // is the value the last element of the container?
+  const bool isLastElement = (it == (inContainer.end() - 1));
+  if (!isLastElement) {
+    // not the last element -> swap with the last element of the container
+    std::swap(*it, inContainer.back());
+  }
+
+  // remove the (potentially swapped) value from the container
+  // this will not reallocate
+  // -> unlike std::vector<T>::erase()
+  inContainer.pop_back();
+  return true;
+}
+
+}
+
 WebSocketSessionManager::WebSocketSessionManager() {
   _allSessions.reserve(1024);
 }
 
 void
-WebSocketSessionManager::addSession(
-  std::shared_ptr<IWebSocketSession> inWsSession) {
-  std::unique_lock uniqueLock(_mutex); // only one write at a time
+WebSocketSessionManager::addSession(SessionPtr inWsSession) {
+
+  // only one write at a time
+  std::unique_lock uniqueLock(_mutex);
 
   _allSessions.push_back(inWsSession);
 }
 
 void
-WebSocketSessionManager::removeSession(
-  std::shared_ptr<IWebSocketSession> inWsSession) {
-  std::unique_lock uniqueLock(_mutex); // only one write at a time
+WebSocketSessionManager::removeSession(SessionPtr inWsSession) {
 
-  for (std::size_t index = 0; index < _allSessions.size(); ++index)
-    if (_allSessions[index] == inWsSession) {
-      const bool isLastElement = (index + 1 == _allSessions.size());
+  // only one write at a time
+  std::unique_lock uniqueLock(_mutex);
 
-      if (!isLastElement) {
-        // alternative to erase() -> will avoid a potential reallocation
-        std::swap(_allSessions[index], _allSessions.back());
-      }
+  const bool wasRemoved = _no_realloc_erase(_allSessions, inWsSession);
 
-      _allSessions.pop_back();
-      break;
-    }
+  if (!wasRemoved) {
+    throw std::runtime_error("websocket session to remove was not found");
+  }
 }
 
 void
 WebSocketSessionManager::forEachSession(
-  const std::function<void(std::shared_ptr<IWebSocketSession>)>& inCallback) {
-  std::shared_lock sharedLock(_mutex); // allow multiple read at the same time
+  const std::function<void(SessionPtr)>& inCallback) {
+
+  // allow multiple read at the same time
+  std::shared_lock sharedLock(_mutex);
 
   for (std::size_t index = 0; index < _allSessions.size(); ++index) {
     inCallback(_allSessions[index]);

@@ -27,6 +27,12 @@ const asyncRun = async () => {
 
   const result = await Bun.build(config);
 
-  console.log('result', result);
+  if (result.success) {
+    console.log('BUILD SUCCESS');
+  } else {
+    console.log('BUILD FAILURE');
+    console.log('result', result);
+  }
+
 };
 asyncRun();

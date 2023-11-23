@@ -21,7 +21,7 @@
 
 # Description
 
-Client-server example
+C++ Client-Server example
 
 ## The Client Side:
 * is written in C++ and compiled to WebAssembly
@@ -30,6 +30,83 @@ Client-server example
     * or ~5-6 times faster than JavaScript (also devoid of GC slowdown)
 * will connect to the server with a websocket inside the WebAssembly logic
   * the connection is established using a config fetched from the server-side (easily configured if needed)
+
+
+```mermaid
+
+%%{
+  init: {
+    'theme': 'base',
+    'themeVariables': {
+      'primaryColor': '#242424',
+      'primaryTextColor': '#DDD',
+      'primaryBorderColor': '#000',
+      'lineColor': '#A0A0A0',
+      'secondaryColor': '#454545',
+      'tertiaryColor': '#353535'
+    }
+  }
+}%%
+
+  flowchart TB
+
+    subgraph client-side [Client Side]
+
+      browser[Browser]
+
+      subgraph client-js-app [Web Js App]
+
+        direction TB
+
+        file_index_html[index.html]
+        file_bundle_js[bundle.js]
+
+        file_index_html -..-> file_bundle_js
+      end
+
+      subgraph client-wasm-app [Web Wasm App]
+
+        direction TB
+
+        file_index_js[index.js]
+        file_index_wasm[index.wasm]
+        file_index_data[index.data]
+
+        file_index_js -..-> file_index_wasm
+        file_index_js -..-> file_index_data
+
+      end
+
+      subgraph real-time-client-app ["Real Time Client App (Example)"]
+
+        direction LR
+
+        ws_client[WebSocket<br>Client]
+        client_game_logic[Game Logic]
+        client_physic_logic[Physic]
+        client_graphic_logic[Graphic]
+
+        client_game_logic <---> ws_client
+        client_game_logic <-.-> client_physic_logic
+        client_game_logic <-.-> client_graphic_logic
+      end
+
+      browser --- client-js-app
+      client-js-app --> client-wasm-app
+      client-wasm-app --- real-time-client-app
+
+      client_http_get((HTTP GET))
+      client_websocket((WebSocket))
+
+      client-js-app --- client_http_get
+      client-wasm-app --- client_http_get
+      real-time-client-app --- client_websocket
+
+    end
+
+
+
+```
 
 ## The Server Side:
 * is written in C++ and compiled to a native binary
@@ -54,6 +131,51 @@ Client-server example
     * will set the appropriate content-type header (when supported)
   * 404 status if the requested file is missing from the in-memory cache
 
+
+```mermaid
+
+%%{
+  init: {
+    'theme': 'base',
+    'themeVariables': {
+      'primaryColor': '#242424',
+      'primaryTextColor': '#DDD',
+      'primaryBorderColor': '#000',
+      'lineColor': '#A0A0A0',
+      'secondaryColor': '#454545',
+      'tertiaryColor': '#353535'
+    }
+  }
+}%%
+
+  flowchart TD
+
+    subgraph server-side [Server Side]
+
+      direction LR
+
+      server_http_get((HTTP GET))
+
+      subgraph server-files [File Server]
+
+        http_server[HTTP Server]
+
+        direction LR
+
+        server_file_cache[File Cache]
+        server_file_disk[Disk]
+
+        http_server <---> server_file_cache
+        server_file_cache <-.-> server_file_disk
+
+      end
+
+      server_http_get --- server-files
+
+    end
+
+```
+
 ### WebSocket Server:
 * event(s)
   * accept connection(s)
@@ -69,6 +191,55 @@ Client-server example
   * a `shared mutex` is used
     * multiple read will rely on `shared lock(s)`
     * unique write will rely on `unique lock(s)`
+
+
+
+```mermaid
+
+%%{
+  init: {
+    'theme': 'base',
+    'themeVariables': {
+      'primaryColor': '#242424',
+      'primaryTextColor': '#DDD',
+      'primaryBorderColor': '#000',
+      'lineColor': '#A0A0A0',
+      'secondaryColor': '#454545',
+      'tertiaryColor': '#353535'
+    }
+  }
+}%%
+
+  flowchart TD
+
+    subgraph server-side [Server Side]
+
+      direction LR
+
+      server_websocket((WebSocket))
+
+      subgraph real-time-server-app ["Real Time Server App (Example)"]
+
+        direction LR
+
+        ws_server[WebSocket<br>Server]
+        server_game_logic[Game Logic]
+        server_physic_logic[Physic]
+
+        ws_server <---> server_game_logic
+        server_game_logic <-.-> server_physic_logic
+
+      end
+
+      server_websocket --- real-time-server-app
+
+    end
+
+
+
+
+```
+
 
 # Dependencies
 
@@ -121,8 +292,8 @@ chmod +x ./sh_build_everything.sh
 
 ```bash
 cd ./server-side
-#           ip-address  http-port  ws-port  total-threads
-./bin/exec  127.0.0.1   7777       8888     1
+#           ip-address  http-port  ws-port  http-threads  ws-threads
+./bin/exec  127.0.0.1   7777       8888     1             1
 ```
 
 ## Step 2 - Load The Client

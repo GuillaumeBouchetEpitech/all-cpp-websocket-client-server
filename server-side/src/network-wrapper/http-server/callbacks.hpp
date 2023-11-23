@@ -1,6 +1,6 @@
 
-#include <boost/beast/http/dynamic_body.hpp>
-#include <boost/beast/http/message.hpp>
+#include <boost/beast/http/dynamic_body.hpp> // http::dynamic_body
+#include <boost/beast/http/message.hpp>      // http::request, http::response
 
 #include <functional>
 

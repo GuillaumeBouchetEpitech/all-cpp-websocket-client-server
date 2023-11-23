@@ -6,6 +6,7 @@
 #include <boost/beast/http/verb.hpp>
 
 #include <iostream>
+#include <iomanip>
 
 HttpFileServer::HttpFileServer(
   const std::string& inBasePath, const std::string& inIpAddress,
@@ -58,71 +59,51 @@ HttpFileServer::setCustomHandler(const CustomHandler& handler) {
 void
 HttpFileServer::_onGetRequest(
   const http_callbacks::request& request, http_callbacks::response& response) {
-  response.result(boost::beast::http::status::ok);
-  response.set(boost::beast::http::field::server, "Beast");
 
   const std::string finalPath(request.target().begin(), request.target().end());
 
   if (_customHandler(finalPath, request, response)) {
-    // ...
-  } else if (auto cache = _fileManager.getFile(finalPath)) {
+    return;
+  }
 
-    // cached file was found
-
-    response.set(boost::beast::http::field::content_type, cache->type);
-    response.set(boost::beast::http::field::last_modified, cache->lastModified);
-
-    // cached file is compressed
-
-    if (_isGzipCompressionPossible(*cache, request)) {
-
-      // response payload will be compressed
-
-      response.set(boost::beast::http::field::content_encoding, "gzip");
-
-      boost::beast::ostream(response.body()) << cache->compressed;
-
-      const std::size_t payloadSize = response.payload_size()
-                                        ? response.payload_size().get()
-                                        : cache->fileContent.size();
-
-      std::cout << "[HTTP] GET 200"
-                << " [" << payloadSize << "b]"
-                << " " << request.target() << " " << cache->type << " "
-                << cache->compressionRatio << " " << cache->lastModified
-                << std::endl;
-
-    } else {
-
-      // response payload will not be compressed
-
-      boost::beast::ostream(response.body()) << cache->fileContent;
-
-      const std::size_t payloadSize = response.payload_size()
-                                        ? response.payload_size().get()
-                                        : cache->fileContent.size();
-      std::cout << "[HTTP] GET 200"
-                << " [" << payloadSize << "b]"
-                << " " << request.target() << " " << cache->type << " "
-                << cache->compressionRatio << " " << cache->lastModified
-                << std::endl;
-    }
-
-  } else {
-
+  auto result = _fileManager.getFile(finalPath);
+  if (result.has_value() == false) {
     // cached file was not found
 
     response.result(boost::beast::http::status::not_found);
+    response.set(boost::beast::http::field::server, "Beast");
     response.set(boost::beast::http::field::content_type, "text/plain");
     boost::beast::ostream(response.body()) << "File not found\r\n";
 
     std::cout << "[HTTP] GET 404 " << request.target() << std::endl;
   }
+
+  const FileCacheEntry& cachedResult = *result;
+
+  // cached file was found
+
+  response.result(boost::beast::http::status::ok);
+  response.set(boost::beast::http::field::server, "Beast");
+  response.set(boost::beast::http::field::content_type, cachedResult.type);
+  response.set(boost::beast::http::field::last_modified, cachedResult.lastModified);
+
+  // cached file (compressed or not)
+
+  if (_isGzipCompressionPossible(cachedResult, request)) {
+    response.set(boost::beast::http::field::content_encoding, "gzip");
+    boost::beast::ostream(response.body()) << cachedResult.compressedFileContent;
+  } else {
+    boost::beast::ostream(response.body()) << cachedResult.fileContent;
+  }
+
+  // simple log
+
+  std::cout << "[HTTP] GET 200 " << cachedResult.logContent << std::endl;
 }
 
 bool
 HttpFileServer::_isGzipCompressionPossible(
-  const FileCacheResult& cache, const http_callbacks::request& request) {
+  const FileCacheEntry& cache, const http_callbacks::request& request) {
 
   // cache file compressed?
   if (cache.compressionRatio <= 0.0f)
@@ -134,8 +115,8 @@ HttpFileServer::_isGzipCompressionPossible(
     return false;
 
   // relevant request header value present?
-  const std::size_t found = encoding.find("gzip");
-  if (found == std::string::npos)
+  const std::size_t foundIndex = encoding.find("gzip");
+  if (foundIndex == std::string::npos)
     return false;
 
   return true;

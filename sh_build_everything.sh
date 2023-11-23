@@ -84,7 +84,7 @@ echo "# starting server side (localhost)"
 echo "#"
 echo ""
 
-./bin/exec 127.0.0.1 7777 8888 1
+./bin/exec 127.0.0.1 7777 8888 1 1
 
 cd $CURRENT_DIR
 
