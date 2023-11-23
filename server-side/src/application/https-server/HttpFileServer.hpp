@@ -15,10 +15,8 @@ public:
 
 public:
   HttpFileServer(
-    const std::string& inBasePath,
-    const std::string& inIpAddress,
-    uint16_t inHttpPort,
-    uint32_t inTotalThreads);
+    const std::string& inBasePath, const std::string& inIpAddress,
+    uint16_t inHttpPort, uint32_t inTotalThreads);
 
   ~HttpFileServer();
 
@@ -31,12 +29,10 @@ public:
 
 private:
   void _onGetRequest(
-    const http_callbacks::request& request,
-    http_callbacks::response& response);
+    const http_callbacks::request& request, http_callbacks::response& response);
 
   static bool _isGzipCompressionPossible(
-    const FileCacheEntry& cache,
-    const http_callbacks::request& request);
+    const FileCacheEntry& cache, const http_callbacks::request& request);
 
 private:
   FileManager _fileManager;

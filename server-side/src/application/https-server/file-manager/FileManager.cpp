@@ -30,19 +30,19 @@ FileManager::getFile(const std::string& filename) const {
 
 void
 FileManager::_buildTypesMap() {
-  _typesMap[".ico"]  = "image/x-icon";
+  _typesMap[".ico"] = "image/x-icon";
   _typesMap[".html"] = "text/html";
-  _typesMap[".js"]   = "text/javascript";
+  _typesMap[".js"] = "text/javascript";
   _typesMap[".json"] = "application/json";
-  _typesMap[".css"]  = "text/css";
-  _typesMap[".png"]  = "image/png";
-  _typesMap[".jpg"]  = "image/jpeg";
-  _typesMap[".wav"]  = "audio/wav";
-  _typesMap[".mp3"]  = "audio/mpeg";
-  _typesMap[".wav"]  = "audio/wav";
-  _typesMap[".svg"]  = "image/svg+xml";
-  _typesMap[".pdf"]  = "application/pdf";
-  _typesMap[".doc"]  = "application/msword";
+  _typesMap[".css"] = "text/css";
+  _typesMap[".png"] = "image/png";
+  _typesMap[".jpg"] = "image/jpeg";
+  _typesMap[".wav"] = "audio/wav";
+  _typesMap[".mp3"] = "audio/mpeg";
+  _typesMap[".wav"] = "audio/wav";
+  _typesMap[".svg"] = "image/svg+xml";
+  _typesMap[".pdf"] = "application/pdf";
+  _typesMap[".doc"] = "application/msword";
 
   // this allows the browser "streaming compilation", if supported
   _typesMap[".wasm"] = "application/wasm";
@@ -55,7 +55,8 @@ FileManager::_buildFileCache() {
     const std::string filePath = dir_entry.path();
 
     const std::string requestPath = filePath.substr(_basePath.size());
-    std::shared_ptr<FileCacheEntry> fileCachePtr = _loadFile(filePath, requestPath);
+    std::shared_ptr<FileCacheEntry> fileCachePtr =
+      _loadFile(filePath, requestPath);
 
     if (!fileCachePtr) {
       continue;
@@ -66,8 +67,8 @@ FileManager::_buildFileCache() {
     std::cout << " => disk path     : " << filePath << std::endl;
     std::cout << " => web path      : " << requestPath << std::endl;
     std::cout << " => type          : " << fileCachePtr->type << std::endl;
-    std::cout << " => compression   : " << std::fixed << std::setprecision(1) << fileCachePtr->compressionRatio << "x"
-              << std::endl;
+    std::cout << " => compression   : " << std::fixed << std::setprecision(1)
+              << fileCachePtr->compressionRatio << "x" << std::endl;
     std::cout << " => last modified : " << fileCachePtr->lastModified
               << std::endl;
 #endif
@@ -89,14 +90,16 @@ FileManager::_buildFileCache() {
 
     const std::string subKey = requestPath.substr(0, pathIndex + 1);
 
-    std::cout << " => file was indexed: " << filePath << " -> " << subKey << std::endl;
+    std::cout << " => file was indexed: " << filePath << " -> " << subKey
+              << std::endl;
 
     _fileCache[subKey] = fileCachePtr;
   }
 }
 
 std::shared_ptr<FileCacheEntry>
-FileManager::_loadFile(const std::string& filename, const std::string& requestPath) {
+FileManager::_loadFile(
+  const std::string& filename, const std::string& requestPath) {
 
   // filename exist and is file
   if (fs::is_regular_file(filename) == false) {
@@ -154,36 +157,39 @@ FileManager::_loadFile(const std::string& filename, const std::string& requestPa
     std::stringstream subSstr;
     subSstr << " [size=" << std::setw(8) << fileContent.size() << "b,";
     if (newCache->compressionRatio > 0.0f) {
-      subSstr << " sent=" << std::setw(8) << newCache->compressedFileContent.size() << "b,";
+      subSstr << " sent=" << std::setw(8)
+              << newCache->compressedFileContent.size() << "b,";
     } else {
       subSstr << " sent=" << std::setw(8) << fileContent.size() << "b,";
     }
-    subSstr << " compression=" << std::setw(3) << std::fixed << std::setprecision(1) << newCache->compressionRatio << "x]";
+    subSstr << " compression=" << std::setw(3) << std::fixed
+            << std::setprecision(1) << newCache->compressionRatio << "x]";
     subSstr << " " << newCache->lastModified;
     subSstr << " " << std::setw(20) << newCache->type << " " << requestPath;
 
     newCache->logContent = subSstr.str();
   }
 
-
   return newCache;
 }
 
-void FileManager::_getLastModifiedTime(
-  const std::string_view& filename,
-  const std::string_view& format,
-  std::string& outLastModified
-) {
+void
+FileManager::_getLastModifiedTime(
+  const std::string_view& filename, const std::string_view& format,
+  std::string& outLastModified) {
   fs::file_time_type file_time = fs::last_write_time(filename);
 
-  auto sctp = std::chrono::time_point_cast<std::chrono::system_clock::duration>(file_time - fs::file_time_type::clock::now() + std::chrono::system_clock::now());
+  auto sctp = std::chrono::time_point_cast<std::chrono::system_clock::duration>(
+    file_time - fs::file_time_type::clock::now() +
+    std::chrono::system_clock::now());
   std::time_t tt = std::chrono::system_clock::to_time_t(sctp);
 
   std::tm now_tm = *std::localtime(&tt);
 
   constexpr std::size_t k_bufferMaxSize = 128;
   char bufferData[k_bufferMaxSize];
-  const size_t bufferSize = std::strftime(bufferData, k_bufferMaxSize, format.data(), &now_tm);
+  const size_t bufferSize =
+    std::strftime(bufferData, k_bufferMaxSize, format.data(), &now_tm);
   bufferData[bufferSize] = '\0';
 
   outLastModified = std::string(bufferData, bufferSize);

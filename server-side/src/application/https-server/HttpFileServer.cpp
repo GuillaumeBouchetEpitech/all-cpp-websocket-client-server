@@ -5,8 +5,8 @@
 #include <boost/beast/http/status.hpp>
 #include <boost/beast/http/verb.hpp>
 
-#include <iostream>
 #include <iomanip>
+#include <iostream>
 
 HttpFileServer::HttpFileServer(
   const std::string& inBasePath, const std::string& inIpAddress,
@@ -85,13 +85,15 @@ HttpFileServer::_onGetRequest(
   response.result(boost::beast::http::status::ok);
   response.set(boost::beast::http::field::server, "Beast");
   response.set(boost::beast::http::field::content_type, cachedResult.type);
-  response.set(boost::beast::http::field::last_modified, cachedResult.lastModified);
+  response.set(
+    boost::beast::http::field::last_modified, cachedResult.lastModified);
 
   // cached file (compressed or not)
 
   if (_isGzipCompressionPossible(cachedResult, request)) {
     response.set(boost::beast::http::field::content_encoding, "gzip");
-    boost::beast::ostream(response.body()) << cachedResult.compressedFileContent;
+    boost::beast::ostream(response.body())
+      << cachedResult.compressedFileContent;
   } else {
     boost::beast::ostream(response.body()) << cachedResult.fileContent;
   }

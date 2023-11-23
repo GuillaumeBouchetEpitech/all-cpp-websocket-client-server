@@ -3,9 +3,9 @@
 
 namespace {
 
-template<typename T>
-bool _no_realloc_erase(std::vector<T>& inContainer, const T& inValue)
-{
+template <typename T>
+bool
+_no_realloc_erase(std::vector<T>& inContainer, const T& inValue) {
   auto it = std::find(inContainer.begin(), inContainer.end(), inValue);
   if (it == inContainer.end()) {
     return false;
@@ -27,7 +27,7 @@ bool _no_realloc_erase(std::vector<T>& inContainer, const T& inValue)
   return true;
 }
 
-}
+} // namespace
 
 WebSocketSessionManager::WebSocketSessionManager() {
   _allSessions.reserve(1024);
