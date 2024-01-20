@@ -1,6 +1,8 @@
 
 #include "WebSocketSessionManager.hpp"
 
+#include <mutex>
+
 namespace {
 
 template <typename T>

@@ -6,6 +6,7 @@
 #include <functional>
 #include <shared_mutex>
 #include <vector>
+#include <memory>
 
 class WebSocketSessionManager {
 

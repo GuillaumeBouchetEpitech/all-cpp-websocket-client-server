@@ -18,8 +18,9 @@ fail(beast::error_code ec, char const* what) {
 } // namespace
 
 SendBuffer::SendBuffer(const char* inData, std::size_t inSize) : size(inSize) {
-  if (inSize > max_send_buffer_size)
+  if (inSize > max_send_buffer_size) {
     throw std::runtime_error("send buffer requested size is too big");
+  }
 
   std::memcpy(data, inData, inSize);
 }
@@ -39,13 +40,16 @@ WebSocketSession::WebSocketSession(
 void
 WebSocketSession::run() {
 
+  // allow shared ownership to net::dispatch callback
+  auto self = shared_from_this();
+
   // We need to be executing within a strand to perform async operations
   // on the I/O objects in this session. Although not strictly necessary
   // for single-threaded contexts, this example code is written to be
   // thread-safe by default.
   net::dispatch(
     _ws.get_executor(),
-    beast::bind_front_handler(&WebSocketSession::_onRun, shared_from_this()));
+    beast::bind_front_handler(&WebSocketSession::_onRun, self));
 }
 
 void
@@ -55,12 +59,16 @@ WebSocketSession::write(const char* data, std::size_t length) {
   _buffersToSend.push_back(SendBuffer(data, length));
 
   if (wasEmpty == true) {
+
+    // allow shared ownership to async_write callback
+    auto self = shared_from_this();
+
     const SendBuffer& buffer = _buffersToSend.front();
 
     _ws.async_write(
       boost::asio::buffer(buffer.data, buffer.size),
       beast::bind_front_handler(
-        &WebSocketSession::_onWrite, shared_from_this()));
+        &WebSocketSession::_onWrite, self));
   }
 }
 
@@ -84,9 +92,14 @@ WebSocketSession::_onRun() {
         http::field::server,
         std::string(BOOST_BEAST_VERSION_STRING) + " websocket-server-async");
     }));
+
+
+  // allow shared ownership to async_accept callback
+  auto self = shared_from_this();
+
   // Accept the websocket handshake
   _ws.async_accept(beast::bind_front_handler(
-    &WebSocketSession::_onAccept, shared_from_this()));
+    &WebSocketSession::_onAccept, self));
 }
 
 void
@@ -97,7 +110,11 @@ WebSocketSession::_onAccept(beast::error_code ec) {
   }
 
   if (_mainTcpListener._onConnectionCallback) {
-    _mainTcpListener._onConnectionCallback(shared_from_this());
+
+    // allow shared ownership to _onConnectionCallback callback
+    auto self = shared_from_this();
+
+    _mainTcpListener._onConnectionCallback(self);
   }
 
   // Read a message
@@ -106,10 +123,14 @@ WebSocketSession::_onAccept(beast::error_code ec) {
 
 void
 WebSocketSession::_doRead() {
+
+  // allow shared ownership to async_read callback
+  auto self = shared_from_this();
+
   // Read a message into our buffer
   _ws.async_read(
     _buffer,
-    beast::bind_front_handler(&WebSocketSession::_onRead, shared_from_this()));
+    beast::bind_front_handler(&WebSocketSession::_onRead, self));
 }
 
 void
@@ -118,8 +139,13 @@ WebSocketSession::_onRead(beast::error_code ec, std::size_t bytes_transferred) {
 
   // This indicates that the session was closed
   if (ec == websocket::error::closed) {
-    if (_mainTcpListener._onDisconnectionCallback)
-      _mainTcpListener._onDisconnectionCallback(shared_from_this());
+    if (_mainTcpListener._onDisconnectionCallback) {
+
+      // allow shared ownership to _onDisconnectionCallback callback
+      auto self = shared_from_this();
+
+      _mainTcpListener._onDisconnectionCallback(self);
+    }
 
     return;
   }
@@ -132,8 +158,10 @@ WebSocketSession::_onRead(beast::error_code ec, std::size_t bytes_transferred) {
     const char* dataPtr = static_cast<const char*>(subBuffer.data());
     const std::size_t dataLength = subBuffer.size();
 
-    _mainTcpListener._onMessageCallback(
-      shared_from_this(), dataPtr, dataLength);
+    // allow shared ownership to _onMessageCallback callback
+    auto self = shared_from_this();
+
+    _mainTcpListener._onMessageCallback(self, dataPtr, dataLength);
   }
 
   // Clear the buffer
@@ -148,18 +176,22 @@ WebSocketSession::_onWrite(
   beast::error_code ec, std::size_t bytes_transferred) {
   boost::ignore_unused(bytes_transferred);
 
-  if (ec)
+  if (ec) {
     return fail(ec, "write");
+  }
 
   if (_buffersToSend.size() > 1) {
     _buffersToSend.pop_front();
 
     const SendBuffer& buffer = _buffersToSend.front();
 
+    // allow shared ownership to async_write callback
+    auto self = shared_from_this();
+
     _ws.async_write(
       boost::asio::buffer(buffer.data, buffer.size),
       beast::bind_front_handler(
-        &WebSocketSession::_onWrite, shared_from_this()));
+        &WebSocketSession::_onWrite, self));
   } else {
     _buffersToSend.pop_front();
   }

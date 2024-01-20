@@ -25,11 +25,12 @@ WebSocketMainLogicServer::WebSocketMainLogicServer(
 
       std::stringstream sstr;
       sstr << "new client: " << newPlayerData->id;
-      const std::string messageToSend = sstr.str();
+      // const std::string messageToSend = ;
+      std::shared_ptr messageToSend = std::make_shared<std::string>(sstr.str());
 
       _sessionManager.forEachSession(
-        [&messageToSend](std::shared_ptr<IWebSocketSession> currWsSession) {
-          currWsSession->write(messageToSend.data(), messageToSend.size());
+        [messageToSend](std::shared_ptr<IWebSocketSession> currWsSession) {
+          currWsSession->write(messageToSend->data(), messageToSend->size());
         });
 
       //
@@ -64,15 +65,16 @@ WebSocketMainLogicServer::WebSocketMainLogicServer(
         std::stringstream sstr;
         sstr << "client (" << playerId << ") sent: \"" << messageReceived
              << "\"";
-        const std::string messageToSend = sstr.str();
+        // const std::string messageToSend = sstr.str();
+        std::shared_ptr messageToSend = std::make_shared<std::string>(sstr.str());
 
         std::cout << "[WS] " << messageToSend << std::endl;
 
         _sessionManager.forEachSession(
-          [&messageToSend,
+          [messageToSend,
            inWsSession](std::shared_ptr<IWebSocketSession> currWsSession) {
             if (inWsSession != currWsSession)
-              currWsSession->write(messageToSend.data(), messageToSend.size());
+              currWsSession->write(messageToSend->data(), messageToSend->size());
           });
       }
 
@@ -84,9 +86,10 @@ WebSocketMainLogicServer::WebSocketMainLogicServer(
         std::stringstream sstr;
         sstr << "you (" << playerId << ") sent -> \"" << messageReceived
              << "\"";
-        const std::string messageToSend = sstr.str();
+        // const std::string messageToSend = sstr.str();
+        std::shared_ptr messageToSend = std::make_shared<std::string>(sstr.str());
 
-        inWsSession->write(messageToSend.data(), messageToSend.size());
+        inWsSession->write(messageToSend->data(), messageToSend->size());
       }
     });
 

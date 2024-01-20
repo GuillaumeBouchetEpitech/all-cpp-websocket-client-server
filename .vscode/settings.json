@@ -106,6 +106,8 @@
     "*.hlsl": "cpp",
     "*.cl": "cpp",
     "cassert": "cpp",
-    "stb_vorbis.c": "cpp"
+    "stb_vorbis.c": "cpp",
+    "source_location": "cpp",
+    "numbers": "cpp"
   }
 }

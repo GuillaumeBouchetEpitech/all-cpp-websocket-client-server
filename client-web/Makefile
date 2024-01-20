@@ -80,6 +80,9 @@ LDFLAGS+= -s EXPORTED_FUNCTIONS="['_free']"
 # LDFLAGS+= -s EXPORTED_RUNTIME_METHODS="['cwrap','_malloc','stringToUTF8','lengthBytesUTF8','UTF8ToString','allocateUTF8']"
 LDFLAGS+= -s EXPORTED_RUNTIME_METHODS="['cwrap','stringToUTF8','lengthBytesUTF8','UTF8ToString','allocateUTF8']"
 
+LDFLAGS+= -s EXPORT_NAME="clientWeb"
+LDFLAGS+= -s MODULARIZE=1
+
 ifeq ($(build_mode),debug)
 
 LDFLAGS+=	-s DEMANGLE_SUPPORT=1

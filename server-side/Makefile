@@ -44,7 +44,7 @@ APP_SRC+=	\
 		$(DIR_APP_SRC)/https-server/file-manager/*.cpp \
 		$(DIR_APP_SRC)/websocket-server/*.cpp \
 		$(DIR_APP_SRC)/websocket-server/session-manager/*.cpp \
-		)
+	)
 
 NET_WRAPPER_SRC+=	\
 	$(wildcard \
@@ -52,7 +52,7 @@ NET_WRAPPER_SRC+=	\
 		$(DIR_NET_WRAPPER_SRC)/http-server/internals/*.cpp \
 		$(DIR_NET_WRAPPER_SRC)/websocket-server/*.cpp \
 		$(DIR_NET_WRAPPER_SRC)/websocket-server/internals/*.cpp \
-		)
+	)
 
 #
 

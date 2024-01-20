@@ -9,8 +9,9 @@ HttpServer::HttpServer(
   : _ioc(inTotalThreads),
     _acceptor(_ioc, {net::ip::make_address(inIpAddress), inPort}),
     _socket(_ioc), _totalThreads(inTotalThreads) {
-  if (inTotalThreads == 0)
+  if (inTotalThreads == 0) {
     throw std::runtime_error("total thread(s) must be > 0");
+  }
 }
 
 HttpServer::~HttpServer() { stop(); }
@@ -23,8 +24,9 @@ HttpServer::setOnConnectionCallback(
 
 void
 HttpServer::start() {
-  if (!_onConnectionCallback)
+  if (!_onConnectionCallback) {
     throw std::runtime_error("missing OnConnectionCallback");
+  }
 
   stop();
 
@@ -32,32 +34,51 @@ HttpServer::start() {
 
   // Run the I/O service on the requested number of threads
   _allThreads.reserve(_totalThreads);
-  for (uint32_t index = 0; index < _totalThreads; ++index)
+  for (uint32_t index = 0; index < _totalThreads; ++index) {
     _allThreads.emplace_back([this] { _ioc.run(); });
-  // _ioc.run();
+  }
 }
 
 void
 HttpServer::stop() {
-  if (_allThreads.empty())
+  if (_allThreads.empty()) {
     return;
+  }
 
   _acceptor.close();
   _ioc.stop();
 
-  for (std::size_t index = 0; index < _allThreads.size(); ++index)
-    if (_allThreads[index].joinable())
-      _allThreads[index].join();
+  for (std::size_t index = 0; index < _allThreads.size(); ++index) {
+
+    auto& currThread = _allThreads.at(index);
+
+    if (currThread.joinable()) {
+      currThread.join();
+    }
+  }
   _allThreads.clear();
 }
 
 void
 HttpServer::_doAccept() {
-  _acceptor.async_accept(_socket, [this](beast::error_code ec) {
-    if (!ec)
-      std::make_shared<HttpConnection>(std::move(_socket))
-        ->setOnConnectionCallback(_onConnectionCallback)
-        .start();
-    _doAccept();
-  });
+
+  // allow shared ownership to async_accept callback
+  auto self = shared_from_this();
+
+  _acceptor.async_accept(
+    // The new connection gets its own strand
+    net::make_strand(_ioc),
+    beast::bind_front_handler(&HttpServer::_onAccept, self));
+}
+
+void
+HttpServer::_onAccept(beast::error_code ec, boost::asio::ip::tcp::socket socket) {
+  if (!ec) {
+    std::make_shared<HttpConnection>(std::move(socket))
+      ->setOnConnectionCallback(_onConnectionCallback)
+      .start();
+  }
+
+  // Accept another connection
+  _doAccept();
 }

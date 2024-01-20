@@ -36,7 +36,7 @@ private:
 
 private:
   FileManager _fileManager;
-  std::unique_ptr<AbstractHttpServer> _httpServer;
+  std::shared_ptr<AbstractHttpServer> _httpServer;
 
   CustomHandler _customHandler;
 };

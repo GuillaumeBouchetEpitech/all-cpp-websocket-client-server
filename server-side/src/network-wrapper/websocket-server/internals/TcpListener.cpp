@@ -100,10 +100,14 @@ TcpListener::stop() {
 
 void
 TcpListener::_doAccept() {
-  // The new connection gets its own strand
+
+  // allow shared ownership to async_accept callback
+  auto self = shared_from_this();
+
   _acceptor.async_accept(
+    // The new connection gets its own strand
     net::make_strand(_ioc),
-    beast::bind_front_handler(&TcpListener::_onAccept, shared_from_this()));
+    beast::bind_front_handler(&TcpListener::_onAccept, self));
 }
 
 void
@@ -112,10 +116,11 @@ TcpListener::_onAccept(
 
   if (ec) {
     fail(ec, "accept");
-  } else {
-    // Create the session and run it
-    std::make_shared<WebSocketSession>(std::move(socket), *this)->run();
+    return;
   }
+
+  // Create the session and run it
+  std::make_shared<WebSocketSession>(std::move(socket), *this)->run();
 
   // Accept another connection
   _doAccept();

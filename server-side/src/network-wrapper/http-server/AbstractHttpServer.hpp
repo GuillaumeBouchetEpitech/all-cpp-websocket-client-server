@@ -22,7 +22,7 @@ public:
   virtual void stop() = 0;
 
 public:
-  static std::unique_ptr<AbstractHttpServer> create(
+  static std::shared_ptr<AbstractHttpServer> create(
     const std::string& inIpAddress, uint16_t inPort,
     uint32_t inTotalThreads = 1);
 };

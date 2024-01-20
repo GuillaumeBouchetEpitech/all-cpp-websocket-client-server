@@ -4,6 +4,7 @@
 #include <memory>
 #include <optional>
 #include <unordered_map>
+#include <string>
 
 struct FileCacheEntry {
   std::string fileContent;

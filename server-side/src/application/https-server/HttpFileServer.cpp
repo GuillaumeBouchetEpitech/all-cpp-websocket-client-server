@@ -66,6 +66,8 @@ HttpFileServer::_onGetRequest(
     return;
   }
 
+  auto output = boost::beast::ostream(response.body());
+
   auto result = _fileManager.getFile(finalPath);
   if (result.has_value() == false) {
     // cached file was not found
@@ -73,9 +75,10 @@ HttpFileServer::_onGetRequest(
     response.result(boost::beast::http::status::not_found);
     response.set(boost::beast::http::field::server, "Beast");
     response.set(boost::beast::http::field::content_type, "text/plain");
-    boost::beast::ostream(response.body()) << "File not found\r\n";
+    output << "File not found\r\n";
 
     std::cout << "[HTTP] GET 404 " << request.target() << std::endl;
+    return;
   }
 
   const FileCacheEntry& cachedResult = *result;
@@ -92,10 +95,9 @@ HttpFileServer::_onGetRequest(
 
   if (_isGzipCompressionPossible(cachedResult, request)) {
     response.set(boost::beast::http::field::content_encoding, "gzip");
-    boost::beast::ostream(response.body())
-      << cachedResult.compressedFileContent;
+    output << cachedResult.compressedFileContent;
   } else {
-    boost::beast::ostream(response.body()) << cachedResult.fileContent;
+    output << cachedResult.fileContent;
   }
 
   // simple log

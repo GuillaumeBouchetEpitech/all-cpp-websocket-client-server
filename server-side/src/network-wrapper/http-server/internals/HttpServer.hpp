@@ -10,7 +10,10 @@
 
 #include <vector>
 
-class HttpServer : public AbstractHttpServer {
+class HttpServer
+  : public AbstractHttpServer
+  , public std::enable_shared_from_this<HttpServer>
+{
 
 public:
   HttpServer(
@@ -33,6 +36,7 @@ public:
 
 private:
   void _doAccept();
+  void _onAccept(beast::error_code ec, boost::asio::ip::tcp::socket socket);
 
 private:
   net::io_context _ioc;

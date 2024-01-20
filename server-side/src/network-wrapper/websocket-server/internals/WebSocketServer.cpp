@@ -38,22 +38,6 @@ WebSocketServer::setOnMessageCallback(
   _mainTcpListener->setOnMessageCallback(onMessageCallback);
 }
 
-// void WebSocketServer::start() {
-
-//   _mainTcpListener->run();
-
-//   // Run the I/O service on the requested number of threads
-//   std::vector<std::thread> allThreads;
-//   allThreads.reserve(_totalThreads - 1);
-//   for (uint32_t index = _totalThreads - 1; index > 0; --index)
-//     allThreads.emplace_back([this] { _ioc.run(); });
-//   _ioc.run();
-// }
-
-// void WebSocketServer::stop()
-// {
-// }
-
 void
 WebSocketServer::start() {
   stop();
@@ -62,9 +46,9 @@ WebSocketServer::start() {
 
   // Run the I/O service on the requested number of threads
   _allThreads.reserve(_totalThreads);
-  for (uint32_t index = 0; index < _totalThreads; ++index)
+  for (uint32_t index = 0; index < _totalThreads; ++index) {
     _allThreads.emplace_back([this]() { _ioc.run(); });
-  // _ioc.run();
+  }
 }
 
 void
@@ -77,8 +61,9 @@ WebSocketServer::stop() {
   _ioc.stop();
 
   for (std::size_t index = 0; index < _allThreads.size(); ++index) {
-    if (_allThreads[index].joinable()) {
-      _allThreads[index].join();
+    auto& currThread = _allThreads.at(index);
+    if (currThread.joinable()) {
+      currThread.join();
     }
   }
   _allThreads.clear();

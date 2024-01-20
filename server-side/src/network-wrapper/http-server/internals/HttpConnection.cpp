@@ -1,7 +1,7 @@
 
 #include "HttpConnection.hpp"
 
-HttpConnection::HttpConnection(boost::asio::ip::tcp::socket socket)
+HttpConnection::HttpConnection(boost::asio::ip::tcp::socket&& socket)
   : _socket(std::move(socket)) {}
 
 HttpConnection&
@@ -21,14 +21,17 @@ HttpConnection::start() {
 // Asynchronously receive a complete request message.
 void
 HttpConnection::_read_request() {
+
+  // allow shared ownership to async_read callback
   auto self = shared_from_this();
 
   http::async_read(
     _socket, _buffer, _request,
     [self](beast::error_code ec, std::size_t bytes_transferred) {
       boost::ignore_unused(bytes_transferred);
-      if (!ec)
+      if (!ec) {
         self->_process_request();
+      }
     });
 }
 
@@ -46,6 +49,8 @@ HttpConnection::_process_request() {
 // Asynchronously transmit the response message.
 void
 HttpConnection::_write_response() {
+
+  // allow shared ownership to async_write callback
   auto self = shared_from_this();
 
   _response.content_length(_response.body().size());
@@ -60,6 +65,8 @@ HttpConnection::_write_response() {
 // Check whether we have spent enough time on this connection.
 void
 HttpConnection::_check_deadline() {
+
+  // allow shared ownership to async_wait callback
   auto self = shared_from_this();
 
   _deadline.async_wait([self](beast::error_code ec) {
