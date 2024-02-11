@@ -128,28 +128,55 @@ echo "# building web-wasm-loader (TypeScript -> JavaScript)"
 echo "#"
 echo ""
 
-cd ./client-web/web-wasm-loader
+cd ./client-web/
 
-if [ -d "./node_modules" ]
+if [ -f "./dist/index.js" && -f "./dist/index.html" ]
 then
-  echo " ===> up to date dependencies"
-  echo " =====> skip install"
+
+  echo " ===> 'dist' folder content up to date"
+  echo " =====> skipping further checks"
+
 else
-  echo " ===> missing dependencies"
-  echo " =====> installing"
 
-  npm install
-fi
+  echo " ===> 'dist' folder content is missing"
+  echo " =====> checking"
 
-if [ -f "./js/bundle.js" ]
-then
-  echo " ===> up to date bundle.js"
-  echo " =====> skip bundling"
-else
-  echo " ===> outdated bundle.js"
-  echo " =====> bundling"
+  cd ./web-wasm-loader
 
-  npm run release
+  if [ -d "./node_modules" ]
+  then
+    echo " =====> up to date dependencies"
+    echo " =======> skip install"
+  else
+    echo " =====> missing dependencies"
+    echo " =======> installing"
+
+    npm install
+  fi
+
+  if [ -f "./js/bundle.js" ]
+  then
+    echo " =====> up to date bundle.js"
+    echo " =======> skip bundling"
+  else
+    echo " =====> outdated bundle.js"
+    echo " =======> bundling"
+
+    npm run release
+  fi
+
+  echo " ===> ensure 'dist' folder exist"
+
+  npm run ensure-dist-folders
+
+  echo " ===> copying html to 'dist' folder"
+
+  npm run copy-html-to-dist-folders
+
+  echo " ===> copying js to 'dist' folder"
+
+  npm run copy-js-to-dist-folders
+
 fi
 
 cd $CURRENT_DIR
