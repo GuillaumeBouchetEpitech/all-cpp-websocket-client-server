@@ -54,8 +54,10 @@ void
 TcpListener::start() {
 
   if (
-    !_onConnectionCallback && !_onDisconnectionCallback && !_onMessageCallback)
+    !_onConnectionCallback && !_onDisconnectionCallback && !_onMessageCallback
+  ) {
     throw std::runtime_error("not callback(s) setup");
+  }
 
   stop();
 

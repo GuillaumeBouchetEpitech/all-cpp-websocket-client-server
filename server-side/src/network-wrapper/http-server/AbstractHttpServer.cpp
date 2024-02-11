@@ -5,8 +5,9 @@
 
 std::shared_ptr<AbstractHttpServer>
 AbstractHttpServer::create(
-  const std::string& inIpAddress, uint16_t inPort,
-  uint32_t inTotalThreads /*= 1*/
+  const std::string& ip_address, uint16_t port,
+  uint32_t total_threads /*= 1*/
 ) {
-  return std::make_shared<HttpServer>(inIpAddress, inPort, inTotalThreads);
+  return std::make_shared<HttpServer>(ip_address, port, total_threads);
 }
+

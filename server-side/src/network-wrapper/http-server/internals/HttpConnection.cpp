@@ -1,78 +1,77 @@
 
 #include "HttpConnection.hpp"
 
-HttpConnection::HttpConnection(boost::asio::ip::tcp::socket&& socket)
-  : _socket(std::move(socket)) {}
+HttpConnection::HttpConnection(boost::asio::ip::tcp::socket&& tcpSocket)
+  : _tcpSocket(std::move(tcpSocket)) {}
 
 HttpConnection&
 HttpConnection::setOnConnectionCallback(
-  const http_callbacks::OnConnection& inOnConnectionCallback) {
-  _onConnectionCallback = inOnConnectionCallback;
+  const http_callbacks::OnConnection& onConnectionCallback) {
+  _onConnectionCallback = onConnectionCallback;
   return *this;
 }
 
 // Initiate the asynchronous operations associated with the connection.
 void
 HttpConnection::start() {
-  _read_request();
-  _check_deadline();
+  _readRequest();
+  _checkConnectionTimeout();
 }
 
 // Asynchronously receive a complete request message.
 void
-HttpConnection::_read_request() {
+HttpConnection::_readRequest() {
 
   // allow shared ownership to async_read callback
   auto self = shared_from_this();
 
   http::async_read(
-    _socket, _buffer, _request,
+    _tcpSocket, _readBuffer, _requestBody,
     [self](beast::error_code ec, std::size_t bytes_transferred) {
       boost::ignore_unused(bytes_transferred);
       if (!ec) {
-        self->_process_request();
+        self->_processRequest();
       }
     });
 }
 
 // Determine what needs to be done with the request message.
 void
-HttpConnection::_process_request() {
+HttpConnection::_processRequest() {
 
   if (_onConnectionCallback) {
-    _onConnectionCallback(_request, _response);
+    _onConnectionCallback(_requestBody, _responseBody);
   }
 
-  _write_response();
+  _writeResponse();
 }
 
 // Asynchronously transmit the response message.
 void
-HttpConnection::_write_response() {
+HttpConnection::_writeResponse() {
 
   // allow shared ownership to async_write callback
   auto self = shared_from_this();
 
-  _response.content_length(_response.body().size());
+  _responseBody.content_length(_responseBody.body().size());
 
   http::async_write(
-    _socket, _response, [self](beast::error_code ec, std::size_t) {
-      self->_socket.shutdown(boost::asio::ip::tcp::socket::shutdown_send, ec);
-      self->_deadline.cancel();
+    _tcpSocket, _responseBody, [self](beast::error_code ec, std::size_t) {
+      self->_tcpSocket.shutdown(boost::asio::ip::tcp::socket::shutdown_send, ec);
+      self->_connectionTimer.cancel();
     });
 }
 
-// Check whether we have spent enough time on this connection.
 void
-HttpConnection::_check_deadline() {
+HttpConnection::_checkConnectionTimeout() {
 
   // allow shared ownership to async_wait callback
   auto self = shared_from_this();
 
-  _deadline.async_wait([self](beast::error_code ec) {
+  _connectionTimer.async_wait([self](beast::error_code ec) {
     if (!ec) {
-      // Close socket to cancel any outstanding operation.
-      self->_socket.close(ec);
+      // timeout -> close socket
+      self->_tcpSocket.close(ec);
     }
   });
 }

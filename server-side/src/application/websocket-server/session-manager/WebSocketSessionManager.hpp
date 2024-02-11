@@ -27,7 +27,8 @@ public:
   virtual ~WebSocketSessionManager() = default;
 
 public:
-  void addSession(SessionPtr inWsSession);
-  void removeSession(SessionPtr inWsSession);
-  void forEachSession(const std::function<void(SessionPtr)>& inCallback);
+  void addSession(SessionPtr wsSession);
+  void removeSession(SessionPtr wsSession);
+  void forEachSession(const std::function<void(SessionPtr)>& callback);
+  void forEachSession(const std::function<void(SessionPtr)>& callback) const;
 };

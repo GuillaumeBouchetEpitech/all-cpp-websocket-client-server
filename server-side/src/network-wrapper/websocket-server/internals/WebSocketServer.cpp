@@ -4,18 +4,18 @@
 #include "boostHeaders.hpp"
 
 WebSocketServer::WebSocketServer(
-  const std::string& inIpAddress, uint16_t inPort,
-  uint32_t inTotalThreads /*= 1*/
+  const std::string& ipAddress, uint16_t port,
+  uint32_t totalThreads /*= 1*/
   )
-  : _ioc(inTotalThreads), _totalThreads(inTotalThreads) {
-  if (inTotalThreads == 0) {
+  : _ioc(totalThreads), _totalThreads(totalThreads) {
+  if (totalThreads == 0) {
     throw std::runtime_error("total thread(s) must be > 0");
   }
 
   // Create and launch a listening port
   _mainTcpListener = std::make_shared<TcpListener>(
     _ioc,
-    boost::asio::ip::tcp::endpoint{net::ip::make_address(inIpAddress), inPort});
+    boost::asio::ip::tcp::endpoint{net::ip::make_address(ipAddress), port});
 }
 
 WebSocketServer::~WebSocketServer() { stop(); }

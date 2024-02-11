@@ -17,12 +17,12 @@ fail(beast::error_code ec, char const* what) {
 
 } // namespace
 
-SendBuffer::SendBuffer(const char* inData, std::size_t inSize) : size(inSize) {
-  if (inSize > max_send_buffer_size) {
+SendBuffer::SendBuffer(const char* dataToSend, std::size_t dataSize) : size(dataSize) {
+  if (dataSize > max_send_buffer_size) {
     throw std::runtime_error("send buffer requested size is too big");
   }
 
-  std::memcpy(data, inData, inSize);
+  std::memcpy(data, dataToSend, dataSize);
 }
 
 //
@@ -33,8 +33,8 @@ SendBuffer::SendBuffer(const char* inData, std::size_t inSize) : size(inSize) {
 
 // Take ownership of the socket
 WebSocketSession::WebSocketSession(
-  boost::asio::ip::tcp::socket&& inSocket, TcpListener& inMainTcpListener)
-  : _ws(std::move(inSocket)), _mainTcpListener(inMainTcpListener) {}
+  boost::asio::ip::tcp::socket&& socket, TcpListener& mainTcpListener)
+  : _ws(std::move(socket)), _mainTcpListener(mainTcpListener) {}
 
 // Get on the correct executor
 void
@@ -150,8 +150,9 @@ WebSocketSession::_onRead(beast::error_code ec, std::size_t bytes_transferred) {
     return;
   }
 
-  if (ec)
+  if (ec) {
     return fail(ec, "read");
+  }
 
   if (_mainTcpListener._onMessageCallback) {
     const auto& subBuffer = _buffer.data();

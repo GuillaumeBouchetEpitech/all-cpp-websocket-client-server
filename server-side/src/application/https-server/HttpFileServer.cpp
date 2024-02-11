@@ -9,11 +9,11 @@
 #include <iostream>
 
 HttpFileServer::HttpFileServer(
-  const std::string& inBasePath, const std::string& inIpAddress,
-  uint16_t inHttpPort, uint32_t inTotalThreads)
-  : _fileManager(inBasePath) {
+  const std::string& basePath, const std::string& ipAddress,
+  uint16_t httpPort, uint32_t totalThreads)
+  : _fileManager(basePath) {
   _httpServer =
-    AbstractHttpServer::create(inIpAddress, inHttpPort, inTotalThreads);
+    AbstractHttpServer::create(ipAddress, httpPort, totalThreads);
 }
 
 HttpFileServer::~HttpFileServer() { _httpServer->stop(); }
@@ -27,11 +27,12 @@ HttpFileServer::start() {
     response.keep_alive(false);
 
     switch (request.method()) {
-    case boost::beast::http::verb::get:
+    case boost::beast::http::verb::get: {
       _onGetRequest(request, response);
       break;
+    }
 
-    default:
+    default: {
       // We return responses indicating an error if
       // we do not recognize the request method.
       response.result(boost::beast::http::status::bad_request);
@@ -40,6 +41,7 @@ HttpFileServer::start() {
         << "Invalid request-method '" << std::string(request.method_string())
         << "'";
       break;
+    }
     }
   });
 
@@ -110,18 +112,21 @@ HttpFileServer::_isGzipCompressionPossible(
   const FileCacheEntry& cache, const http_callbacks::request& request) {
 
   // cache file compressed?
-  if (cache.compressionRatio <= 0.0f)
+  if (cache.compressionRatio <= 0.0f) {
     return false;
+  }
 
   // relevant request header present?
   const boost::beast::string_view encoding = request["accept-encoding"];
-  if (encoding.empty())
+  if (encoding.empty()) {
     return false;
+  }
 
   // relevant request header value present?
   const std::size_t foundIndex = encoding.find("gzip");
-  if (foundIndex == std::string::npos)
+  if (foundIndex == std::string::npos) {
     return false;
+  }
 
   return true;
 }

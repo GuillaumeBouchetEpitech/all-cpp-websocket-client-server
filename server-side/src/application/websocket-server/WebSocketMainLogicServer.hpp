@@ -23,7 +23,7 @@ private:
 
 public:
   WebSocketMainLogicServer(
-    const std::string& inIpAddress, uint16_t inPort, uint32_t inTotalThreads);
+    const std::string& ipAddress, uint16_t port, uint32_t totalThreads);
 
   ~WebSocketMainLogicServer();
 

@@ -16,7 +16,7 @@ struct SendBuffer {
   std::size_t size = 0;
   char data[max_send_buffer_size];
 
-  SendBuffer(const char* inData, std::size_t inSize);
+  SendBuffer(const char* data, std::size_t size);
 };
 
 // Echoes back all received WebSocket messages
@@ -29,7 +29,7 @@ public:
 public:
   // Take ownership of the socket
   explicit WebSocketSession(
-    boost::asio::ip::tcp::socket&& inSocket, TcpListener& inMainTcpListener);
+    boost::asio::ip::tcp::socket&& socket, TcpListener& mainTcpListener);
 
   // Get on the correct executor
   void run() override;

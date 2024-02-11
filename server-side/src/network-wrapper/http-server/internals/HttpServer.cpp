@@ -4,12 +4,12 @@
 #include <memory>
 
 HttpServer::HttpServer(
-  const std::string& inIpAddress, const uint16_t inPort,
-  const uint32_t inTotalThreads /*= 1*/)
-  : _ioc(inTotalThreads),
-    _acceptor(_ioc, {net::ip::make_address(inIpAddress), inPort}),
-    _socket(_ioc), _totalThreads(inTotalThreads) {
-  if (inTotalThreads == 0) {
+  const std::string& ipAddress, const uint16_t port,
+  const uint32_t totalThreads /*= 1*/)
+  : _ioc(totalThreads),
+    _acceptor(_ioc, {net::ip::make_address(ipAddress), port}),
+    _tcpSocket(_ioc), _totalThreads(totalThreads) {
+  if (totalThreads == 0) {
     throw std::runtime_error("total thread(s) must be > 0");
   }
 }
@@ -68,17 +68,16 @@ HttpServer::_doAccept() {
   _acceptor.async_accept(
     // The new connection gets its own strand
     net::make_strand(_ioc),
-    beast::bind_front_handler(&HttpServer::_onAccept, self));
-}
+    [self](beast::error_code ec, boost::asio::ip::tcp::socket newSocket) {
 
-void
-HttpServer::_onAccept(beast::error_code ec, boost::asio::ip::tcp::socket socket) {
-  if (!ec) {
-    std::make_shared<HttpConnection>(std::move(socket))
-      ->setOnConnectionCallback(_onConnectionCallback)
-      .start();
-  }
+      if (!ec) {
+        // could be stored, but will handle it own lifecycle in any case
+        auto newClient = std::make_shared<HttpConnection>(std::move(newSocket));
+        newClient->setOnConnectionCallback(self->_onConnectionCallback);
+        newClient->start();
+      }
 
-  // Accept another connection
-  _doAccept();
+      // Accept another connection
+      self->_doAccept();
+    });
 }

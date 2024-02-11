@@ -7,13 +7,13 @@
 #include <sstream>
 
 WebSocketMainLogicServer::WebSocketMainLogicServer(
-  const std::string& inIpAddress, uint16_t inPort, uint32_t inTotalThreads) {
+  const std::string& ipAddress, uint16_t port, uint32_t totalThreads) {
   _allPlayersData.reserve(1024);
 
   _webSocketServer =
-    AbstractWebSocketServer::create(inIpAddress, inPort, inTotalThreads);
+    AbstractWebSocketServer::create(ipAddress, port, totalThreads);
   _webSocketServer->setOnConnectionCallback(
-    [this](std::shared_ptr<IWebSocketSession> inNewWsSession) {
+    [this](std::shared_ptr<IWebSocketSession> newWsSession) {
       std::cout << "[WS] new client" << std::endl;
 
       //
@@ -25,36 +25,35 @@ WebSocketMainLogicServer::WebSocketMainLogicServer(
 
       std::stringstream sstr;
       sstr << "new client: " << newPlayerData->id;
-      // const std::string messageToSend = ;
-      std::shared_ptr messageToSend = std::make_shared<std::string>(sstr.str());
+      const std::string messageToSend = sstr.str();
 
       _sessionManager.forEachSession(
-        [messageToSend](std::shared_ptr<IWebSocketSession> currWsSession) {
-          currWsSession->write(messageToSend->data(), messageToSend->size());
+        [&messageToSend](std::shared_ptr<IWebSocketSession> currWsSession) {
+          currWsSession->write(messageToSend.data(), messageToSend.size());
         });
 
       //
       //
       // add session
 
-      _sessionManager.addSession(inNewWsSession);
+      _sessionManager.addSession(newWsSession);
 
       //
       //
       // add data
 
       _allPlayersData.push_back(newPlayerData);
-      inNewWsSession->userData = newPlayerData.get();
+      newWsSession->userData = newPlayerData.get();
     });
 
   _webSocketServer->setOnMessageCallback(
     [this](
-      std::shared_ptr<IWebSocketSession> inWsSession, const char* dataPtr,
+      std::shared_ptr<IWebSocketSession> wsSession, const char* dataPtr,
       std::size_t dataLength) {
       std::string_view messageReceived(dataPtr, dataLength);
 
       const PlayerData* currPlayerData =
-        static_cast<PlayerData*>(inWsSession->userData);
+        static_cast<PlayerData*>(wsSession->userData);
       const int32_t playerId = currPlayerData ? currPlayerData->id : -1;
 
       //
@@ -65,16 +64,16 @@ WebSocketMainLogicServer::WebSocketMainLogicServer(
         std::stringstream sstr;
         sstr << "client (" << playerId << ") sent: \"" << messageReceived
              << "\"";
-        // const std::string messageToSend = sstr.str();
-        std::shared_ptr messageToSend = std::make_shared<std::string>(sstr.str());
+
+        const std::string messageToSend = sstr.str();
 
         std::cout << "[WS] " << messageToSend << std::endl;
 
         _sessionManager.forEachSession(
-          [messageToSend,
-           inWsSession](std::shared_ptr<IWebSocketSession> currWsSession) {
-            if (inWsSession != currWsSession)
-              currWsSession->write(messageToSend->data(), messageToSend->size());
+          [&messageToSend,
+           wsSession](std::shared_ptr<IWebSocketSession> currWsSession) {
+            if (wsSession != currWsSession)
+              currWsSession->write(messageToSend.data(), messageToSend.size());
           });
       }
 
@@ -86,26 +85,26 @@ WebSocketMainLogicServer::WebSocketMainLogicServer(
         std::stringstream sstr;
         sstr << "you (" << playerId << ") sent -> \"" << messageReceived
              << "\"";
-        // const std::string messageToSend = sstr.str();
-        std::shared_ptr messageToSend = std::make_shared<std::string>(sstr.str());
 
-        inWsSession->write(messageToSend->data(), messageToSend->size());
+        const std::string messageToSend = sstr.str();
+
+        wsSession->write(messageToSend.data(), messageToSend.size());
       }
     });
 
   _webSocketServer->setOnDisconnectionCallback(
-    [this](std::shared_ptr<IWebSocketSession> inDisconnectedWsSession) {
+    [this](std::shared_ptr<IWebSocketSession> disconnectedWsSession) {
       std::cout << "[WS] client disconnected" << std::endl;
 
       PlayerData* currPlayerData =
-        static_cast<PlayerData*>(inDisconnectedWsSession->userData);
+        static_cast<PlayerData*>(disconnectedWsSession->userData);
       const int32_t playerId = currPlayerData ? currPlayerData->id : -1;
 
       //
       //
       // remove session
 
-      _sessionManager.removeSession(inDisconnectedWsSession);
+      _sessionManager.removeSession(disconnectedWsSession);
 
       //
       //

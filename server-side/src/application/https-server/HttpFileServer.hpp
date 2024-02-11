@@ -15,8 +15,8 @@ public:
 
 public:
   HttpFileServer(
-    const std::string& inBasePath, const std::string& inIpAddress,
-    uint16_t inHttpPort, uint32_t inTotalThreads);
+    const std::string& basePath, const std::string& ipAddress,
+    uint16_t httpPort, uint32_t totalThreads);
 
   ~HttpFileServer();
 

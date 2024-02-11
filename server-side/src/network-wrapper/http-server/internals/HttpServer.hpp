@@ -17,8 +17,8 @@ class HttpServer
 
 public:
   HttpServer(
-    const std::string& inIpAddress, const uint16_t inPort,
-    const uint32_t inTotalThreads = 1);
+    const std::string& ipAddress, const uint16_t port,
+    const uint32_t totalThreads = 1);
   ~HttpServer();
 
   HttpServer(const HttpServer& other) = delete;
@@ -28,20 +28,19 @@ public:
 
 public:
   void setOnConnectionCallback(
-    const http_callbacks::OnConnection& onRequestCallback);
+    const http_callbacks::OnConnection& onRequestCallback) override;
 
 public:
-  void start();
-  void stop();
+  void start() override;
+  void stop() override;
 
 private:
   void _doAccept();
-  void _onAccept(beast::error_code ec, boost::asio::ip::tcp::socket socket);
 
 private:
   net::io_context _ioc;
   boost::asio::ip::tcp::acceptor _acceptor;
-  boost::asio::ip::tcp::socket _socket;
+  boost::asio::ip::tcp::socket _tcpSocket;
   uint32_t _totalThreads;
 
 private:
