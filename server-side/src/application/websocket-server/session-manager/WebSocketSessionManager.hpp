@@ -4,9 +4,9 @@
 #include "network-wrapper/websocket-server/IWebSocketSession.hpp"
 
 #include <functional>
+#include <memory>
 #include <shared_mutex>
 #include <vector>
-#include <memory>
 
 class WebSocketSessionManager {
 

@@ -34,11 +34,11 @@ public:
   }
 };
 
-template <> TraceLogger& TraceLogger::operator<<<bool>(bool data);
+template <> TraceLogger& TraceLogger::operator<< <bool>(bool data);
 
-template <> TraceLogger& TraceLogger::operator<<<float>(float data);
+template <> TraceLogger& TraceLogger::operator<< <float>(float data);
 
-template <> TraceLogger& TraceLogger::operator<<<double>(double data);
+template <> TraceLogger& TraceLogger::operator<< <double>(double data);
 
 } // namespace helpers
 

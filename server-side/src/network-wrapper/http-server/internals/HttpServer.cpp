@@ -7,8 +7,8 @@ HttpServer::HttpServer(
   const std::string& ipAddress, const uint16_t port,
   const uint32_t totalThreads /*= 1*/)
   : _ioc(totalThreads),
-    _acceptor(_ioc, {net::ip::make_address(ipAddress), port}),
-    _tcpSocket(_ioc), _totalThreads(totalThreads) {
+    _acceptor(_ioc, {net::ip::make_address(ipAddress), port}), _tcpSocket(_ioc),
+    _totalThreads(totalThreads) {
   if (totalThreads == 0) {
     throw std::runtime_error("total thread(s) must be > 0");
   }
@@ -69,7 +69,6 @@ HttpServer::_doAccept() {
     // The new connection gets its own strand
     net::make_strand(_ioc),
     [self](beast::error_code ec, boost::asio::ip::tcp::socket newSocket) {
-
       if (!ec) {
         // could be stored, but will handle it own lifecycle in any case
         auto newClient = std::make_shared<HttpConnection>(std::move(newSocket));

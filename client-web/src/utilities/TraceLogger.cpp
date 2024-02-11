@@ -42,17 +42,23 @@ TraceLogger::getData() const {
   return _sstr.str();
 }
 
-template <> TraceLogger& TraceLogger::operator<<<bool>(bool data) {
+template <>
+TraceLogger&
+TraceLogger::operator<< <bool>(bool data) {
   _sstr << std::boolalpha << data;
   return *this;
 }
 
-template <> TraceLogger& TraceLogger::operator<<<float>(float data) {
+template <>
+TraceLogger&
+TraceLogger::operator<< <float>(float data) {
   _sstr << std::fixed << std::setprecision(2) << data;
   return *this;
 }
 
-template <> TraceLogger& TraceLogger::operator<<<double>(double data) {
+template <>
+TraceLogger&
+TraceLogger::operator<< <double>(double data) {
   _sstr << std::fixed << std::setprecision(2) << data;
   return *this;
 }

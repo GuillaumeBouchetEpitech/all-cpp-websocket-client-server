@@ -23,6 +23,5 @@ public:
 
 public:
   static std::shared_ptr<AbstractHttpServer> create(
-    const std::string& ipAddress, uint16_t port,
-    uint32_t totalThreads = 1);
+    const std::string& ipAddress, uint16_t port, uint32_t totalThreads = 1);
 };

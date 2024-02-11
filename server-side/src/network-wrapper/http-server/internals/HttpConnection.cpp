@@ -57,7 +57,8 @@ HttpConnection::_writeResponse() {
 
   http::async_write(
     _tcpSocket, _responseBody, [self](beast::error_code ec, std::size_t) {
-      self->_tcpSocket.shutdown(boost::asio::ip::tcp::socket::shutdown_send, ec);
+      self->_tcpSocket.shutdown(
+        boost::asio::ip::tcp::socket::shutdown_send, ec);
       self->_connectionTimer.cancel();
     });
 }

@@ -9,11 +9,10 @@
 #include <iostream>
 
 HttpFileServer::HttpFileServer(
-  const std::string& basePath, const std::string& ipAddress,
-  uint16_t httpPort, uint32_t totalThreads)
+  const std::string& basePath, const std::string& ipAddress, uint16_t httpPort,
+  uint32_t totalThreads)
   : _fileManager(basePath) {
-  _httpServer =
-    AbstractHttpServer::create(ipAddress, httpPort, totalThreads);
+  _httpServer = AbstractHttpServer::create(ipAddress, httpPort, totalThreads);
 }
 
 HttpFileServer::~HttpFileServer() { _httpServer->stop(); }

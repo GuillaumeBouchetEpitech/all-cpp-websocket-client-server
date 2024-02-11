@@ -38,7 +38,8 @@ private:
   beast::flat_buffer _readBuffer{8192};
   http::request<http::dynamic_body> _requestBody;
   http::response<http::dynamic_body> _responseBody;
-  net::steady_timer _connectionTimer{_tcpSocket.get_executor(), std::chrono::seconds(60)};
+  net::steady_timer _connectionTimer{
+    _tcpSocket.get_executor(), std::chrono::seconds(60)};
 
   http_callbacks::OnConnection _onConnectionCallback;
 };

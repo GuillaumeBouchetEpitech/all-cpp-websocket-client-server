@@ -10,10 +10,8 @@
 
 #include <vector>
 
-class HttpServer
-  : public AbstractHttpServer
-  , public std::enable_shared_from_this<HttpServer>
-{
+class HttpServer : public AbstractHttpServer,
+                   public std::enable_shared_from_this<HttpServer> {
 
 public:
   HttpServer(

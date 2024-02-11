@@ -17,7 +17,8 @@ fail(beast::error_code ec, char const* what) {
 
 } // namespace
 
-SendBuffer::SendBuffer(const char* dataToSend, std::size_t dataSize) : size(dataSize) {
+SendBuffer::SendBuffer(const char* dataToSend, std::size_t dataSize)
+  : size(dataSize) {
   if (dataSize > max_send_buffer_size) {
     throw std::runtime_error("send buffer requested size is too big");
   }
@@ -67,8 +68,7 @@ WebSocketSession::write(const char* data, std::size_t length) {
 
     _ws.async_write(
       boost::asio::buffer(buffer.data, buffer.size),
-      beast::bind_front_handler(
-        &WebSocketSession::_onWrite, self));
+      beast::bind_front_handler(&WebSocketSession::_onWrite, self));
   }
 }
 
@@ -93,13 +93,12 @@ WebSocketSession::_onRun() {
         std::string(BOOST_BEAST_VERSION_STRING) + " websocket-server-async");
     }));
 
-
   // allow shared ownership to async_accept callback
   auto self = shared_from_this();
 
   // Accept the websocket handshake
-  _ws.async_accept(beast::bind_front_handler(
-    &WebSocketSession::_onAccept, self));
+  _ws.async_accept(
+    beast::bind_front_handler(&WebSocketSession::_onAccept, self));
 }
 
 void
@@ -129,8 +128,7 @@ WebSocketSession::_doRead() {
 
   // Read a message into our buffer
   _ws.async_read(
-    _buffer,
-    beast::bind_front_handler(&WebSocketSession::_onRead, self));
+    _buffer, beast::bind_front_handler(&WebSocketSession::_onRead, self));
 }
 
 void
@@ -191,8 +189,7 @@ WebSocketSession::_onWrite(
 
     _ws.async_write(
       boost::asio::buffer(buffer.data, buffer.size),
-      beast::bind_front_handler(
-        &WebSocketSession::_onWrite, self));
+      beast::bind_front_handler(&WebSocketSession::_onWrite, self));
   } else {
     _buffersToSend.pop_front();
   }

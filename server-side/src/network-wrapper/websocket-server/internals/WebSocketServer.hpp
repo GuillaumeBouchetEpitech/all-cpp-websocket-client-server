@@ -13,8 +13,7 @@ class WebSocketServer : public AbstractWebSocketServer {
 
 public:
   explicit WebSocketServer(
-    const std::string& ipAddress, uint16_t port,
-    uint32_t totalThreads = 1);
+    const std::string& ipAddress, uint16_t port, uint32_t totalThreads = 1);
 
   WebSocketServer(const WebSocketServer& other) = delete;
   WebSocketServer(WebSocketServer&& other) = delete;
