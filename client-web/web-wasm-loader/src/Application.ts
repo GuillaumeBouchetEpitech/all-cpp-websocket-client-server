@@ -29,12 +29,8 @@ export class Application {
     await this._setupWasmApplication(wsUrl, inLogger);
   }
 
-  private async _fetchWasmScript(
-    wasmFolder: string,
-    inLogger: Logger,
-  ): Promise<void> {
-
-    inLogger.log("[JS][wasm] fetching");
+  private async _fetchWasmScript(wasmFolder: string, inLogger: Logger): Promise<void> {
+    inLogger.log('[JS][wasm] fetching');
     const fetchStartTime = Date.now();
 
     // this will globally expose the function clientWeb()
@@ -45,12 +41,8 @@ export class Application {
     inLogger.log(`[JS][wasm] fetched ${fetchElapsedTime}sec`);
   }
 
-  private async _loadWasmApplication(
-    wasmFolder: string,
-    inLogger: Logger,
-  ): Promise<void> {
-
-    inLogger.log("[JS] loading");
+  private async _loadWasmApplication(wasmFolder: string, inLogger: Logger): Promise<void> {
+    inLogger.log('[JS] loading');
     const loadStartTime = Date.now();
 
     const downloadingDataRegExp = /Downloading data\.\.\. \(([0-9]*)\/([0-9]*)\)/;
@@ -58,10 +50,13 @@ export class Application {
 
     const moduleArgs = {
       locateFile: (url: string) => `${wasmFolder}/${url}`,
-      print: (text: string) => { inLogger.log(`[C++][out] ${text}`); },
-      printErr: (text: string) => { inLogger.error(`[C++][err] ${text}`); },
+      print: (text: string) => {
+        inLogger.log(`[C++][out] ${text}`);
+      },
+      printErr: (text: string) => {
+        inLogger.error(`[C++][err] ${text}`);
+      },
       setStatus: (text: string) => {
-
         if (!text) {
           return;
         }
@@ -86,10 +81,10 @@ export class Application {
         this._onProgress(percent);
       },
       onRuntimeInitialized: () => {
-        inLogger.log("[JS][wasm] runtime initialized");
+        inLogger.log('[JS][wasm] runtime initialized');
       },
       noInitialRun: true,
-      noExitRuntime: true,
+      noExitRuntime: true
     };
 
     // @ts-ignore
@@ -98,16 +93,14 @@ export class Application {
     const loadStopTime = Date.now();
     const loadElapsedTime = ((loadStopTime - loadStartTime) / 1000).toFixed(3);
     inLogger.log(`[JS] loaded ${loadElapsedTime}sec`);
-
   }
 
   private _initializeWasmApplication(inLogger: Logger): void {
-
-    inLogger.log("[JS][wasm] initializing");
+    inLogger.log('[JS][wasm] initializing');
     const initStartTime = Date.now();
 
     const wasmFunctions = {
-      startApplication: this._module.cwrap('startApplication', undefined, ['number']),
+      startApplication: this._module.cwrap('startApplication', undefined, ['number'])
     };
 
     this._wasmApplicationStartFunc = wasmFunctions.startApplication;
@@ -117,13 +110,9 @@ export class Application {
     const initStopTime = Date.now();
     const initElapsedTime = ((initStopTime - initStartTime) / 1000).toFixed(3);
     inLogger.log(`[JS][wasm] initialized ${initElapsedTime}sec`);
-
   }
 
-  private async _setupWasmApplication(
-    wsUrl: string, inLogger: Logger,
-  ): Promise<void> {
-
+  private async _setupWasmApplication(wsUrl: string, inLogger: Logger): Promise<void> {
     const wasmFolder = `wasm`;
 
     //
@@ -144,9 +133,8 @@ export class Application {
 
     this._module._free(strPtr);
 
-    inLogger.log("[JS][wasm] running");
+    inLogger.log('[JS][wasm] running');
   }
-
 
   abort(): void {
     if (!this._isInitialized || this._isAborted) return;

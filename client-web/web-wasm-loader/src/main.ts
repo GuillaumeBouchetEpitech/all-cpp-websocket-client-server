@@ -3,8 +3,7 @@ import { Application } from './Application';
 
 const findHtmlElementOrFail = <T extends Element>(inElementId: string): T => {
   const textAreaElement = document.querySelector<T>(inElementId);
-  if (!textAreaElement)
-    throw new Error(`DOM elements not found, id: "${inElementId}"`);
+  if (!textAreaElement) throw new Error(`DOM elements not found, id: "${inElementId}"`);
   return textAreaElement;
 };
 
@@ -22,8 +21,7 @@ const getWebSocketConfig = async (logger: Logger): Promise<string> => {
 };
 
 const onGlobalPageLoad = async () => {
-  const textAreaElement =
-    findHtmlElementOrFail<HTMLTextAreaElement>('#loggerOutput');
+  const textAreaElement = findHtmlElementOrFail<HTMLTextAreaElement>('#loggerOutput');
   const logger = new Logger(textAreaElement);
 
   logger.log('[JS] page loaded');
@@ -48,8 +46,7 @@ const onGlobalPageLoad = async () => {
     const statusMsg = `Loading wasm [${percent}%]`;
 
     // remove the last logged entry if it was a progress updated
-    if (logger.size > 0 && logger.peekLast()!.indexOf('Loading wasm [') >= 0)
-      logger.popLast();
+    if (logger.size > 0 && logger.peekLast()!.indexOf('Loading wasm [') >= 0) logger.popLast();
 
     logger.log(`[JS] ${statusMsg}`);
   };

@@ -32,8 +32,7 @@ class Logger {
 
   _pushText(text: string): void {
     this._lines.push(text);
-    if (this._lines.length > this._maxLines)
-      this._lines.splice(0, this._lines.length - this._maxLines);
+    if (this._lines.length > this._maxLines) this._lines.splice(0, this._lines.length - this._maxLines);
 
     this._textAreaElement.value = `${this._lines.join('\n')}\n`;
 
