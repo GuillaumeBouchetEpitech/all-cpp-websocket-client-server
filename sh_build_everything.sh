@@ -55,8 +55,7 @@ func_ensure_wasm_compiler() {
 
   EMSDK_VERSION=3.1.44
 
-  # if [ -z "${EMSDK}" ]; then
-  if [ true ]; then
+  if [ -z "${EMSDK}" ]; then
 
     echo " -> not installed"
     echo "   -> installing"
@@ -96,6 +95,7 @@ func_ensure_wasm_compiler() {
 
   . ./emsdk_env.sh
 
+  # sometimes required? (suspected hiccups in emsdk)
   # em++ --clear-cache
 
   cd $CURRENT_DIR
@@ -129,8 +129,29 @@ echo "#"
 echo ""
 
 cd ./client-web/web-wasm-loader
-bun install
-npm run build
+
+if [ -d "./node_modules" ]
+then
+  echo " ===> up to date dependencies"
+  echo " =====> skip install"
+else
+  echo " ===> missing dependencies"
+  echo " =====> installing"
+
+  npm install
+fi
+
+if [ -f "./js/bundle.js" ]
+then
+  echo " ===> up to date bundle.js"
+  echo " =====> skip bundling"
+else
+  echo " ===> outdated bundle.js"
+  echo " =====> bundling"
+
+  npm run release
+fi
+
 cd $CURRENT_DIR
 
 echo ""
@@ -141,7 +162,13 @@ echo ""
 
 echo "building server-side"
 cd ./server-side
-make build_mode="release" all -j4
+# make build_mode="release" all -j4
+
+echo "building server-side - network wrapper"
+make build_mode="release" networkWrapper -j4
+
+echo "building server-side - application"
+make build_mode="release" application -j4
 
 echo ""
 echo "#"

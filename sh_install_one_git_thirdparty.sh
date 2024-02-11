@@ -102,7 +102,12 @@ yes)
   rm -rf $CURR_DEST_DIR
 
   # clone (but we only ask for one commit, which is very light)
-  git clone --quiet --depth 1 --branch $CURR_GIT_TAG https://github.com/$CURR_GIT_URL $CURR_DEST_DIR
+  git clone \
+    --quiet \
+    --depth 1 \
+    --branch $CURR_GIT_TAG \
+    https://github.com/$CURR_GIT_URL \
+    $CURR_DEST_DIR
 
   if [ -d "$DIR_DEPENDENCIES/$CURR_DEST_DIR" ]
   then
