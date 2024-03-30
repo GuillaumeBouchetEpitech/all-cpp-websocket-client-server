@@ -2,6 +2,7 @@
 #include "WebSocketMainLogicServer.hpp"
 
 #include "network-wrapper/websocket-server/IWebSocketSession.hpp"
+#include "network-wrapper/utilities/stdVectorNoReallocErase.hpp"
 
 #include <iostream>
 #include <sstream>
@@ -18,19 +19,28 @@ WebSocketMainLogicServer::WebSocketMainLogicServer(
 
       //
       //
-      // broadcast
+      // create the new user data saved with the session
 
       auto newPlayerData = std::make_shared<PlayerData>();
       newPlayerData->id = _lastPlayerId++;
+      newWsSession->userData = newPlayerData.get();
 
-      std::stringstream sstr;
-      sstr << "new client: " << newPlayerData->id;
-      const std::string messageToSend = sstr.str();
+      _allPlayersData.push_back(newPlayerData);
 
-      _sessionManager.forEachSession(
-        [&messageToSend](std::shared_ptr<IWebSocketSession> currWsSession) {
-          currWsSession->write(messageToSend.data(), messageToSend.size());
-        });
+      //
+      //
+      // broadcast new session to all existing session(s)
+
+      {
+        std::stringstream sstr;
+        sstr << "[BROADCAST][NEW CLIENT]: " << newPlayerData->id;
+        const std::string messageToSend = sstr.str();
+
+        _sessionManager.forEachSession(
+          [&messageToSend](std::shared_ptr<IWebSocketSession> currWsSession) {
+            currWsSession->write(messageToSend.data(), messageToSend.size());
+          });
+      }
 
       //
       //
@@ -38,12 +48,13 @@ WebSocketMainLogicServer::WebSocketMainLogicServer(
 
       _sessionManager.addSession(newWsSession);
 
-      //
-      //
-      // add data
+      {
+        std::stringstream sstr;
+        sstr << "[YOU ONLY][WELCOME] your ID is \"" << newPlayerData->id << "\"";
+        const std::string messageToSend = sstr.str();
 
-      _allPlayersData.push_back(newPlayerData);
-      newWsSession->userData = newPlayerData.get();
+        newWsSession->write(messageToSend.data(), messageToSend.size());
+      }
     });
 
   _webSocketServer->setOnMessageCallback(
@@ -62,8 +73,7 @@ WebSocketMainLogicServer::WebSocketMainLogicServer(
 
       {
         std::stringstream sstr;
-        sstr << "client (" << playerId << ") sent: \"" << messageReceived
-             << "\"";
+        sstr << "[BROADCAST][NEW MESSAGE][FROM \"" << playerId << "\"] \"" << messageReceived << "\"";
 
         const std::string messageToSend = sstr.str();
 
@@ -72,8 +82,9 @@ WebSocketMainLogicServer::WebSocketMainLogicServer(
         _sessionManager.forEachSession(
           [&messageToSend,
            wsSession](std::shared_ptr<IWebSocketSession> currWsSession) {
-            if (wsSession != currWsSession)
+            if (wsSession != currWsSession) {
               currWsSession->write(messageToSend.data(), messageToSend.size());
+            }
           });
       }
 
@@ -83,8 +94,7 @@ WebSocketMainLogicServer::WebSocketMainLogicServer(
 
       {
         std::stringstream sstr;
-        sstr << "you (" << playerId << ") sent -> \"" << messageReceived
-             << "\"";
+        sstr << "[BROADCAST][NEW MESSAGE][FROM YOU] \"" << messageReceived << "\"";
 
         const std::string messageToSend = sstr.str();
 
@@ -110,22 +120,16 @@ WebSocketMainLogicServer::WebSocketMainLogicServer(
       //
       // remove data of the disconnected player
 
-      auto it = std::find_if(
-        _allPlayersData.begin(), _allPlayersData.end(),
-        [currPlayerData](const std::shared_ptr<PlayerData> currData) {
-          return currData.get() == currPlayerData;
-        });
-
-      if (it != _allPlayersData.end()) {
-        _allPlayersData.erase(it);
-      }
+      stdVectorNoReallocEraseByCallback<std::shared_ptr<PlayerData>>(_allPlayersData, [currPlayerData](const std::shared_ptr<PlayerData>& currData) -> bool {
+        return currData.get() == currPlayerData;
+      });
 
       //
       //
       // broadcast
 
       std::stringstream sstr;
-      sstr << "client disconnected: " << playerId;
+      sstr << "[BROADCAST][CLIENT LEFT][WAS \"" << playerId << "\"]";
       const std::string messageToSend = sstr.str();
 
       _sessionManager.forEachSession(

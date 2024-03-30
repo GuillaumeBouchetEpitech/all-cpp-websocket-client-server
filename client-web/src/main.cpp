@@ -19,8 +19,9 @@ extern "C" {
 EMSCRIPTEN_KEEPALIVE
 void
 startApplication(const char* inUrl) {
-  if (_myApplication)
+  if (_myApplication) {
     return;
+  }
 
   D_LOG_OUT("start");
   D_LOG_OUT(" -> inUrl \"" << inUrl << "\"");

@@ -1,8 +1,6 @@
 
 #include "WebSocketSession.hpp"
 
-#include "TcpListener.hpp"
-
 #include <iostream>
 
 //------------------------------------------------------------------------------
@@ -34,8 +32,16 @@ SendBuffer::SendBuffer(const char* dataToSend, std::size_t dataSize)
 
 // Take ownership of the socket
 WebSocketSession::WebSocketSession(
-  boost::asio::ip::tcp::socket&& socket, TcpListener& mainTcpListener)
-  : _ws(std::move(socket)), _mainTcpListener(mainTcpListener) {}
+  boost::asio::ip::tcp::socket&& socket,
+    const ws_callbacks::OnConnection& onConnectionCallback,
+    const ws_callbacks::OnDisconnection& onDisconnectionCallback,
+    const ws_callbacks::OnMessage& onMessageCallback
+  )
+  : _ws(std::move(socket))
+  , _onConnectionCallback(onConnectionCallback)
+  , _onDisconnectionCallback(onDisconnectionCallback)
+  , _onMessageCallback(onMessageCallback)
+  {}
 
 // Get on the correct executor
 void
@@ -108,12 +114,12 @@ WebSocketSession::_onAccept(beast::error_code ec) {
     return fail(ec, "accept");
   }
 
-  if (_mainTcpListener._onConnectionCallback) {
+  if (_onConnectionCallback) {
 
-    // allow shared ownership to _onConnectionCallback callback
+    // allow shared ownership to _onConnectionCallback
     auto self = shared_from_this();
 
-    _mainTcpListener._onConnectionCallback(self);
+    _onConnectionCallback(self);
   }
 
   // Read a message
@@ -137,12 +143,12 @@ WebSocketSession::_onRead(beast::error_code ec, std::size_t bytes_transferred) {
 
   // This indicates that the session was closed
   if (ec == websocket::error::closed) {
-    if (_mainTcpListener._onDisconnectionCallback) {
+    if (_onDisconnectionCallback) {
 
-      // allow shared ownership to _onDisconnectionCallback callback
+      // allow shared ownership to _onDisconnectionCallback
       auto self = shared_from_this();
 
-      _mainTcpListener._onDisconnectionCallback(self);
+      _onDisconnectionCallback(self);
     }
 
     return;
@@ -152,15 +158,15 @@ WebSocketSession::_onRead(beast::error_code ec, std::size_t bytes_transferred) {
     return fail(ec, "read");
   }
 
-  if (_mainTcpListener._onMessageCallback) {
+  if (_onMessageCallback) {
     const auto& subBuffer = _buffer.data();
     const char* dataPtr = static_cast<const char*>(subBuffer.data());
     const std::size_t dataLength = subBuffer.size();
 
-    // allow shared ownership to _onMessageCallback callback
+    // allow shared ownership to _onMessageCallback
     auto self = shared_from_this();
 
-    _mainTcpListener._onMessageCallback(self, dataPtr, dataLength);
+    _onMessageCallback(self, dataPtr, dataLength);
   }
 
   // Clear the buffer

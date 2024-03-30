@@ -2,13 +2,12 @@
 #pragma once
 
 #include "../IWebSocketSession.hpp"
+#include "../callbacks.hpp"
 
 #include "boostHeaders.hpp"
 
 #include <list>
 #include <memory>
-
-class TcpListener;
 
 constexpr std::size_t max_send_buffer_size = 255;
 
@@ -29,10 +28,14 @@ public:
 public:
   // Take ownership of the socket
   explicit WebSocketSession(
-    boost::asio::ip::tcp::socket&& socket, TcpListener& mainTcpListener);
+    boost::asio::ip::tcp::socket&& socket,
+    const ws_callbacks::OnConnection& onConnectionCallback,
+    const ws_callbacks::OnDisconnection& onDisconnectionCallback,
+    const ws_callbacks::OnMessage& onMessageCallback
+    );
 
   // Get on the correct executor
-  void run() override;
+  void run();
 
   void write(const char* data, std::size_t length) override;
 
@@ -47,7 +50,9 @@ private:
 private:
   websocket::stream<beast::tcp_stream> _ws;
   beast::flat_buffer _buffer;
-  TcpListener& _mainTcpListener;
+  const ws_callbacks::OnConnection& _onConnectionCallback;
+  const ws_callbacks::OnDisconnection& _onDisconnectionCallback;
+  const ws_callbacks::OnMessage& _onMessageCallback;
 
   std::list<SendBuffer> _buffersToSend;
 };

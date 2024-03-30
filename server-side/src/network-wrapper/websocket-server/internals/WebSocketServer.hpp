@@ -2,10 +2,10 @@
 #pragma once
 
 #include "../AbstractWebSocketServer.hpp"
+#include "../callbacks.hpp"
 
-#include "TcpListener.hpp"
+#include "../../common/TcpListener.hpp"
 
-// #include <iostream>
 #include <thread>
 #include <vector>
 
@@ -35,13 +35,13 @@ public:
   void stop() override;
 
 private:
-  // using Sessions = std::vector<std::shared_ptr<AbstractWebSocketSession>>;
-
   net::io_context _ioc;
   uint32_t _totalThreads;
   std::shared_ptr<TcpListener> _mainTcpListener;
   std::vector<std::thread> _allThreads;
 
-  // Sessions allSessions;
-  // allSessions.reserve(1024);
+  ws_callbacks::OnConnection _onConnectionCallback;
+  ws_callbacks::OnDisconnection _onDisconnectionCallback;
+  ws_callbacks::OnMessage _onMessageCallback;
+
 };

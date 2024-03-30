@@ -1,6 +1,8 @@
 
 #include "WebSocketServer.hpp"
 
+#include "WebSocketSession.hpp"
+
 #include "boostHeaders.hpp"
 
 WebSocketServer::WebSocketServer(
@@ -11,10 +13,11 @@ WebSocketServer::WebSocketServer(
     throw std::runtime_error("total thread(s) must be > 0");
   }
 
+  auto boostIpAddr = net::ip::make_address(ipAddress);
+  auto boostEndpoint = boost::asio::ip::tcp::endpoint{boostIpAddr, port};
+
   // Create and launch a listening port
-  _mainTcpListener = std::make_shared<TcpListener>(
-    _ioc,
-    boost::asio::ip::tcp::endpoint{net::ip::make_address(ipAddress), port});
+  _mainTcpListener = std::make_shared<TcpListener>(_ioc, boostEndpoint, _totalThreads);
 }
 
 WebSocketServer::~WebSocketServer() { stop(); }
@@ -22,24 +25,34 @@ WebSocketServer::~WebSocketServer() { stop(); }
 void
 WebSocketServer::setOnConnectionCallback(
   const ws_callbacks::OnConnection& onConnectionCallback) {
-  _mainTcpListener->setOnConnectionCallback(onConnectionCallback);
+  _onConnectionCallback = onConnectionCallback;
 }
 
 void
 WebSocketServer::setOnDisconnectionCallback(
   const ws_callbacks::OnDisconnection& onDisconnectionCallback) {
-  _mainTcpListener->setOnDisconnectionCallback(onDisconnectionCallback);
+  _onDisconnectionCallback = onDisconnectionCallback;
 }
 
 void
 WebSocketServer::setOnMessageCallback(
   const ws_callbacks::OnMessage& onMessageCallback) {
-  _mainTcpListener->setOnMessageCallback(onMessageCallback);
+  _onMessageCallback = onMessageCallback;
 }
 
 void
 WebSocketServer::start() {
   stop();
+
+  _mainTcpListener->setOnNewConnectionCallback([this](boost::asio::ip::tcp::socket&& newSocket)
+  {
+    // Create the session and run it
+    // -> the session is not stored anywhere
+    // -> since calling run() will make more shared pointer of the instance
+    //    the session will not be deleted when going out of scope here...
+    //    ...if anything it's just a bit misleading, hence that comment
+    std::make_shared<WebSocketSession>(std::move(newSocket), _onConnectionCallback, _onDisconnectionCallback, _onMessageCallback)->run();
+  });
 
   _mainTcpListener->start();
 
@@ -59,8 +72,7 @@ WebSocketServer::stop() {
   _mainTcpListener->stop();
   _ioc.stop();
 
-  for (std::size_t index = 0; index < _allThreads.size(); ++index) {
-    auto& currThread = _allThreads.at(index);
+  for (auto& currThread : _allThreads) {
     if (currThread.joinable()) {
       currThread.join();
     }

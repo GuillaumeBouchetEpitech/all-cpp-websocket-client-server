@@ -5,8 +5,9 @@
 
 void
 Application::connect(const char* inUrl) {
-  if (_webSocket)
+  if (_webSocket) {
     _webSocket->disconnect();
+  }
 
   _webSocket = std::make_unique<WebSocketConnection>();
 
@@ -15,8 +16,8 @@ Application::connect(const char* inUrl) {
       static_cast<void>(eventType);      // unused
       static_cast<void>(websocketEvent); // unused
 
-      D_LOG_OUT(" => connected");
-      D_LOG_OUT("   => sending to server the utf8 text message \"ping!\"");
+      D_LOG_OUT("> connected");
+      D_LOG_OUT("> sending utf8 message: \"ping!\"");
 
       _webSocket->sendUtf8Text("ping!");
     });
@@ -26,7 +27,7 @@ Application::connect(const char* inUrl) {
       static_cast<void>(eventType);      // unused
       static_cast<void>(websocketEvent); // unused
 
-      D_LOG_OUT(" => error");
+      D_LOG_OUT("> error");
     });
 
   _webSocket->setOnCloseCallback(
@@ -36,8 +37,9 @@ Application::connect(const char* inUrl) {
       const std::string_view message(websocketEvent->reason);
 
       D_LOG_OUT(
-        " => disconnected, reason (" << message.size() << ") \"" << message
-                                     << " \"");
+        "> disconnected");
+      D_LOG_OUT(
+        ">>> reason (size=" << message.size() << ") \"" << message << " \"");
     });
 
   _webSocket->setOnMessageCallback(
@@ -53,9 +55,9 @@ Application::connect(const char* inUrl) {
 
         const std::string_view message(dataReceived, sizeReceived);
 
-        D_LOG_OUT(" => message received (utf8 text)");
+        // D_LOG_OUT(" => message received (utf8 text)");
         D_LOG_OUT(
-          "   => content: (" << message.size() << ") \"" << message << "\"");
+          "> new msg (utf8, size=" << message.size() << ") \"" << message << "\"");
       } else {
 
         auto tmpBuffer = std::make_unique<char[]>(sizeReceived + 1);
@@ -65,9 +67,9 @@ Application::connect(const char* inUrl) {
 
         const std::string_view message(tmpBuffer.get(), sizeReceived);
 
-        D_LOG_OUT(" => message received (binary)");
+        // D_LOG_OUT(" => message received (binary)");
         D_LOG_OUT(
-          "   => content: (" << message.size() << ") \"" << message << "\"");
+          "> new msg (binary, size=" << message.size() << ") \"" << message << "\"");
       }
     });
 

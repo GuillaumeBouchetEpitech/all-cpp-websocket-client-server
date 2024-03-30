@@ -34,8 +34,9 @@ WebSocketConnection::setOnMessageCallback(
 
 void
 WebSocketConnection::connect(const char* inUrl) {
-  if (_isConnected)
+  if (_isConnected) {
     disconnect();
+  }
 
   // typedef struct EmscriptenWebSocketCreateAttributes {
   //   // The target URL to connect to. This string can point to a stack local
@@ -73,8 +74,9 @@ WebSocketConnection::connect(const char* inUrl) {
 
 void
 WebSocketConnection::disconnect() {
-  if (!_isConnected)
+  if (!_isConnected) {
     return;
+  }
 
   EMSCRIPTEN_RESULT result =
     emscripten_websocket_close(_wsSocket, 1000, "no reason");
@@ -88,8 +90,9 @@ WebSocketConnection::disconnect() {
 
 bool
 WebSocketConnection::sendUtf8Text(const char* inText) {
-  if (!_isConnected)
+  if (!_isConnected) {
     return false;
+  }
 
   EMSCRIPTEN_RESULT result =
     emscripten_websocket_send_utf8_text(_wsSocket, inText);
@@ -104,8 +107,9 @@ WebSocketConnection::sendUtf8Text(const char* inText) {
 
 bool
 WebSocketConnection::sendBinary(void* inData, std::size_t inSize) {
-  if (!_isConnected)
+  if (!_isConnected) {
     return false;
+  }
 
   EMSCRIPTEN_RESULT result =
     emscripten_websocket_send_binary(_wsSocket, (void*)inData, inSize);
@@ -154,8 +158,6 @@ WebSocketConnection::_emOnMessage(
 void
 WebSocketConnection::_onOpen(
   int eventType, const EmscriptenWebSocketOpenEvent* websocketEvent) {
-  // static_cast<void>(eventType); // unused
-  // static_cast<void>(websocketEvent); // unused
 
   _isConnected = true;
 
@@ -166,8 +168,6 @@ WebSocketConnection::_onOpen(
 void
 WebSocketConnection::_onError(
   int eventType, const EmscriptenWebSocketErrorEvent* websocketEvent) {
-  // static_cast<void>(eventType); // unused
-  // static_cast<void>(websocketEvent); // unused
 
   _isConnected = false;
 
@@ -178,8 +178,6 @@ WebSocketConnection::_onError(
 void
 WebSocketConnection::_onClose(
   int eventType, const EmscriptenWebSocketCloseEvent* websocketEvent) {
-  // static_cast<void>(eventType); // unused
-  // static_cast<void>(websocketEvent); // unused
 
   _isConnected = false;
 
@@ -190,8 +188,6 @@ WebSocketConnection::_onClose(
 void
 WebSocketConnection::_onMessage(
   int eventType, const EmscriptenWebSocketMessageEvent* websocketEvent) {
-  // static_cast<void>(eventType); // unused
-  // static_cast<void>(websocketEvent); // unused
 
   if (_onMessageCallback) {
     _onMessageCallback(eventType, websocketEvent);

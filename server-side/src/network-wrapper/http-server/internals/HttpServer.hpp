@@ -5,6 +5,7 @@
 
 #include "../callbacks.hpp"
 
+#include "../../common/TcpListener.hpp"
 #include "HttpConnection.hpp"
 #include "boostHeaders.hpp"
 
@@ -15,7 +16,8 @@ class HttpServer : public AbstractHttpServer,
 
 public:
   HttpServer(
-    const std::string& ipAddress, const uint16_t port,
+    const std::string& ipAddress,
+    const uint16_t port,
     const uint32_t totalThreads = 1);
   ~HttpServer();
 
@@ -37,8 +39,7 @@ private:
 
 private:
   net::io_context _ioc;
-  boost::asio::ip::tcp::acceptor _acceptor;
-  boost::asio::ip::tcp::socket _tcpSocket;
+  std::shared_ptr<TcpListener> _mainTcpListener;
   uint32_t _totalThreads;
 
 private:
