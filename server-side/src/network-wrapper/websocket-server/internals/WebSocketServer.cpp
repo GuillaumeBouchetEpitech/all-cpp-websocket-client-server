@@ -23,20 +23,17 @@ WebSocketServer::WebSocketServer(
 WebSocketServer::~WebSocketServer() { stop(); }
 
 void
-WebSocketServer::setOnConnectionCallback(
-  const ws_callbacks::OnConnection& onConnectionCallback) {
+WebSocketServer::setOnConnectionCallback(const ws_callbacks::OnConnection& onConnectionCallback) {
   _onConnectionCallback = onConnectionCallback;
 }
 
 void
-WebSocketServer::setOnDisconnectionCallback(
-  const ws_callbacks::OnDisconnection& onDisconnectionCallback) {
+WebSocketServer::setOnDisconnectionCallback(const ws_callbacks::OnDisconnection& onDisconnectionCallback) {
   _onDisconnectionCallback = onDisconnectionCallback;
 }
 
 void
-WebSocketServer::setOnMessageCallback(
-  const ws_callbacks::OnMessage& onMessageCallback) {
+WebSocketServer::setOnMessageCallback(const ws_callbacks::OnMessage& onMessageCallback) {
   _onMessageCallback = onMessageCallback;
 }
 
@@ -44,14 +41,15 @@ void
 WebSocketServer::start() {
   stop();
 
-  _mainTcpListener->setOnNewConnectionCallback([this](boost::asio::ip::tcp::socket&& newSocket)
-  {
+  _mainTcpListener->setOnNewConnectionCallback([this](boost::asio::ip::tcp::socket&& newSocket) {
     // Create the session and run it
     // -> the session is not stored anywhere
     // -> since calling run() will make more shared pointer of the instance
     //    the session will not be deleted when going out of scope here...
     //    ...if anything it's just a bit misleading, hence that comment
-    std::make_shared<WebSocketSession>(std::move(newSocket), _onConnectionCallback, _onDisconnectionCallback, _onMessageCallback)->run();
+    std::make_shared<WebSocketSession>(
+      std::move(newSocket), _onConnectionCallback, _onDisconnectionCallback, _onMessageCallback)
+      ->run();
   });
 
   _mainTcpListener->start();

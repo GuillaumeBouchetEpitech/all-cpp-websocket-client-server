@@ -28,17 +28,14 @@ public:
   ~FileManager() = default;
 
 public:
-  std::optional<std::reference_wrapper<const FileCacheEntry>>
-  getFile(const std::string& filename) const;
+  std::optional<std::reference_wrapper<const FileCacheEntry>> getFile(const std::string& filename) const;
 
 private:
   void _buildTypesMap();
   void _buildFileCache();
-  std::shared_ptr<FileCacheEntry>
-  _loadFile(const std::string& filename, const std::string& cacheKey);
+  std::shared_ptr<FileCacheEntry> _loadFile(const std::string& filename, const std::string& cacheKey);
 
 private:
-  static void _getLastModifiedTime(
-    const std::string_view& filename, const std::string_view& format,
-    std::string& outLastModified);
+  static void
+  _getLastModifiedTime(const std::string_view& filename, const std::string_view& format, std::string& outLastModified);
 };

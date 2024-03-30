@@ -19,8 +19,7 @@ struct SendBuffer {
 };
 
 // Echoes back all received WebSocket messages
-class WebSocketSession : public IWebSocketSession,
-                         public std::enable_shared_from_this<WebSocketSession> {
+class WebSocketSession : public IWebSocketSession, public std::enable_shared_from_this<WebSocketSession> {
 
 public:
   void* userData = nullptr;
@@ -28,11 +27,8 @@ public:
 public:
   // Take ownership of the socket
   explicit WebSocketSession(
-    boost::asio::ip::tcp::socket&& socket,
-    const ws_callbacks::OnConnection& onConnectionCallback,
-    const ws_callbacks::OnDisconnection& onDisconnectionCallback,
-    const ws_callbacks::OnMessage& onMessageCallback
-    );
+    boost::asio::ip::tcp::socket&& socket, const ws_callbacks::OnConnection& onConnectionCallback,
+    const ws_callbacks::OnDisconnection& onDisconnectionCallback, const ws_callbacks::OnMessage& onMessageCallback);
 
   // Get on the correct executor
   void run();

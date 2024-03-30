@@ -9,14 +9,10 @@
 class WebSocketConnection {
 
 public:
-  using OnOpenCallback =
-    std::function<void(int, const EmscriptenWebSocketOpenEvent*)>;
-  using OnErrorCallback =
-    std::function<void(int, const EmscriptenWebSocketErrorEvent*)>;
-  using OnCloseCallback =
-    std::function<void(int, const EmscriptenWebSocketCloseEvent*)>;
-  using OnMessageCallback =
-    std::function<void(int, const EmscriptenWebSocketMessageEvent*)>;
+  using OnOpenCallback = std::function<void(int, const EmscriptenWebSocketOpenEvent*)>;
+  using OnErrorCallback = std::function<void(int, const EmscriptenWebSocketErrorEvent*)>;
+  using OnCloseCallback = std::function<void(int, const EmscriptenWebSocketCloseEvent*)>;
+  using OnMessageCallback = std::function<void(int, const EmscriptenWebSocketMessageEvent*)>;
 
 private:
   bool _isConnected = false;
@@ -37,14 +33,10 @@ public:
   virtual ~WebSocketConnection();
 
 public:
-  WebSocketConnection&
-  setOnOpenCallback(const OnOpenCallback& inOnOpenCallback);
-  WebSocketConnection&
-  setOnErrorCallback(const OnErrorCallback& inOnErrorCallback);
-  WebSocketConnection&
-  setOnCloseCallback(const OnCloseCallback& inOnCloseCallback);
-  WebSocketConnection&
-  setOnMessageCallback(const OnMessageCallback& inOnMessageCallback);
+  WebSocketConnection& setOnOpenCallback(const OnOpenCallback& inOnOpenCallback);
+  WebSocketConnection& setOnErrorCallback(const OnErrorCallback& inOnErrorCallback);
+  WebSocketConnection& setOnCloseCallback(const OnCloseCallback& inOnCloseCallback);
+  WebSocketConnection& setOnMessageCallback(const OnMessageCallback& inOnMessageCallback);
 
 public:
   void connect(const char* url);
@@ -56,26 +48,14 @@ public:
   bool sendBinary(void* inData, std::size_t inSize);
 
 private:
-  static EM_BOOL _emOnOpen(
-    int eventType, const EmscriptenWebSocketOpenEvent* websocketEvent,
-    void* userData);
-  static EM_BOOL _emOnError(
-    int eventType, const EmscriptenWebSocketErrorEvent* websocketEvent,
-    void* userData);
-  static EM_BOOL _emOnClose(
-    int eventType, const EmscriptenWebSocketCloseEvent* websocketEvent,
-    void* userData);
-  static EM_BOOL _emOnMessage(
-    int eventType, const EmscriptenWebSocketMessageEvent* websocketEvent,
-    void* userData);
+  static EM_BOOL _emOnOpen(int eventType, const EmscriptenWebSocketOpenEvent* websocketEvent, void* userData);
+  static EM_BOOL _emOnError(int eventType, const EmscriptenWebSocketErrorEvent* websocketEvent, void* userData);
+  static EM_BOOL _emOnClose(int eventType, const EmscriptenWebSocketCloseEvent* websocketEvent, void* userData);
+  static EM_BOOL _emOnMessage(int eventType, const EmscriptenWebSocketMessageEvent* websocketEvent, void* userData);
 
 private:
-  void
-  _onOpen(int eventType, const EmscriptenWebSocketOpenEvent* websocketEvent);
-  void
-  _onError(int eventType, const EmscriptenWebSocketErrorEvent* websocketEvent);
-  void
-  _onClose(int eventType, const EmscriptenWebSocketCloseEvent* websocketEvent);
-  void _onMessage(
-    int eventType, const EmscriptenWebSocketMessageEvent* websocketEvent);
+  void _onOpen(int eventType, const EmscriptenWebSocketOpenEvent* websocketEvent);
+  void _onError(int eventType, const EmscriptenWebSocketErrorEvent* websocketEvent);
+  void _onClose(int eventType, const EmscriptenWebSocketCloseEvent* websocketEvent);
+  void _onMessage(int eventType, const EmscriptenWebSocketMessageEvent* websocketEvent);
 };

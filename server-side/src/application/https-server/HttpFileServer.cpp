@@ -9,8 +9,7 @@
 #include <iostream>
 
 HttpFileServer::HttpFileServer(
-  const std::string& basePath, const std::string& ipAddress, uint16_t httpPort,
-  uint32_t totalThreads)
+  const std::string& basePath, const std::string& ipAddress, uint16_t httpPort, uint32_t totalThreads)
   : _fileManager(basePath) {
   _httpServer = AbstractHttpServer::create(ipAddress, httpPort, totalThreads);
 }
@@ -19,30 +18,28 @@ HttpFileServer::~HttpFileServer() { _httpServer->stop(); }
 
 void
 HttpFileServer::start() {
-  _httpServer->setOnConnectionCallback([this](
-                                         const http_callbacks::request& request,
-                                         http_callbacks::response& response) {
-    response.version(request.version());
-    response.keep_alive(false);
+  _httpServer->setOnConnectionCallback(
+    [this](const http_callbacks::request& request, http_callbacks::response& response) {
+      response.version(request.version());
+      response.keep_alive(false);
 
-    switch (request.method()) {
-    case boost::beast::http::verb::get: {
-      _onGetRequest(request, response);
-      break;
-    }
+      switch (request.method()) {
+      case boost::beast::http::verb::get: {
+        _onGetRequest(request, response);
+        break;
+      }
 
-    default: {
-      // We return responses indicating an error if
-      // we do not recognize the request method.
-      response.result(boost::beast::http::status::bad_request);
-      response.set(boost::beast::http::field::content_type, "text/plain");
-      boost::beast::ostream(response.body())
-        << "Invalid request-method '" << std::string(request.method_string())
-        << "'";
-      break;
-    }
-    }
-  });
+      default: {
+        // We return responses indicating an error if
+        // we do not recognize the request method.
+        response.result(boost::beast::http::status::bad_request);
+        response.set(boost::beast::http::field::content_type, "text/plain");
+        boost::beast::ostream(response.body())
+          << "Invalid request-method '" << std::string(request.method_string()) << "'";
+        break;
+      }
+      }
+    });
 
   _httpServer->start();
 }
@@ -58,8 +55,7 @@ HttpFileServer::setCustomHandler(const CustomHandler& handler) {
 }
 
 void
-HttpFileServer::_onGetRequest(
-  const http_callbacks::request& request, http_callbacks::response& response) {
+HttpFileServer::_onGetRequest(const http_callbacks::request& request, http_callbacks::response& response) {
 
   const std::string finalPath(request.target().begin(), request.target().end());
 
@@ -89,8 +85,7 @@ HttpFileServer::_onGetRequest(
   response.result(boost::beast::http::status::ok);
   response.set(boost::beast::http::field::server, "Beast");
   response.set(boost::beast::http::field::content_type, cachedResult.type);
-  response.set(
-    boost::beast::http::field::last_modified, cachedResult.lastModified);
+  response.set(boost::beast::http::field::last_modified, cachedResult.lastModified);
 
   // cached file (compressed or not)
 
@@ -107,8 +102,7 @@ HttpFileServer::_onGetRequest(
 }
 
 bool
-HttpFileServer::_isGzipCompressionPossible(
-  const FileCacheEntry& cache, const http_callbacks::request& request) {
+HttpFileServer::_isGzipCompressionPossible(const FileCacheEntry& cache, const http_callbacks::request& request) {
 
   // cache file compressed?
   if (cache.compressionRatio <= 0.0f) {

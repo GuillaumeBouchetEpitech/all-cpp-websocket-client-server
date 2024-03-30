@@ -12,22 +12,19 @@ WebSocketConnection::setOnOpenCallback(const OnOpenCallback& inOnOpenCallback) {
 }
 
 WebSocketConnection&
-WebSocketConnection::setOnErrorCallback(
-  const OnErrorCallback& inOnErrorCallback) {
+WebSocketConnection::setOnErrorCallback(const OnErrorCallback& inOnErrorCallback) {
   _onErrorCallback = inOnErrorCallback;
   return *this;
 }
 
 WebSocketConnection&
-WebSocketConnection::setOnCloseCallback(
-  const OnCloseCallback& inOnCloseCallback) {
+WebSocketConnection::setOnCloseCallback(const OnCloseCallback& inOnCloseCallback) {
   _onCloseCallback = inOnCloseCallback;
   return *this;
 }
 
 WebSocketConnection&
-WebSocketConnection::setOnMessageCallback(
-  const OnMessageCallback& inOnMessageCallback) {
+WebSocketConnection::setOnMessageCallback(const OnMessageCallback& inOnMessageCallback) {
   _onMessageCallback = inOnMessageCallback;
   return *this;
 }
@@ -78,11 +75,9 @@ WebSocketConnection::disconnect() {
     return;
   }
 
-  EMSCRIPTEN_RESULT result =
-    emscripten_websocket_close(_wsSocket, 1000, "no reason");
+  EMSCRIPTEN_RESULT result = emscripten_websocket_close(_wsSocket, 1000, "no reason");
   if (result) {
-    std::cerr << "Failed to emscripten_websocket_close(): " << result
-              << std::endl;
+    std::cerr << "Failed to emscripten_websocket_close(): " << result << std::endl;
   }
 
   _isConnected = false;
@@ -94,11 +89,9 @@ WebSocketConnection::sendUtf8Text(const char* inText) {
     return false;
   }
 
-  EMSCRIPTEN_RESULT result =
-    emscripten_websocket_send_utf8_text(_wsSocket, inText);
+  EMSCRIPTEN_RESULT result = emscripten_websocket_send_utf8_text(_wsSocket, inText);
   if (result) {
-    std::cerr << "Failed to send utf8 text payload, result: " << result
-              << std::endl;
+    std::cerr << "Failed to send utf8 text payload, result: " << result << std::endl;
     return false;
   }
 
@@ -111,11 +104,9 @@ WebSocketConnection::sendBinary(void* inData, std::size_t inSize) {
     return false;
   }
 
-  EMSCRIPTEN_RESULT result =
-    emscripten_websocket_send_binary(_wsSocket, (void*)inData, inSize);
+  EMSCRIPTEN_RESULT result = emscripten_websocket_send_binary(_wsSocket, (void*)inData, inSize);
   if (result) {
-    std::cerr << "Failed to send binary payload, result: " << result
-              << std::endl;
+    std::cerr << "Failed to send binary payload, result: " << result << std::endl;
     return false;
   }
 
@@ -123,41 +114,33 @@ WebSocketConnection::sendBinary(void* inData, std::size_t inSize) {
 }
 
 EM_BOOL
-WebSocketConnection::_emOnOpen(
-  int eventType, const EmscriptenWebSocketOpenEvent* websocketEvent,
-  void* userData) {
+WebSocketConnection::_emOnOpen(int eventType, const EmscriptenWebSocketOpenEvent* websocketEvent, void* userData) {
   WebSocketConnection* self = static_cast<WebSocketConnection*>(userData);
   self->_onOpen(eventType, websocketEvent);
   return EM_TRUE;
 }
 EM_BOOL
-WebSocketConnection::_emOnError(
-  int eventType, const EmscriptenWebSocketErrorEvent* websocketEvent,
-  void* userData) {
+WebSocketConnection::_emOnError(int eventType, const EmscriptenWebSocketErrorEvent* websocketEvent, void* userData) {
   WebSocketConnection* self = static_cast<WebSocketConnection*>(userData);
   self->_onError(eventType, websocketEvent);
   return EM_TRUE;
 }
 EM_BOOL
-WebSocketConnection::_emOnClose(
-  int eventType, const EmscriptenWebSocketCloseEvent* websocketEvent,
-  void* userData) {
+WebSocketConnection::_emOnClose(int eventType, const EmscriptenWebSocketCloseEvent* websocketEvent, void* userData) {
   WebSocketConnection* self = static_cast<WebSocketConnection*>(userData);
   self->_onClose(eventType, websocketEvent);
   return EM_TRUE;
 }
 EM_BOOL
 WebSocketConnection::_emOnMessage(
-  int eventType, const EmscriptenWebSocketMessageEvent* websocketEvent,
-  void* userData) {
+  int eventType, const EmscriptenWebSocketMessageEvent* websocketEvent, void* userData) {
   WebSocketConnection* self = static_cast<WebSocketConnection*>(userData);
   self->_onMessage(eventType, websocketEvent);
   return EM_TRUE;
 }
 
 void
-WebSocketConnection::_onOpen(
-  int eventType, const EmscriptenWebSocketOpenEvent* websocketEvent) {
+WebSocketConnection::_onOpen(int eventType, const EmscriptenWebSocketOpenEvent* websocketEvent) {
 
   _isConnected = true;
 
@@ -166,8 +149,7 @@ WebSocketConnection::_onOpen(
   }
 }
 void
-WebSocketConnection::_onError(
-  int eventType, const EmscriptenWebSocketErrorEvent* websocketEvent) {
+WebSocketConnection::_onError(int eventType, const EmscriptenWebSocketErrorEvent* websocketEvent) {
 
   _isConnected = false;
 
@@ -176,8 +158,7 @@ WebSocketConnection::_onError(
   }
 }
 void
-WebSocketConnection::_onClose(
-  int eventType, const EmscriptenWebSocketCloseEvent* websocketEvent) {
+WebSocketConnection::_onClose(int eventType, const EmscriptenWebSocketCloseEvent* websocketEvent) {
 
   _isConnected = false;
 
@@ -186,8 +167,7 @@ WebSocketConnection::_onClose(
   }
 }
 void
-WebSocketConnection::_onMessage(
-  int eventType, const EmscriptenWebSocketMessageEvent* websocketEvent) {
+WebSocketConnection::_onMessage(int eventType, const EmscriptenWebSocketMessageEvent* websocketEvent) {
 
   if (_onMessageCallback) {
     _onMessageCallback(eventType, websocketEvent);

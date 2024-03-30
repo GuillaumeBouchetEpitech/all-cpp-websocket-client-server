@@ -22,8 +22,7 @@ private:
   std::vector<std::shared_ptr<PlayerData>> _allPlayersData;
 
 public:
-  WebSocketMainLogicServer(
-    const std::string& ipAddress, uint16_t port, uint32_t totalThreads);
+  WebSocketMainLogicServer(const std::string& ipAddress, uint16_t port, uint32_t totalThreads);
 
   ~WebSocketMainLogicServer();
 

@@ -9,14 +9,11 @@
 class HttpFileServer {
 
 public:
-  using CustomHandler = std::function<bool(
-    const std::string&, const http_callbacks::request&,
-    http_callbacks::response&)>;
+  using CustomHandler =
+    std::function<bool(const std::string&, const http_callbacks::request&, http_callbacks::response&)>;
 
 public:
-  HttpFileServer(
-    const std::string& basePath, const std::string& ipAddress,
-    uint16_t httpPort, uint32_t totalThreads);
+  HttpFileServer(const std::string& basePath, const std::string& ipAddress, uint16_t httpPort, uint32_t totalThreads);
 
   ~HttpFileServer();
 
@@ -28,11 +25,9 @@ public:
   void stop();
 
 private:
-  void _onGetRequest(
-    const http_callbacks::request& request, http_callbacks::response& response);
+  void _onGetRequest(const http_callbacks::request& request, http_callbacks::response& response);
 
-  static bool _isGzipCompressionPossible(
-    const FileCacheEntry& cache, const http_callbacks::request& request);
+  static bool _isGzipCompressionPossible(const FileCacheEntry& cache, const http_callbacks::request& request);
 
 private:
   FileManager _fileManager;

@@ -5,10 +5,7 @@
 
 #include <mutex>
 
-
-WebSocketSessionManager::WebSocketSessionManager() {
-  _allSessions.reserve(1024);
-}
+WebSocketSessionManager::WebSocketSessionManager() { _allSessions.reserve(1024); }
 
 void
 WebSocketSessionManager::addSession(SessionPtr wsSession) {
@@ -33,8 +30,7 @@ WebSocketSessionManager::removeSession(SessionPtr wsSession) {
 }
 
 void
-WebSocketSessionManager::forEachSession(
-  const std::function<void(SessionPtr)>& callback) {
+WebSocketSessionManager::forEachSession(const std::function<void(SessionPtr)>& callback) {
 
   // allow multiple read at the same time
   std::shared_lock sharedLock(_mutex);
@@ -45,8 +41,7 @@ WebSocketSessionManager::forEachSession(
 }
 
 void
-WebSocketSessionManager::forEachSession(
-  const std::function<void(SessionPtr)>& callback) const {
+WebSocketSessionManager::forEachSession(const std::function<void(SessionPtr)>& callback) const {
 
   // allow multiple read at the same time
   std::shared_lock sharedLock(_mutex);

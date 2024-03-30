@@ -1,6 +1,6 @@
 
-#include <vector>
 #include <functional>
+#include <vector>
 
 template <typename T>
 bool
@@ -13,9 +13,6 @@ stdVectorNoReallocEraseByValue(std::vector<T>& container, const T& value) {
   return stdVectorNoReallocEraseByIterator(container, it);
 }
 
-
-
-
 template <typename T>
 bool
 stdVectorNoReallocEraseByCallback(std::vector<T>& container, const std::function<bool(const T&)>& findCallback) {
@@ -26,7 +23,6 @@ stdVectorNoReallocEraseByCallback(std::vector<T>& container, const std::function
 
   return stdVectorNoReallocEraseByIterator(container, it);
 }
-
 
 template <typename T, typename _Alloc = std::allocator<T>>
 bool

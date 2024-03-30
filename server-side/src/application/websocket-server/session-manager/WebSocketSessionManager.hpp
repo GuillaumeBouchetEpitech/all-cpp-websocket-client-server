@@ -21,8 +21,7 @@ public:
   WebSocketSessionManager();
   WebSocketSessionManager(const WebSocketSessionManager& other) = delete;
   WebSocketSessionManager(WebSocketSessionManager&& other) = delete;
-  WebSocketSessionManager&
-  operator=(const WebSocketSessionManager& other) = delete;
+  WebSocketSessionManager& operator=(const WebSocketSessionManager& other) = delete;
   WebSocketSessionManager& operator=(WebSocketSessionManager&& other) = delete;
   virtual ~WebSocketSessionManager() = default;
 

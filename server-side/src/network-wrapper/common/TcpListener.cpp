@@ -13,16 +13,10 @@ fail(beast::error_code ec, char const* what) {
 
 } // namespace
 
-TcpListener::TcpListener(
-  net::io_context& ioc,
-  boost::asio::ip::tcp::endpoint endpoint,
-  uint32_t totalThreads)
-  : _ioc(ioc), _acceptor(ioc), _endpoint(endpoint), _totalThreads(totalThreads)
-{}
+TcpListener::TcpListener(net::io_context& ioc, boost::asio::ip::tcp::endpoint endpoint, uint32_t totalThreads)
+  : _ioc(ioc), _acceptor(ioc), _endpoint(endpoint), _totalThreads(totalThreads) {}
 
-TcpListener::~TcpListener() {
-  stop();
-}
+TcpListener::~TcpListener() { stop(); }
 
 //
 //
@@ -31,8 +25,7 @@ TcpListener::~TcpListener() {
 //
 
 void
-TcpListener::setOnNewConnectionCallback(const OnNewConnection& onNewConnectionCallback)
-{
+TcpListener::setOnNewConnectionCallback(const OnNewConnection& onNewConnectionCallback) {
   _onNewConnectionCallback = onNewConnectionCallback;
 }
 
@@ -92,10 +85,7 @@ TcpListener::_doAccept() {
   // allow shared ownership to _onAcceptCallback
   auto self = shared_from_this();
 
-  auto _onAcceptCallback = [self](
-    beast::error_code ec,
-    boost::asio::ip::tcp::socket socket
-  ) {
+  auto _onAcceptCallback = [self](beast::error_code ec, boost::asio::ip::tcp::socket socket) {
     if (ec) {
       fail(ec, "accept");
       return;

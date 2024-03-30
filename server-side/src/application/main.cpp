@@ -24,11 +24,9 @@ int
 main(int argc, char* argv[]) {
   // Check command line arguments.
   if (argc != 6) {
-    std::cerr
-      << "Usage: " << argv[0]
-      << " <ip-address> <http-port> <ws-port> <http-threads> <ws-threads>\n"
-      << "Example:\n"
-      << "    " << argv[0] << " 0.0.0.0 7777 8888 1 1\n";
+    std::cerr << "Usage: " << argv[0] << " <ip-address> <http-port> <ws-port> <http-threads> <ws-threads>\n"
+              << "Example:\n"
+              << "    " << argv[0] << " 0.0.0.0 7777 8888 1 1\n";
     return EXIT_FAILURE;
   }
 
@@ -53,12 +51,10 @@ main(int argc, char* argv[]) {
   //
 
   const std::string_view webSocketConfigPath = "/web-socket-config.json";
-  const std::string webSocketConfigPayload =
-    _buildWebSocketUrl(ipAddress, wsPort);
+  const std::string webSocketConfigPayload = _buildWebSocketUrl(ipAddress, wsPort);
 
   auto customHandler = [&webSocketConfigPath, &webSocketConfigPayload](
-                         const std::string& path,
-                         const http_callbacks::request& request,
+                         const std::string& path, const http_callbacks::request& request,
                          http_callbacks::response& response) {
     static_cast<void>(request); // unused
 
@@ -83,8 +79,7 @@ main(int argc, char* argv[]) {
   //
 
   std::cout << "servers started" << std::endl;
-  std::cout << " -> link: \"http://" << ipAddress << ":" << httpPort << "/\""
-            << std::endl;
+  std::cout << " -> link: \"http://" << ipAddress << ":" << httpPort << "/\"" << std::endl;
 
   //
   // loop forever...

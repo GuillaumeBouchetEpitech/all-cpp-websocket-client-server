@@ -55,8 +55,7 @@ FileManager::_buildFileCache() {
     const std::string filePath = dir_entry.path();
 
     const std::string requestPath = filePath.substr(_basePath.size());
-    std::shared_ptr<FileCacheEntry> fileCachePtr =
-      _loadFile(filePath, requestPath);
+    std::shared_ptr<FileCacheEntry> fileCachePtr = _loadFile(filePath, requestPath);
 
     if (!fileCachePtr) {
       continue;
@@ -67,10 +66,9 @@ FileManager::_buildFileCache() {
     std::cout << " => disk path     : " << filePath << std::endl;
     std::cout << " => web path      : " << requestPath << std::endl;
     std::cout << " => type          : " << fileCachePtr->type << std::endl;
-    std::cout << " => compression   : " << std::fixed << std::setprecision(1)
-              << fileCachePtr->compressionRatio << "x" << std::endl;
-    std::cout << " => last modified : " << fileCachePtr->lastModified
+    std::cout << " => compression   : " << std::fixed << std::setprecision(1) << fileCachePtr->compressionRatio << "x"
               << std::endl;
+    std::cout << " => last modified : " << fileCachePtr->lastModified << std::endl;
 #endif
 
     _fileCache[requestPath] = fileCachePtr;
@@ -90,16 +88,14 @@ FileManager::_buildFileCache() {
 
     const std::string subKey = requestPath.substr(0, pathIndex + 1);
 
-    std::cout << " => file was indexed: " << filePath << " -> " << subKey
-              << std::endl;
+    std::cout << " => file was indexed: " << filePath << " -> " << subKey << std::endl;
 
     _fileCache[subKey] = fileCachePtr;
   }
 }
 
 std::shared_ptr<FileCacheEntry>
-FileManager::_loadFile(
-  const std::string& filename, const std::string& requestPath) {
+FileManager::_loadFile(const std::string& filename, const std::string& requestPath) {
 
   // filename exist and is file
   if (fs::is_regular_file(filename) == false) {
@@ -134,13 +130,11 @@ FileManager::_loadFile(
 
   // file content (attempting gzip)
 
-  const std::string compressedFileContent =
-    gzip::compress(fileContent.c_str(), fileContent.size(), Z_BEST_COMPRESSION);
+  const std::string compressedFileContent = gzip::compress(fileContent.c_str(), fileContent.size(), Z_BEST_COMPRESSION);
 
   if (compressedFileContent.size() < fileContent.size()) {
     // compressed file content is smaller: keep
-    newCache->compressionRatio =
-      float(fileContent.size()) / float(compressedFileContent.size());
+    newCache->compressionRatio = float(fileContent.size()) / float(compressedFileContent.size());
     newCache->compressedFileContent = std::move(compressedFileContent);
   } else {
     // compressed file content is larger: ignore
@@ -157,13 +151,12 @@ FileManager::_loadFile(
     std::stringstream subSstr;
     subSstr << " [size=" << std::setw(8) << fileContent.size() << "b,";
     if (newCache->compressionRatio > 0.0f) {
-      subSstr << " sent=" << std::setw(8)
-              << newCache->compressedFileContent.size() << "b,";
+      subSstr << " sent=" << std::setw(8) << newCache->compressedFileContent.size() << "b,";
     } else {
       subSstr << " sent=" << std::setw(8) << fileContent.size() << "b,";
     }
-    subSstr << " compression=" << std::setw(3) << std::fixed
-            << std::setprecision(1) << newCache->compressionRatio << "x]";
+    subSstr << " compression=" << std::setw(3) << std::fixed << std::setprecision(1) << newCache->compressionRatio
+            << "x]";
     subSstr << " " << newCache->lastModified;
     subSstr << " " << std::setw(20) << newCache->type << " " << requestPath;
 
@@ -175,21 +168,18 @@ FileManager::_loadFile(
 
 void
 FileManager::_getLastModifiedTime(
-  const std::string_view& filename, const std::string_view& format,
-  std::string& outLastModified) {
+  const std::string_view& filename, const std::string_view& format, std::string& outLastModified) {
   fs::file_time_type file_time = fs::last_write_time(filename);
 
   auto sctp = std::chrono::time_point_cast<std::chrono::system_clock::duration>(
-    file_time - fs::file_time_type::clock::now() +
-    std::chrono::system_clock::now());
+    file_time - fs::file_time_type::clock::now() + std::chrono::system_clock::now());
   std::time_t tt = std::chrono::system_clock::to_time_t(sctp);
 
   std::tm now_tm = *std::localtime(&tt);
 
   constexpr std::size_t k_bufferMaxSize = 128;
   char bufferData[k_bufferMaxSize];
-  const size_t bufferSize =
-    std::strftime(bufferData, k_bufferMaxSize, format.data(), &now_tm);
+  const size_t bufferSize = std::strftime(bufferData, k_bufferMaxSize, format.data(), &now_tm);
   bufferData[bufferSize] = '\0';
 
   outLastModified = std::string(bufferData, bufferSize);

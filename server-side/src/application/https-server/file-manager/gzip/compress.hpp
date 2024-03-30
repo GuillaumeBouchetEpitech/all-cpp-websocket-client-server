@@ -17,8 +17,7 @@ class Compressor {
 public:
   Compressor(
     int level = Z_DEFAULT_COMPRESSION,
-    std::size_t max_bytes =
-      2000000000) // by default refuse operation if uncompressed data is > 2GB
+    std::size_t max_bytes = 2000000000) // by default refuse operation if uncompressed data is > 2GB
     : max_(max_bytes), level_(level) {}
 
   template <typename InputType>
@@ -29,13 +28,11 @@ public:
     // Verify if size input will fit into unsigned int, type used for zlib's
     // avail_in
     if (size > std::numeric_limits<unsigned int>::max()) {
-      throw std::runtime_error(
-        "size arg is too large to fit into unsigned int type");
+      throw std::runtime_error("size arg is too large to fit into unsigned int type");
     }
 #endif
     if (size > max_) {
-      throw std::runtime_error(
-        "size may use more memory than intended when decompressing");
+      throw std::runtime_error("size may use more memory than intended when decompressing");
     }
 
     z_stream deflate_s;
@@ -65,10 +62,7 @@ public:
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wold-style-cast"
-    if (
-      deflateInit2(
-        &deflate_s, level_, Z_DEFLATED, window_bits, mem_level,
-        Z_DEFAULT_STRATEGY) != Z_OK) {
+    if (deflateInit2(&deflate_s, level_, Z_DEFLATED, window_bits, mem_level, Z_DEFAULT_STRATEGY) != Z_OK) {
       throw std::runtime_error("deflate init failed");
     }
 #pragma GCC diagnostic pop
@@ -85,8 +79,7 @@ public:
       // There is no way we see that "increase" would not fit in an unsigned
       // int, hence we use static cast here to avoid -Wshorten-64-to-32 error
       deflate_s.avail_out = static_cast<unsigned int>(increase);
-      deflate_s.next_out =
-        reinterpret_cast<Bytef*>((&output[0] + size_compressed));
+      deflate_s.next_out = reinterpret_cast<Bytef*>((&output[0] + size_compressed));
       // From http://www.zlib.net/zlib_how.html
       // "deflate() has a return value that can indicate errors, yet we do not
       // check it here. Why not? Well, it turns out that deflate() can do no
@@ -102,8 +95,7 @@ public:
 };
 
 inline std::string
-compress(
-  const char* data, std::size_t size, int level = Z_DEFAULT_COMPRESSION) {
+compress(const char* data, std::size_t size, int level = Z_DEFAULT_COMPRESSION) {
   Compressor comp(level);
   std::string output;
   comp.compress(output, data, size);

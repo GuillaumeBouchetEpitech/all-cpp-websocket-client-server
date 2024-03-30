@@ -1,12 +1,10 @@
 
 #include "HttpConnection.hpp"
 
-HttpConnection::HttpConnection(boost::asio::ip::tcp::socket&& tcpSocket)
-  : _tcpSocket(std::move(tcpSocket)) {}
+HttpConnection::HttpConnection(boost::asio::ip::tcp::socket&& tcpSocket) : _tcpSocket(std::move(tcpSocket)) {}
 
 HttpConnection&
-HttpConnection::setOnConnectionCallback(
-  const http_callbacks::OnConnection& onConnectionCallback) {
+HttpConnection::setOnConnectionCallback(const http_callbacks::OnConnection& onConnectionCallback) {
   _onConnectionCallback = onConnectionCallback;
   return *this;
 }
@@ -25,14 +23,12 @@ HttpConnection::_readRequest() {
   // allow shared ownership to async_read callback
   auto self = shared_from_this();
 
-  http::async_read(
-    _tcpSocket, _readBuffer, _requestBody,
-    [self](beast::error_code ec, std::size_t bytes_transferred) {
-      boost::ignore_unused(bytes_transferred);
-      if (!ec) {
-        self->_processRequest();
-      }
-    });
+  http::async_read(_tcpSocket, _readBuffer, _requestBody, [self](beast::error_code ec, std::size_t bytes_transferred) {
+    boost::ignore_unused(bytes_transferred);
+    if (!ec) {
+      self->_processRequest();
+    }
+  });
 }
 
 // Determine what needs to be done with the request message.
@@ -55,12 +51,10 @@ HttpConnection::_writeResponse() {
 
   _responseBody.content_length(_responseBody.body().size());
 
-  http::async_write(
-    _tcpSocket, _responseBody, [self](beast::error_code ec, std::size_t) {
-      self->_tcpSocket.shutdown(
-        boost::asio::ip::tcp::socket::shutdown_send, ec);
-      self->_connectionTimer.cancel();
-    });
+  http::async_write(_tcpSocket, _responseBody, [self](beast::error_code ec, std::size_t) {
+    self->_tcpSocket.shutdown(boost::asio::ip::tcp::socket::shutdown_send, ec);
+    self->_connectionTimer.cancel();
+  });
 }
 
 void

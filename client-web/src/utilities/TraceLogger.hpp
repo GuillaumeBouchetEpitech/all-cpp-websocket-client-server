@@ -45,14 +45,12 @@ template <> TraceLogger& TraceLogger::operator<< <double>(double data);
 #if 0
 
 // this will reduce the "__FILE__" macro to it's filename -> friendlier to read
-#define D_LOG_OUT_FILENAME \
-  (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
+#define D_LOG_OUT_FILENAME (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
 
 // this is just to make the "D_LOG_OUT" macro source code easier to read
 #define D_LOG_OUT_STACK D_LOG_OUT_FILENAME << "|" << __func__ << "|" << __LINE__
 
-#define D_LOG_OUT_PREFIX \
-  "[" << helpers::TraceLogger::getTime() << "] (" << D_LOG_OUT_STACK << ") -> "
+#define D_LOG_OUT_PREFIX "[" << helpers::TraceLogger::getTime() << "] (" << D_LOG_OUT_STACK << ") -> "
 
 #else
 

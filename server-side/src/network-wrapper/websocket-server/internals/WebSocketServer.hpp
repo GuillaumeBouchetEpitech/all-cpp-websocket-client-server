@@ -12,8 +12,7 @@
 class WebSocketServer : public AbstractWebSocketServer {
 
 public:
-  explicit WebSocketServer(
-    const std::string& ipAddress, uint16_t port, uint32_t totalThreads = 1);
+  explicit WebSocketServer(const std::string& ipAddress, uint16_t port, uint32_t totalThreads = 1);
 
   WebSocketServer(const WebSocketServer& other) = delete;
   WebSocketServer(WebSocketServer&& other) = delete;
@@ -23,12 +22,9 @@ public:
   ~WebSocketServer();
 
 public:
-  void setOnConnectionCallback(
-    const ws_callbacks::OnConnection& onConnectionCallback) override;
-  void setOnDisconnectionCallback(
-    const ws_callbacks::OnDisconnection& onDisconnectionCallback) override;
-  void setOnMessageCallback(
-    const ws_callbacks::OnMessage& onMessageCallback) override;
+  void setOnConnectionCallback(const ws_callbacks::OnConnection& onConnectionCallback) override;
+  void setOnDisconnectionCallback(const ws_callbacks::OnDisconnection& onDisconnectionCallback) override;
+  void setOnMessageCallback(const ws_callbacks::OnMessage& onMessageCallback) override;
 
 public:
   void start() override;
@@ -43,5 +39,4 @@ private:
   ws_callbacks::OnConnection _onConnectionCallback;
   ws_callbacks::OnDisconnection _onDisconnectionCallback;
   ws_callbacks::OnMessage _onMessageCallback;
-
 };

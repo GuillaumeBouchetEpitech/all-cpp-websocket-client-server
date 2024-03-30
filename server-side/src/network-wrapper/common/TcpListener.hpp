@@ -17,10 +17,7 @@ class TcpListener : public std::enable_shared_from_this<TcpListener> {
   friend WebSocketSession;
 
 public:
-  TcpListener(
-    net::io_context& ioc,
-    boost::asio::ip::tcp::endpoint endpoint,
-    uint32_t totalThreads);
+  TcpListener(net::io_context& ioc, boost::asio::ip::tcp::endpoint endpoint, uint32_t totalThreads);
 
   ~TcpListener();
 

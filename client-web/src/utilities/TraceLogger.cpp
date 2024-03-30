@@ -16,11 +16,9 @@ TraceLogger::getTime() {
   std::tm* now = std::localtime(&rawTime);
 
   std::stringstream sstr;
-  sstr << std::setfill('0') << std::setw(2) // <= left pad (size=2)
-       << now->tm_hour << ":" << std::setfill('0')
-       << std::setw(2) // <= left pad (size=2)
-       << now->tm_min << ":" << std::setfill('0')
-       << std::setw(2) // <= left pad (size=2)
+  sstr << std::setfill('0') << std::setw(2)                        // <= left pad (size=2)
+       << now->tm_hour << ":" << std::setfill('0') << std::setw(2) // <= left pad (size=2)
+       << now->tm_min << ":" << std::setfill('0') << std::setw(2)  // <= left pad (size=2)
        << now->tm_sec;
 
   return sstr.str();

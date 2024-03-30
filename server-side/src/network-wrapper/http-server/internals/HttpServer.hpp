@@ -11,14 +11,10 @@
 
 #include <vector>
 
-class HttpServer : public AbstractHttpServer,
-                   public std::enable_shared_from_this<HttpServer> {
+class HttpServer : public AbstractHttpServer, public std::enable_shared_from_this<HttpServer> {
 
 public:
-  HttpServer(
-    const std::string& ipAddress,
-    const uint16_t port,
-    const uint32_t totalThreads = 1);
+  HttpServer(const std::string& ipAddress, const uint16_t port, const uint32_t totalThreads = 1);
   ~HttpServer();
 
   HttpServer(const HttpServer& other) = delete;
@@ -27,8 +23,7 @@ public:
   HttpServer& operator=(HttpServer&& other) = delete;
 
 public:
-  void setOnConnectionCallback(
-    const http_callbacks::OnConnection& onRequestCallback) override;
+  void setOnConnectionCallback(const http_callbacks::OnConnection& onRequestCallback) override;
 
 public:
   void start() override;

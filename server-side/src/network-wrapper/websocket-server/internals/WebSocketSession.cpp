@@ -15,8 +15,7 @@ fail(beast::error_code ec, char const* what) {
 
 } // namespace
 
-SendBuffer::SendBuffer(const char* dataToSend, std::size_t dataSize)
-  : size(dataSize) {
+SendBuffer::SendBuffer(const char* dataToSend, std::size_t dataSize) : size(dataSize) {
   if (dataSize > max_send_buffer_size) {
     throw std::runtime_error("send buffer requested size is too big");
   }
@@ -32,16 +31,10 @@ SendBuffer::SendBuffer(const char* dataToSend, std::size_t dataSize)
 
 // Take ownership of the socket
 WebSocketSession::WebSocketSession(
-  boost::asio::ip::tcp::socket&& socket,
-    const ws_callbacks::OnConnection& onConnectionCallback,
-    const ws_callbacks::OnDisconnection& onDisconnectionCallback,
-    const ws_callbacks::OnMessage& onMessageCallback
-  )
-  : _ws(std::move(socket))
-  , _onConnectionCallback(onConnectionCallback)
-  , _onDisconnectionCallback(onDisconnectionCallback)
-  , _onMessageCallback(onMessageCallback)
-  {}
+  boost::asio::ip::tcp::socket&& socket, const ws_callbacks::OnConnection& onConnectionCallback,
+  const ws_callbacks::OnDisconnection& onDisconnectionCallback, const ws_callbacks::OnMessage& onMessageCallback)
+  : _ws(std::move(socket)), _onConnectionCallback(onConnectionCallback),
+    _onDisconnectionCallback(onDisconnectionCallback), _onMessageCallback(onMessageCallback) {}
 
 // Get on the correct executor
 void
@@ -54,9 +47,7 @@ WebSocketSession::run() {
   // on the I/O objects in this session. Although not strictly necessary
   // for single-threaded contexts, this example code is written to be
   // thread-safe by default.
-  net::dispatch(
-    _ws.get_executor(),
-    beast::bind_front_handler(&WebSocketSession::_onRun, self));
+  net::dispatch(_ws.get_executor(), beast::bind_front_handler(&WebSocketSession::_onRun, self));
 }
 
 void
@@ -73,8 +64,7 @@ WebSocketSession::write(const char* data, std::size_t length) {
     const SendBuffer& buffer = _buffersToSend.front();
 
     _ws.async_write(
-      boost::asio::buffer(buffer.data, buffer.size),
-      beast::bind_front_handler(&WebSocketSession::_onWrite, self));
+      boost::asio::buffer(buffer.data, buffer.size), beast::bind_front_handler(&WebSocketSession::_onWrite, self));
   }
 }
 
@@ -88,23 +78,18 @@ WebSocketSession::write(const char* data, std::size_t length) {
 void
 WebSocketSession::_onRun() {
   // Set suggested timeout settings for the websocket
-  _ws.set_option(
-    websocket::stream_base::timeout::suggested(beast::role_type::server));
+  _ws.set_option(websocket::stream_base::timeout::suggested(beast::role_type::server));
 
   // Set a decorator to change the Server of the handshake
-  _ws.set_option(
-    websocket::stream_base::decorator([](websocket::response_type& res) {
-      res.set(
-        http::field::server,
-        std::string(BOOST_BEAST_VERSION_STRING) + " websocket-server-async");
-    }));
+  _ws.set_option(websocket::stream_base::decorator([](websocket::response_type& res) {
+    res.set(http::field::server, std::string(BOOST_BEAST_VERSION_STRING) + " websocket-server-async");
+  }));
 
   // allow shared ownership to async_accept callback
   auto self = shared_from_this();
 
   // Accept the websocket handshake
-  _ws.async_accept(
-    beast::bind_front_handler(&WebSocketSession::_onAccept, self));
+  _ws.async_accept(beast::bind_front_handler(&WebSocketSession::_onAccept, self));
 }
 
 void
@@ -133,8 +118,7 @@ WebSocketSession::_doRead() {
   auto self = shared_from_this();
 
   // Read a message into our buffer
-  _ws.async_read(
-    _buffer, beast::bind_front_handler(&WebSocketSession::_onRead, self));
+  _ws.async_read(_buffer, beast::bind_front_handler(&WebSocketSession::_onRead, self));
 }
 
 void
@@ -177,8 +161,7 @@ WebSocketSession::_onRead(beast::error_code ec, std::size_t bytes_transferred) {
 }
 
 void
-WebSocketSession::_onWrite(
-  beast::error_code ec, std::size_t bytes_transferred) {
+WebSocketSession::_onWrite(beast::error_code ec, std::size_t bytes_transferred) {
   boost::ignore_unused(bytes_transferred);
 
   if (ec) {
@@ -194,8 +177,7 @@ WebSocketSession::_onWrite(
     auto self = shared_from_this();
 
     _ws.async_write(
-      boost::asio::buffer(buffer.data, buffer.size),
-      beast::bind_front_handler(&WebSocketSession::_onWrite, self));
+      boost::asio::buffer(buffer.data, buffer.size), beast::bind_front_handler(&WebSocketSession::_onWrite, self));
   } else {
     _buffersToSend.pop_front();
   }
