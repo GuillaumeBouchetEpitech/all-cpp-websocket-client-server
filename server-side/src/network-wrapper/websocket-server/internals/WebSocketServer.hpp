@@ -4,7 +4,7 @@
 #include "../AbstractWebSocketServer.hpp"
 #include "../callbacks.hpp"
 
-#include "../../common/TcpListener.hpp"
+#include "../../common/AbstractTcpListener.hpp"
 
 #include <thread>
 #include <vector>
@@ -33,7 +33,7 @@ public:
 private:
   net::io_context _ioc;
   uint32_t _totalThreads;
-  std::shared_ptr<TcpListener> _mainTcpListener;
+  std::shared_ptr<AbstractTcpListener> _mainTcpListener;
   std::vector<std::thread> _allThreads;
 
   ws_callbacks::OnConnection _onConnectionCallback;

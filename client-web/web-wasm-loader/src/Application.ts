@@ -73,7 +73,7 @@ export class Application {
         const total = parseFloat(capture[2]);
         const percent = Math.floor((current / total) * 100);
 
-        if (lastProgressLevel === percent) {
+        if (lastProgressLevel <= percent) {
           return;
         }
 
@@ -100,7 +100,7 @@ export class Application {
     const initStartTime = Date.now();
 
     const wasmFunctions = {
-      startApplication: this._module.cwrap('startApplication', undefined, ['number'])
+      startApplication: this._module.cwrap('startApplication', undefined, ['number']),
     };
 
     this._wasmApplicationStartFunc = wasmFunctions.startApplication;

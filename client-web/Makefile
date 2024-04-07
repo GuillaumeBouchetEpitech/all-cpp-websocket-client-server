@@ -66,7 +66,7 @@ CXX=em++
 AR=emar
 
 CXXFLAGS+=	$(BUILD_FLAG)
-CXXFLAGS+=	-std=c++17
+CXXFLAGS+=	-std=c++20
 CXXFLAGS+=	-Wall -W -Wextra -Wunused -Wpedantic -Wshadow -Wconversion -Werror
 CXXFLAGS+=	-I$(DIR_SRC)
 

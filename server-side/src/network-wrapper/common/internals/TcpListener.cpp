@@ -13,10 +13,15 @@ fail(beast::error_code ec, char const* what) {
 
 } // namespace
 
-TcpListener::TcpListener(net::io_context& ioc, boost::asio::ip::tcp::endpoint endpoint, uint32_t totalThreads)
-  : _ioc(ioc), _acceptor(ioc), _endpoint(endpoint), _totalThreads(totalThreads) {}
+TcpListener::TcpListener(net::io_context& ioc, boost::asio::ip::tcp::endpoint endpoint, bool useBoostStrands)
+  : _ioc(ioc), _acceptor(ioc), _endpoint(endpoint), _useBoostStrands(useBoostStrands) {}
 
-TcpListener::~TcpListener() { stop(); }
+TcpListener::~TcpListener() {
+
+  std::cerr << "TcpListener::dtor()" << std::endl;
+
+  stop();
+}
 
 //
 //
@@ -97,7 +102,7 @@ TcpListener::_doAccept() {
     self->_doAccept();
   };
 
-  if (_totalThreads > 1) {
+  if (_useBoostStrands) {
     // more than one thread
     // -> the new connection gets its own boost::strand
     // -> it will scale well across the available threads

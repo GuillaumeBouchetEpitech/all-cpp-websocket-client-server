@@ -5,7 +5,7 @@
 
 #include "../callbacks.hpp"
 
-#include "../../common/TcpListener.hpp"
+#include "../../common/AbstractTcpListener.hpp"
 #include "HttpConnection.hpp"
 #include "boostHeaders.hpp"
 
@@ -34,7 +34,7 @@ private:
 
 private:
   net::io_context _ioc;
-  std::shared_ptr<TcpListener> _mainTcpListener;
+  std::shared_ptr<AbstractTcpListener> _mainTcpListener;
   uint32_t _totalThreads;
 
 private:

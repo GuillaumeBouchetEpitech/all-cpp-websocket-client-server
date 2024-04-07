@@ -2,6 +2,7 @@
 #include "HttpServer.hpp"
 
 #include <memory>
+#include <iostream>
 
 HttpServer::HttpServer(const std::string& ipAddress, const uint16_t port, const uint32_t totalThreads /*= 1*/)
   : _ioc(totalThreads), _totalThreads(totalThreads) {
@@ -9,11 +10,19 @@ HttpServer::HttpServer(const std::string& ipAddress, const uint16_t port, const 
     throw std::runtime_error("total thread(s) must be > 0");
   }
 
-  auto boostIpAddr = net::ip::make_address(ipAddress);
-  auto boostEndpoint = boost::asio::ip::tcp::endpoint{boostIpAddr, port};
+  // more than one thread
+  // -> the new connection gets its own boost::strand
+  // -> it will scale well across the available threads
+  // only one thread
+  // -> then it's faster NOT to use boost::strand
+  const bool useBoostStrands = (_totalThreads > 1);
 
-  // Create and launch a listening port
-  _mainTcpListener = std::make_shared<TcpListener>(_ioc, boostEndpoint, _totalThreads);
+  const auto boostIpAddr = net::ip::make_address(ipAddress);
+  const auto boostEndpoint = boost::asio::ip::tcp::endpoint{boostIpAddr, port};
+
+  _mainTcpListener = AbstractTcpListener::create(_ioc, boostEndpoint, useBoostStrands);
+
+  std::cerr << "_mainTcpListener.get() " << _mainTcpListener.get() << std::endl;
 }
 
 HttpServer::~HttpServer() { stop(); }

@@ -49,6 +49,7 @@ APP_SRC+=	\
 NET_WRAPPER_SRC+=	\
 	$(wildcard \
 		$(DIR_NET_WRAPPER_SRC)/common/*.cpp \
+		$(DIR_NET_WRAPPER_SRC)/common/internals/*.cpp \
 		$(DIR_NET_WRAPPER_SRC)/http-server/*.cpp \
 		$(DIR_NET_WRAPPER_SRC)/http-server/internals/*.cpp \
 		$(DIR_NET_WRAPPER_SRC)/websocket-server/*.cpp \
@@ -88,7 +89,7 @@ CXX=g++
 AR=ar
 
 CXXFLAGS +=	$(BUILD_FLAG)
-CXXFLAGS +=	-std=c++17
+CXXFLAGS +=	-std=c++20
 CXXFLAGS += -Wall -W -Wextra -Wunused -Wpedantic -Wshadow -Wconversion -Werror
 CXXFLAGS +=	-I$(DIR_SRC)
 
