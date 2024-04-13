@@ -1,19 +1,20 @@
 
 #pragma once
 
-#include "network/WebSocketConnection.hpp"
+#include "../network-wrapper/AbstractWebSocketConnection.hpp"
 
+#include <string_view>
 #include <memory>
 
 class Application {
 
 public:
-  Application() = default;
+  Application(std::shared_ptr<AbstractWebSocketConnection> webSocket);
   ~Application() = default;
 
 public:
-  void connect(const char* inUrl);
+  void connect(std::string_view inHost, std::string_view inPort);
 
 private:
-  std::unique_ptr<WebSocketConnection> _webSocket = nullptr;
+  std::shared_ptr<AbstractWebSocketConnection> _webSocket = nullptr;
 };

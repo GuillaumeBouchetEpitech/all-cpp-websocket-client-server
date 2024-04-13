@@ -24,6 +24,10 @@ TraceLogger::getTime() {
   return sstr.str();
 }
 
+//
+//
+//
+
 void
 TraceLogger::dumpOut() {
   auto lock = std::lock_guard<std::mutex>(_mutex);
@@ -39,6 +43,10 @@ std::string
 TraceLogger::getData() const {
   return _sstr.str();
 }
+
+//
+//
+//
 
 template <>
 TraceLogger&

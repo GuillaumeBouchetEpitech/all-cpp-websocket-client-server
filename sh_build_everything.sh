@@ -118,9 +118,20 @@ echo "# building client-web (C++ -> WebAssembly)"
 echo "#"
 echo ""
 
-cd ./client-web
-make build_mode="release" all -j4
-cd $CURRENT_DIR
+RETVAL=$(sh sh_check_if_up_to_date.sh  ./client-web/src  ./client-web/dist/wasm)
+
+# echo "RETVAL: $RETVAL"
+
+if [ "$RETVAL" != "latest" ]
+then
+
+  cd ./client-web
+  make build_platform="web-wasm" build_mode="release" all -j4
+  cd $CURRENT_DIR
+
+fi
+
+# exit 0
 
 echo ""
 echo "#"
@@ -193,9 +204,11 @@ cd ./server-side
 
 echo "building server-side - network wrapper"
 make build_mode="release" networkWrapper -j4
+# make build_mode="debug" networkWrapper -j4
 
 echo "building server-side - application"
 make build_mode="release" application -j4
+# make build_mode="debug" application -j4
 
 echo ""
 echo "#"
@@ -212,6 +225,7 @@ echo "#"
 echo ""
 
 ./bin/exec 127.0.0.1 7777 8888 1 1
+# gdb ./bin/exec 127.0.0.1 7777 8888 1 1
 
 cd $CURRENT_DIR
 

@@ -4,7 +4,6 @@
 #include <cstdint>
 #include <cstring> // <= strrchr()
 #include <mutex>
-#include <ostream>
 #include <sstream> // <= std::stringstream
 
 namespace helpers {
@@ -12,10 +11,6 @@ namespace helpers {
 class TraceLogger {
 public:
   static std::string getTime();
-
-private:
-  std::mutex _mutex;
-  std::stringstream _sstr;
 
 public:
   TraceLogger() = default;
@@ -32,6 +27,11 @@ public:
     _sstr << data;
     return *this;
   }
+
+private:
+  std::mutex _mutex;
+  std::stringstream _sstr;
+
 };
 
 template <> TraceLogger& TraceLogger::operator<< <bool>(bool data);

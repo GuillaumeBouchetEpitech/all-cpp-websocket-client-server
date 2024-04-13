@@ -1,18 +1,14 @@
 #pragma once
 
+#include "../../AbstractWebSocketConnection.hpp"
+
 #include <emscripten/emscripten.h>
 #include <emscripten/websocket.h>
 
 #include <cstring> // memset, memcpy
-#include <functional>
+// #include <functional>
 
-class WebSocketConnection {
-
-public:
-  using OnOpenCallback = std::function<void(int, const EmscriptenWebSocketOpenEvent*)>;
-  using OnErrorCallback = std::function<void(int, const EmscriptenWebSocketErrorEvent*)>;
-  using OnCloseCallback = std::function<void(int, const EmscriptenWebSocketCloseEvent*)>;
-  using OnMessageCallback = std::function<void(int, const EmscriptenWebSocketMessageEvent*)>;
+class WebSocketConnection : public AbstractWebSocketConnection {
 
 private:
   bool _isConnected = false;
@@ -33,19 +29,21 @@ public:
   virtual ~WebSocketConnection();
 
 public:
-  WebSocketConnection& setOnOpenCallback(const OnOpenCallback& inOnOpenCallback);
-  WebSocketConnection& setOnErrorCallback(const OnErrorCallback& inOnErrorCallback);
-  WebSocketConnection& setOnCloseCallback(const OnCloseCallback& inOnCloseCallback);
-  WebSocketConnection& setOnMessageCallback(const OnMessageCallback& inOnMessageCallback);
+  AbstractWebSocketConnection& setOnOpenCallback(const OnOpenCallback& inOnOpenCallback) override;
+  AbstractWebSocketConnection& setOnErrorCallback(const OnErrorCallback& inOnErrorCallback) override;
+  AbstractWebSocketConnection& setOnCloseCallback(const OnCloseCallback& inOnCloseCallback) override;
+  AbstractWebSocketConnection& setOnMessageCallback(const OnMessageCallback& inOnMessageCallback) override;
 
 public:
-  void connect(const char* url);
-
-  void disconnect();
+  void connect(std::string_view inHost, std::string_view inPort) override;
+  void disconnect() override;
 
 public:
-  bool sendUtf8Text(const char* inText);
-  bool sendBinary(void* inData, std::size_t inSize);
+  bool sendUtf8Text(const char* inText) override;
+  bool sendBinary(const void* inData, std::size_t inSize) override;
+
+public:
+  bool isConnected() const override;
 
 private:
   static EM_BOOL _emOnOpen(int eventType, const EmscriptenWebSocketOpenEvent* websocketEvent, void* userData);

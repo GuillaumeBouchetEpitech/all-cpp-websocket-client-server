@@ -10,7 +10,7 @@
     - [Http Server:](#http-server)
     - [WebSocket Server:](#websocket-server)
 - [Dependencies](#dependencies)
-  - [Client-Side: Emscripten 3.1.44, bun](#client-side-emscripten-3144-bun)
+  - [Client-Side:](#client-side)
   - [Server-Side: zlib, boost](#server-side-zlib-boost)
 - [How to Build](#how-to-build)
   - [Build Everything (client + server side, also run the server)](#build-everything-client--server-side-also-run-the-server)
@@ -243,33 +243,18 @@ C++ Client-Server example
 
 # Dependencies
 
-## Client-Side: Emscripten 3.1.44, bun
-```bash
-git clone https://github.com/emscripten-core/emsdk.git
+## Client-Side:
 
-cd emsdk
-
-./emsdk install 3.1.44
-./emsdk activate --embedded 3.1.44
-
-. ./emsdk_env.sh
-
-em++ --clear-cache
-```
-
-```bash
-npm install -g bun
-```
+- Emscripten 3.1.44
+  - This will be locally installed (cloned and setup) if not detected
+  - the 3.1.44 version will be ensured, even if already present
+- NodeJs
 
 ## Server-Side: zlib, boost
 
-```bash
-libzstd1
-```
-
-```bash
-libboost1.71-dev
-```
+- g++ (build-essential)
+- libzstd1
+- libboost1.71-dev
 
 # How to Build
 
@@ -284,6 +269,9 @@ chmod +x ./sh_build_everything.sh
 # -> build the server C++ application (binary)
 # -> copy the client files in the server asset folder
 # -> run the server
+#    -> http-port: 777
+#    -> ws-port: 8888
+#    -> threads all at 1
 ```
 
 # How to Run
@@ -291,7 +279,10 @@ chmod +x ./sh_build_everything.sh
 ## Step 1 - Run The Server
 
 ```bash
+# the server need to be started from the "./server-side" folder
+# -> mainly since this is where the "files/" folder is located
 cd ./server-side
+
 #           ip-address  http-port  ws-port  http-threads  ws-threads
 ./bin/exec  127.0.0.1   7777       8888     1             1
 ```
@@ -301,6 +292,9 @@ cd ./server-side
 ```bash
 # http://{ip-address}:{http-port}/
 http://127.0.0.1:7777/
+
+# to see it in action -> open more tabs with the same url
+# -> will log broadcasts of when a new clients join/leave
 ```
 
 # Thanks for watching!

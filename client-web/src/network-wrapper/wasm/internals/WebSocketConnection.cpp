@@ -2,35 +2,37 @@
 #include "WebSocketConnection.hpp"
 
 #include <iostream>
+#include <sstream>
 
 WebSocketConnection::~WebSocketConnection() { disconnect(); }
 
-WebSocketConnection&
+AbstractWebSocketConnection&
 WebSocketConnection::setOnOpenCallback(const OnOpenCallback& inOnOpenCallback) {
   _onOpenCallback = inOnOpenCallback;
   return *this;
 }
 
-WebSocketConnection&
+AbstractWebSocketConnection&
 WebSocketConnection::setOnErrorCallback(const OnErrorCallback& inOnErrorCallback) {
   _onErrorCallback = inOnErrorCallback;
   return *this;
 }
 
-WebSocketConnection&
+AbstractWebSocketConnection&
 WebSocketConnection::setOnCloseCallback(const OnCloseCallback& inOnCloseCallback) {
   _onCloseCallback = inOnCloseCallback;
   return *this;
 }
 
-WebSocketConnection&
+AbstractWebSocketConnection&
 WebSocketConnection::setOnMessageCallback(const OnMessageCallback& inOnMessageCallback) {
   _onMessageCallback = inOnMessageCallback;
   return *this;
 }
 
 void
-WebSocketConnection::connect(const char* inUrl) {
+WebSocketConnection::connect(std::string_view inHost, std::string_view inPort) {
+
   if (_isConnected) {
     disconnect();
   }
@@ -60,7 +62,11 @@ WebSocketConnection::connect(const char* inUrl) {
   //   EM_BOOL createOnMainThread;
   // } EmscriptenWebSocketCreateAttributes;
 
-  EmscriptenWebSocketCreateAttributes ws_attrs = {inUrl, NULL, EM_TRUE};
+  std::stringstream sstr;
+  sstr << "ws://" << inHost << ":" << inPort << "/";
+  const std::string urlStr = sstr.str();
+
+  EmscriptenWebSocketCreateAttributes ws_attrs = {urlStr.c_str(), NULL, EM_TRUE};
 
   _wsSocket = emscripten_websocket_new(&ws_attrs);
   emscripten_websocket_set_onopen_callback(_wsSocket, this, _emOnOpen);
@@ -99,18 +105,24 @@ WebSocketConnection::sendUtf8Text(const char* inText) {
 }
 
 bool
-WebSocketConnection::sendBinary(void* inData, std::size_t inSize) {
+WebSocketConnection::sendBinary(const void* inData, std::size_t inSize) {
   if (!_isConnected) {
     return false;
   }
 
-  EMSCRIPTEN_RESULT result = emscripten_websocket_send_binary(_wsSocket, (void*)inData, inSize);
+  EMSCRIPTEN_RESULT result = emscripten_websocket_send_binary(_wsSocket, const_cast<void*>(inData), inSize);
   if (result) {
     std::cerr << "Failed to send binary payload, result: " << result << std::endl;
     return false;
   }
 
   return true;
+}
+
+bool
+WebSocketConnection::isConnected() const
+{
+  return _isConnected;
 }
 
 EM_BOOL
@@ -142,34 +154,51 @@ WebSocketConnection::_emOnMessage(
 void
 WebSocketConnection::_onOpen(int eventType, const EmscriptenWebSocketOpenEvent* websocketEvent) {
 
+  static_cast<void>(eventType); // unused
+  static_cast<void>(websocketEvent); // unused
+
   _isConnected = true;
 
   if (_onOpenCallback) {
-    _onOpenCallback(eventType, websocketEvent);
+    // _onOpenCallback(eventType, websocketEvent);
+    _onOpenCallback();
   }
 }
 void
 WebSocketConnection::_onError(int eventType, const EmscriptenWebSocketErrorEvent* websocketEvent) {
 
+  static_cast<void>(eventType); // unused
+  static_cast<void>(websocketEvent); // unused
+
   _isConnected = false;
 
   if (_onErrorCallback) {
-    _onErrorCallback(eventType, websocketEvent);
+    // _onErrorCallback(eventType, websocketEvent);
+    _onErrorCallback();
   }
 }
 void
 WebSocketConnection::_onClose(int eventType, const EmscriptenWebSocketCloseEvent* websocketEvent) {
 
+  static_cast<void>(eventType); // unused
+  // static_cast<void>(websocketEvent); // unused
+
   _isConnected = false;
 
   if (_onCloseCallback) {
-    _onCloseCallback(eventType, websocketEvent);
+    // _onCloseCallback(eventType, websocketEvent);
+    std::string_view reason(websocketEvent->reason);
+    _onCloseCallback(reason);
   }
 }
 void
 WebSocketConnection::_onMessage(int eventType, const EmscriptenWebSocketMessageEvent* websocketEvent) {
 
+  static_cast<void>(eventType); // unused
+  // static_cast<void>(websocketEvent); // unused
+
   if (_onMessageCallback) {
-    _onMessageCallback(eventType, websocketEvent);
+    // _onMessageCallback(eventType, websocketEvent);
+    _onMessageCallback(websocketEvent->numBytes, websocketEvent->data);
   }
 }

@@ -1,6 +1,6 @@
 import Logger from './Logger';
 import { scriptLoadingUtility } from './helpers/index';
-import { isWasmSupported } from './environment/index';
+import { isWasmSupported, isWebSocketSupported } from './environment/index';
 
 export class Application {
   private _isInitialized: boolean = false;
@@ -9,13 +9,13 @@ export class Application {
 
   private _module: any;
 
-  private _wasmApplicationStartFunc: (inUrlStrPtr: number) => void;
+  private _wasmApplicationStartFunc: (inHostStrPtr: number, inPortStrPtr: number) => void;
 
   constructor(onProgress: (percent: number) => void) {
     this._onProgress = onProgress;
   }
 
-  async initialize(wsUrl: string, inLogger: Logger): Promise<void> {
+  async initialize(host: string, port: string, inLogger: Logger): Promise<void> {
     //
     //
     // WebAssembly support
@@ -23,18 +23,22 @@ export class Application {
     if (!isWasmSupported()) {
       throw new Error('missing WebAssembly feature (unsupported)');
     }
-
     inLogger.log('[JS][check] WebAssembly feature => supported');
 
-    await this._setupWasmApplication(wsUrl, inLogger);
+    if (!isWebSocketSupported()) {
+      throw new Error('missing WebSocket feature (unsupported)');
+    }
+    inLogger.log('[JS][check] WebSocket feature => supported');
+
+    await this._setupWasmApplication(host, port, inLogger);
   }
 
   private async _fetchWasmScript(wasmFolder: string, inLogger: Logger): Promise<void> {
     inLogger.log('[JS][wasm] fetching');
     const fetchStartTime = Date.now();
 
-    // this will globally expose the function clientWeb()
-    await scriptLoadingUtility(`./${wasmFolder}/client.js`);
+    // this will globally expose the wasm functions
+    await scriptLoadingUtility(`./${wasmFolder}/index.js`);
 
     const fetchStopTime = Date.now();
     const fetchElapsedTime = ((fetchStopTime - fetchStartTime) / 1000).toFixed(3);
@@ -100,7 +104,7 @@ export class Application {
     const initStartTime = Date.now();
 
     const wasmFunctions = {
-      startApplication: this._module.cwrap('startApplication', undefined, ['number']),
+      startApplication: this._module.cwrap('startApplication', undefined, ['number', 'number']),
     };
 
     this._wasmApplicationStartFunc = wasmFunctions.startApplication;
@@ -112,7 +116,7 @@ export class Application {
     inLogger.log(`[JS][wasm] initialized ${initElapsedTime}sec`);
   }
 
-  private async _setupWasmApplication(wsUrl: string, inLogger: Logger): Promise<void> {
+  private async _setupWasmApplication(host: string, port: string, inLogger: Logger): Promise<void> {
     const wasmFolder = `wasm`;
 
     //
@@ -127,11 +131,13 @@ export class Application {
     //
     //
 
-    const strPtr = this._module.allocateUTF8(wsUrl);
+    const hostStrPtr = this._module.allocateUTF8(host);
+    const portStrPtr = this._module.allocateUTF8(port);
 
-    this._wasmApplicationStartFunc(strPtr);
+    this._wasmApplicationStartFunc(hostStrPtr, portStrPtr);
 
-    this._module._free(strPtr);
+    this._module._free(hostStrPtr);
+    this._module._free(portStrPtr);
 
     inLogger.log('[JS][wasm] running');
   }

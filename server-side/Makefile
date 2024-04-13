@@ -154,7 +154,7 @@ include $(shell test -d $(DIR_NET_WRAPPER_OBJ) && find $(DIR_NET_WRAPPER_OBJ) -n
 
 clean:
 	$(RM) $(DIR_APP_OBJ)
-	$(RM) $(DIR_APP_OBJ)
+	$(RM) $(DIR_NET_WRAPPER_OBJ)
 
 fclean:	clean
 	$(RM) $(NAME_APP)

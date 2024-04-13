@@ -7,12 +7,12 @@ const findHtmlElementOrFail = <T extends Element>(inElementId: string): T => {
   return textAreaElement;
 };
 
-const getWebSocketConfig = async (logger: Logger): Promise<string> => {
+const getWebSocketConfig = async (logger: Logger): Promise<{host: string, port: string}> => {
   try {
     const response = await fetch('/web-socket-config.json');
     const result = await response.json();
     logger.log(`[JS] config from server: "${JSON.stringify(result)}"`);
-    return result.webSocketUrl;
+    return result;
   } catch (err) {
     logger.error(`[JS] fail to fetch the websocket config from server`);
     logger.error(`[JS] -> message: "${err}"`);
@@ -35,8 +35,9 @@ const onGlobalPageLoad = async () => {
   //
   // fetch websocket config
 
-  const websocketUrl = await getWebSocketConfig(logger);
-  logger.log(`[JS] websocketUrl: "${websocketUrl}"`);
+  const websocketConfig = await getWebSocketConfig(logger);
+  logger.log(`[JS] websocketConfig.host: "${websocketConfig.host}"`);
+  logger.log(`[JS] websocketConfig.port: "${websocketConfig.port}"`);
 
   //
   //
@@ -46,7 +47,9 @@ const onGlobalPageLoad = async () => {
     const statusMsg = `Loading wasm [${percent}%]`;
 
     // remove the last logged entry if it was a progress updated
-    if (logger.size > 0 && logger.peekLast()!.indexOf('Loading wasm [') >= 0) logger.popLast();
+    if (logger.size > 0 && logger.peekLast()!.indexOf('Loading wasm [') >= 0) {
+      logger.popLast();
+    }
 
     logger.log(`[JS] ${statusMsg}`);
   };
@@ -54,7 +57,7 @@ const onGlobalPageLoad = async () => {
   const myApplication = new Application(onProgress);
 
   try {
-    await myApplication.initialize(websocketUrl, logger);
+    await myApplication.initialize(websocketConfig.host, websocketConfig.port, logger);
   } catch (err) {
     logger.error(`[JS] failed to initialize the wasm application`);
     logger.error(`[JS] -> message: "${err.message}"`);
