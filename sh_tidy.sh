@@ -1,18 +1,18 @@
 
 # clang-tidy \
-#   ./client-web/src/*.cpp \
+#   ./client-side/src/*.cpp \
 #   -extra-arg=-std=c++17 \
 #   -- \
-#   -I./client-web/src/ \
+#   -I./client-side/src/ \
 #   -I${EMSDK}/upstream/emscripten/system/include/ \
 #   ...
 
 
 # clang-tidy \
-#   ./client-web/src/*.cpp \
+#   ./client-side/src/*.cpp \
 #   -extra-arg=-std=c++17 \
 #   -- \
-#   -I./client-web/src/ \
+#   -I./client-side/src/ \
 #   -I${EMSDK}/upstream/emscripten/cache/sysroot/include/ \
 #   ...
 

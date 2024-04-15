@@ -160,46 +160,46 @@ fi
 
 echo ""
 echo "#"
-echo "# building client-web (C++ -> Native)"
+echo "# building client-side (C++ -> Native)"
 echo "#"
 echo ""
 
 # done to avoid the slow wasm build process that happen even if nothing changed
-RETVAL=$(sh sh_check_if_up_to_date.sh  ./client-web/src  ./client-web/bin)
+RETVAL=$(sh sh_check_if_up_to_date.sh  ./client-side/src  ./client-side/bin)
 if [ "$RETVAL" != "latest" ]
 then
 
-  echo "client-web is not built or not up to date with the latest source code"
+  echo "client-side is not built or not up to date with the latest source code"
 
-  cd ./client-web
+  cd ./client-side
   make build_platform="native" build_mode="release" all -j4
   cd $CURRENT_DIR
 
 else
-  echo "client-web is built and up to date with the latest source code"
+  echo "client-side is built and up to date with the latest source code"
 fi
 
 # exit 0
 
 echo ""
 echo "#"
-echo "# building client-web (C++ -> WebAssembly)"
+echo "# building client-side (C++ -> WebAssembly)"
 echo "#"
 echo ""
 
 # done to avoid the slow wasm build process that happen even if nothing changed
-RETVAL=$(sh sh_check_if_up_to_date.sh  ./client-web/src  ./client-web/dist/wasm)
+RETVAL=$(sh sh_check_if_up_to_date.sh  ./client-side/src  ./client-side/dist/wasm)
 if [ "$RETVAL" != "latest" ]
 then
 
-  echo "client-web is not built or not up to date with the latest source code"
+  echo "client-side is not built or not up to date with the latest source code"
 
-  cd ./client-web
+  cd ./client-side
   make build_platform="web-wasm" build_mode="release" all -j4
   cd $CURRENT_DIR
 
 else
-  echo "client-web is built and up to date with the latest source code"
+  echo "client-side is built and up to date with the latest source code"
 fi
 
 # exit 0
@@ -210,7 +210,7 @@ echo "# building web-wasm-loader (TypeScript -> JavaScript)"
 echo "#"
 echo ""
 
-cd ./client-web/
+cd ./client-side/
 
 if [ -f "./dist/index.js" && -f "./dist/index.html" ]
 then

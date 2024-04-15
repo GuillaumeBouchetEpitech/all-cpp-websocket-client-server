@@ -3,7 +3,7 @@
         {
             "name": "Linux",
             "includePath": [
-                "${workspaceFolder}/client-web/src/**",
+                "${workspaceFolder}/client-side/src/**",
                 "${workspaceFolder}/server-side/src/**",
                 "${workspaceFolder}/network-wrapper/src/**",
                 "${EMSDK}/upstream/emscripten/system/include/**"

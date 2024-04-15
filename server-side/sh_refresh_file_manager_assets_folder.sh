@@ -1,7 +1,7 @@
 
 rm -rf ./files
 mkdir -p ./files
-cp -rf ../client-web/dist/* ./files/
+cp -rf ../client-side/dist/* ./files/
 
-tree --du -hF ../client-web/dist
+tree --du -hF ../client-side/dist
 tree --du -hF ./files
