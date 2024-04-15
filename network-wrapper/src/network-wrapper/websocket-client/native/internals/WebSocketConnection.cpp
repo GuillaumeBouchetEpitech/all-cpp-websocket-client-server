@@ -19,17 +19,6 @@ namespace websocket = beast::websocket; // from <boost/beast/websocket.hpp>
 namespace net = boost::asio;            // from <boost/asio.hpp>
 using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
 
-namespace {
-
-// Report a failure
-void
-fail(beast::error_code ec, char const* what)
-{
-  std::cerr << what << ": " << ec.message() << "\n";
-}
-
-}
-
 SendBuffer::SendBuffer(const char* dataToSend, std::size_t dataSize) : size(dataSize) {
   if (dataSize > max_send_buffer_size) {
     throw std::runtime_error("send buffer requested size is too big");
@@ -103,8 +92,11 @@ WebSocketConnection::connect(
   _thread = std::thread([this]()
   {
     _ioc.run();
+    _threadIsRunning = false;
   });
+  _threadIsRunning = true;
 
+  // connect() -> on_resolve() -> on_connect()
 
   // Look up the domain name
   _resolver.async_resolve(
@@ -121,7 +113,9 @@ WebSocketConnection::on_resolve(
   tcp::resolver::results_type results)
 {
   if (ec) {
-    return fail(ec, "resolve");
+    // cannot join the thread here -> deadlock
+    constexpr bool isThreadSafe = false;
+    return _failed(ec, "resolve", isThreadSafe);
   }
 
   // Set the timeout for the operation
@@ -141,7 +135,9 @@ WebSocketConnection::on_connect(
   tcp::resolver::results_type::endpoint_type
 ) {
   if (ec) {
-    return fail(ec, "connect");
+    // cannot join the thread here -> deadlock
+    constexpr bool isThreadSafe = false;
+    return _failed(ec, "connect", isThreadSafe);
   }
 
   // Turn off the timeout on the tcp_stream, because
@@ -173,7 +169,9 @@ void
 WebSocketConnection::on_handshake(beast::error_code ec)
 {
   if(ec) {
-    return fail(ec, "handshake");
+    // cannot join the thread here -> deadlock
+    constexpr bool isThreadSafe = false;
+    return _failed(ec, "handshake", isThreadSafe);
   }
 
   _isConnected = true;
@@ -200,27 +198,54 @@ WebSocketConnection::_doRead() {
 }
 
 void
+WebSocketConnection::_failed(beast::error_code ec, char const* what, bool isThreadSafe)
+{
+  std::cerr << what << ": " << ec.message();
+  if (_onErrorCallback) {
+    _onErrorCallback(ec.message());
+  }
+
+  // alternative disconnect
+  _isConnected = false;
+
+  _stop(isThreadSafe);
+}
+
+void
+WebSocketConnection::_stop(bool isThreadSafe)
+{
+  if (!_isConnected) {
+    return;
+  }
+  _isConnected = false;
+
+  _ioc.stop();
+
+  if (!_threadIsRunning || !isThreadSafe) {
+    return;
+  }
+
+  if (_thread.joinable()) {
+    _thread.join();
+  }
+  _threadIsRunning = false;
+}
+
+void
 WebSocketConnection::on_read(
     beast::error_code ec,
     std::size_t bytes_transferred)
 {
-  boost::ignore_unused(bytes_transferred);
-
   static_cast<void>(bytes_transferred); // unused
 
+  if (!_isConnected) {
+    return;
+  }
+
   if(ec) {
-    fail(ec, "read");
-    if (_onCloseCallback) {
-      _onCloseCallback(ec.message());
-    }
-
-    // alternative disconnect
-    _isConnected = false;
-    _ioc.stop();
-
     // cannot join the thread here -> deadlock
-
-    return; // fail(ec, "read");
+    constexpr bool isThreadSafe = false;
+    return _failed(ec, "read", isThreadSafe);
   }
 
   if (_onMessageCallback) {
@@ -271,50 +296,33 @@ WebSocketConnection::disconnect() {
   if (!_isConnected) {
     return;
   }
-  _isConnected = false;
 
   _ws.close(websocket::close_code::normal);
 
-  // _ws.async_close(websocket::close_code::normal,
-  //   beast::bind_front_handler(
-  //     &WebSocketConnection::on_close,
-  //     shared_from_this()));
-
-
-  _ioc.stop();
-
-  if (_thread.joinable()) {
-    _thread.join();
-  }
+  _stop(true);
 }
 
 void
 WebSocketConnection::_onWrite(beast::error_code ec, std::size_t bytes_transferred) {
   boost::ignore_unused(bytes_transferred);
 
-  if (ec) {
-    return fail(ec, "write");
-  }
-
   if (!_isConnected) {
     _buffersToSend.clear();
     return;
   }
 
-  if (_buffersToSend.size() > 1) {
-    _buffersToSend.pop_front();
+  if (ec) {
+    // cannot join the thread here -> deadlock
+    constexpr bool isThreadSafe = false;
+    return _failed(ec, "write", isThreadSafe);
+  }
 
+  // remove the buffer we just sent
+  _buffersToSend.pop_front();
+
+  // more to send?
+  if (_buffersToSend.size() > 0) {
     _doWrite();
-
-    // const SendBuffer& buffer = _buffersToSend.front();
-
-    // // allow shared ownership to async_write callback
-    // auto self = shared_from_this();
-
-    // _ws.async_write(
-    //   boost::asio::buffer(buffer.data, buffer.size), beast::bind_front_handler(&WebSocketConnection::_onWrite, self));
-  } else {
-    _buffersToSend.pop_front();
   }
 }
 
@@ -323,11 +331,9 @@ WebSocketConnection::_doWrite()
 {
   const SendBuffer& buffer = _buffersToSend.front();
 
-  // allow shared ownership to async_write callback
-  auto self = shared_from_this();
-
   _ws.async_write(
-    boost::asio::buffer(buffer.data, buffer.size), beast::bind_front_handler(&WebSocketConnection::_onWrite, self));
+    boost::asio::buffer(buffer.data, buffer.size),
+    beast::bind_front_handler(&WebSocketConnection::_onWrite, shared_from_this()));
 }
 
 // void

@@ -21,8 +21,6 @@ HttpServer::HttpServer(const std::string& ipAddress, const uint16_t port, const 
   const auto boostEndpoint = boost::asio::ip::tcp::endpoint{boostIpAddr, port};
 
   _mainTcpListener = AbstractTcpListener::create(_ioc, boostEndpoint, useBoostStrands);
-
-  std::cerr << "_mainTcpListener.get() " << _mainTcpListener.get() << std::endl;
 }
 
 HttpServer::~HttpServer() { stop(); }

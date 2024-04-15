@@ -5,6 +5,7 @@
             "includePath": [
                 "${workspaceFolder}/client-web/src/**",
                 "${workspaceFolder}/server-side/src/**",
+                "${workspaceFolder}/network-wrapper/src/**",
                 "${EMSDK}/upstream/emscripten/system/include/**"
             ],
             "defines": [

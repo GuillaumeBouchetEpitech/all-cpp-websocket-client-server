@@ -1,3 +1,3 @@
 export const isWebSocketSupported = (): boolean => {
-  return (typeof(WebSocket) === 'object');
+  return (window.WebSocket !== undefined);
 };

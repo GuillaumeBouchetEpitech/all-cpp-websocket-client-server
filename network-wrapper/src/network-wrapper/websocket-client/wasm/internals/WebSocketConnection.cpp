@@ -174,7 +174,7 @@ WebSocketConnection::_onError(int eventType, const EmscriptenWebSocketErrorEvent
 
   if (_onErrorCallback) {
     // _onErrorCallback(eventType, websocketEvent);
-    _onErrorCallback();
+    _onErrorCallback("unkown error");
   }
 }
 void

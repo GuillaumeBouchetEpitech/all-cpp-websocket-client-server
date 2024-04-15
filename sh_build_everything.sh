@@ -114,21 +114,92 @@ func_ensure_wasm_compiler
 
 echo ""
 echo "#"
+echo "# building network-wrapper (C++ -> Native)"
+echo "#"
+echo ""
+
+cd ./network-wrapper
+make build_platform="native" build_mode="release" all -j4
+cd $CURRENT_DIR
+
+#
+#
+#
+#
+#
+
+echo ""
+echo "#"
+echo "# building network-wrapper (C++ -> WebAssembly)"
+echo "#"
+echo ""
+
+cd $CURRENT_DIR
+# done to avoid the slow wasm build process that happen even if nothing changed
+RETVAL=$(sh sh_check_if_up_to_date.sh  ./network-wrapper/src  ./network-wrapper/lib/wasm)
+if [ "$RETVAL" != "latest" ]
+then
+
+  echo "network-wrapper is not built or not up to date with the latest source code"
+
+  cd ./network-wrapper
+  make build_platform="web-wasm" build_mode="release" all -j4
+  cd $CURRENT_DIR
+
+else
+  echo "network-wrapper is built and up to date with the latest source code"
+fi
+
+# exit 0
+
+#
+#
+#
+#
+#
+
+echo ""
+echo "#"
+echo "# building client-web (C++ -> Native)"
+echo "#"
+echo ""
+
+# done to avoid the slow wasm build process that happen even if nothing changed
+RETVAL=$(sh sh_check_if_up_to_date.sh  ./client-web/src  ./client-web/bin)
+if [ "$RETVAL" != "latest" ]
+then
+
+  echo "client-web is not built or not up to date with the latest source code"
+
+  cd ./client-web
+  make build_platform="native" build_mode="release" all -j4
+  cd $CURRENT_DIR
+
+else
+  echo "client-web is built and up to date with the latest source code"
+fi
+
+# exit 0
+
+echo ""
+echo "#"
 echo "# building client-web (C++ -> WebAssembly)"
 echo "#"
 echo ""
 
+# done to avoid the slow wasm build process that happen even if nothing changed
 RETVAL=$(sh sh_check_if_up_to_date.sh  ./client-web/src  ./client-web/dist/wasm)
-
-# echo "RETVAL: $RETVAL"
-
 if [ "$RETVAL" != "latest" ]
 then
+
+  echo "client-web is not built or not up to date with the latest source code"
 
   cd ./client-web
   make build_platform="web-wasm" build_mode="release" all -j4
   cd $CURRENT_DIR
 
+else
+  echo "client-web is built and up to date with the latest source code"
 fi
 
 # exit 0
@@ -198,14 +269,7 @@ echo "# building server-side (C++ -> binary)"
 echo "#"
 echo ""
 
-echo "building server-side"
 cd ./server-side
-# make build_mode="release" all -j4
-
-echo "building server-side - network wrapper"
-make build_mode="release" networkWrapper -j4
-# make build_mode="debug" networkWrapper -j4
-
 echo "building server-side - application"
 make build_mode="release" application -j4
 # make build_mode="debug" application -j4

@@ -2,11 +2,11 @@
 
 clear
 
-
-# # make build_platform="native" networkWrapper -j4
-# make build_platform="native" application -j4
+# make build_platform="native" build_mode="debug" networkWrapper -j4
+# make build_platform="web-wasm" networkWrapper -j4
+# # make build_platform="native" application -j4
 # # make build_platform="web-wasm" networkWrapper
-# make build_platform="web-wasm" application
+# # make build_platform="web-wasm" application
 # exit 0
 
 func_do_clean() {

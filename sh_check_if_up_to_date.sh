@@ -5,9 +5,18 @@ SRC_PATH=$1
 DST_PATH=$2
 
 
-func_lol() {
+get_latest_mtime_of_folder() {
 
     INPUT=$1
+    NOT_FOUND_MSG=$1
+
+    if [ ! -d "$INPUT" ]; then
+
+        eval "$2='-1'"
+
+        echo "$NOT_FOUND_MSG"
+        exit 0
+    fi
 
     # echo "##############"
 
@@ -29,16 +38,11 @@ func_lol() {
     eval "$2='$LASTEST_TIME'"
 }
 
-return_src=""
-# func_lol "./client-web/src" return_src
-func_lol "$SRC_PATH" return_src
-
 return_dst=""
-# func_lol "./client-web/dist/wasm" return_dst
-func_lol "$DST_PATH" return_dst
+get_latest_mtime_of_folder "$DST_PATH" "outdated" return_dst
 
-# echo "return_src=$return_src"
-# echo "return_dst=$return_dst"
+return_src=""
+get_latest_mtime_of_folder "$SRC_PATH" "outdated" return_src
 
 DIFF=$(echo "$return_dst - $return_src" | bc)
 
@@ -47,7 +51,7 @@ then
 
     # echo "SRC is newer than DST, should build"
     echo "outdated"
-    exit 1
+    exit 0
 
 else
 

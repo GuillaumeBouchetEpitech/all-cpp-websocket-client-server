@@ -31,23 +31,20 @@ LOG_INFO= '[${build_mode}] [${build_platform}]'
 ifeq ($(build_platform),native)
 
 DIR_APPLICATION=		./bin
-DIR_NET_WRAPPER=		./lib/native
 NAME_APPLICATION=		$(DIR_APPLICATION)/exec
-NAME_NET_WRAPPER=		$(DIR_NET_WRAPPER)/network-wrapper.a
 
 else ifeq ($(build_platform),web-wasm)
 
 DIR_APPLICATION=		./dist/wasm
-DIR_NET_WRAPPER=		./lib/wasm
 NAME_APPLICATION=		$(DIR_APPLICATION)/index.js
-NAME_NET_WRAPPER=		$(DIR_NET_WRAPPER)/network-wrapper.bc
 
 endif
 
 #### DIRS
 
-DIR_SRC=	src
+DIR_SRC=	src/application
 
+DIR_NETOWRK_WRAPPER_LIB=	../network-wrapper
 
 #### /DIRS
 
@@ -63,37 +60,15 @@ endif
 #### SRC
 
 DIR_APP_OBJ=	$(DIR_OBJ)/application
-DIR_NET_WRAPPER_OBJ=	$(DIR_OBJ)/network-wrapper
 
 
-SRC+=	\
+ALL_SRC+=	\
 	$(wildcard \
 		$(DIR_SRC)/*.cpp \
-		$(DIR_SRC)/application/*.cpp \
 		$(DIR_SRC)/utilities/*.cpp \
 		)
 
-ifeq ($(build_platform),native)
-
-NET_WRAPPER_SRC+=	\
-	$(wildcard \
-		$(DIR_SRC)/network-wrapper/native/*.cpp \
-		$(DIR_SRC)/network-wrapper/native/internals/*.cpp \
-	)
-
-else ifeq ($(build_platform),web-wasm)
-
-NET_WRAPPER_SRC+=	\
-	$(wildcard \
-		$(DIR_SRC)/network-wrapper/wasm/*.cpp \
-		$(DIR_SRC)/network-wrapper/wasm/internals/*.cpp \
-	)
-
-endif
-#
-
-OBJ=	$(patsubst %.cpp, $(DIR_APP_OBJ)/%.o, $(SRC))
-NET_WRAPPER_OBJ=	$(patsubst %.cpp, $(DIR_NET_WRAPPER_OBJ)/%.o, $(NET_WRAPPER_SRC))
+ALL_OBJ=	$(patsubst %.cpp, $(DIR_APP_OBJ)/%.o, $(ALL_SRC))
 
 #
 
@@ -118,6 +93,7 @@ CXXFLAGS+=	$(BUILD_FLAG)
 CXXFLAGS+=	-std=c++20
 CXXFLAGS+=	-Wall -W -Wextra -Wunused -Wpedantic -Wshadow -Wconversion -Werror
 CXXFLAGS+=	-I$(DIR_SRC)
+CXXFLAGS+=	-I$(DIR_NETOWRK_WRAPPER_LIB)/src/
 
 LDFLAGS+=	$(BUILD_FLAG)
 
@@ -127,14 +103,15 @@ ifeq ($(build_platform),native)
 CXX=g++
 AR=ar
 
-LDFLAGS+=	$(NAME_NET_WRAPPER)
+LDFLAGS+=	$(DIR_NETOWRK_WRAPPER_LIB)/lib/native/network-wrapper.a
 
 else ifeq ($(build_platform),web-wasm)
 
 CXX=em++
 AR=emar
 
-LDFLAGS+=	$(NAME_NET_WRAPPER)
+LDFLAGS+=	$(DIR_NETOWRK_WRAPPER_LIB)/lib/wasm/network-wrapper.bc
+
 LDFLAGS+=	-lwebsocket.js
 LDFLAGS+=	-s TOTAL_MEMORY=128Mb
 LDFLAGS+=	-s WASM=1
@@ -170,18 +147,12 @@ all:	application
 
 ensureFolders:
 	@mkdir -p $(DIR_APPLICATION)
-	@mkdir -p $(DIR_NET_WRAPPER)
 
-application:	ensureFolders $(OBJ)
+application:	ensureFolders $(ALL_OBJ)
 	@echo ' ---> building $(LOG_INFO) "application"'
 	@mkdir -p `dirname $(NAME_APPLICATION)`
-	@$(CXX) $(CXXFLAGS) $(OBJ) -o $(NAME_APPLICATION) $(LDFLAGS)
+	@$(CXX) $(CXXFLAGS) $(ALL_OBJ) -o $(NAME_APPLICATION) $(LDFLAGS)
 	@echo '   --> built $(LOG_INFO) "application"'
-
-networkWrapper:	ensureFolders $(NET_WRAPPER_OBJ)
-	@echo ' ---> building $(LOG_INFO): "network-wrapper library"'
-	@$(AR) cr $(NAME_NET_WRAPPER) $(NET_WRAPPER_OBJ)
-	@echo '   --> built $(LOG_INFO): "network-wrapper library"'
 
 #
 
@@ -198,22 +169,11 @@ include $(shell test -d $(DIR_APP_OBJ) && find $(DIR_APP_OBJ) -name "*.dep")
 
 #
 
-$(DIR_NET_WRAPPER_OBJ)/%.o: %.cpp
-	@mkdir -p `dirname $@`
-	@echo ' --> processing $(LOG_INFO):' $<
-	@$(CXX) -c $(CXXFLAGS) -MMD -MT "$@" -MF "$@.dep" -o "$@" $<
-
-include $(shell test -d $(DIR_NET_WRAPPER_OBJ) && find $(DIR_NET_WRAPPER_OBJ) -name "*.dep")
-
-#
-
 clean:
 	$(RM) $(DIR_APP_OBJ)
-	$(RM) $(DIR_NET_WRAPPER_OBJ)
 
 fclean:  clean
 	$(RM) $(NAME_APPLICATION)
-	# $(RM) $(NAME_NET_WRAPPER)
 
 re: fclean all
 
@@ -221,7 +181,6 @@ re: fclean all
 	all \
 	ensureFolders \
 	application \
-	networkWrapper \
 	clean \
 	fclean \
 	re

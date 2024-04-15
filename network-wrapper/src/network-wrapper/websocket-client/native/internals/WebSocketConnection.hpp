@@ -1,6 +1,10 @@
 
 #pragma once
 
+#if defined __EMSCRIPTEN__
+#error this file should only be included for a native build
+#endif
+
 #include "../../AbstractWebSocketConnection.hpp"
 
 #include <boost/beast/core.hpp>
@@ -50,7 +54,7 @@ public:
     std::string_view ipAddress,
     std::string_view port) override;
 
-public:
+private:
   void
   on_resolve(
     beast::error_code ec,
@@ -62,24 +66,10 @@ public:
   void
   on_handshake(beast::error_code ec);
 
-  // // bool sendUtf8Text(const char* inText);
-  // bool
-  // sendBinary(
-  //   void* inData,
-  //   std::size_t inSize);
-
-  // void
-  // on_write(
-  //     beast::error_code ec,
-  //     std::size_t bytes_transferred);
-
   void
   on_read(
       beast::error_code ec,
       std::size_t bytes_transferred);
-
-// public:
-//   void disconnect();
 
 public:
   AbstractWebSocketConnection& setOnOpenCallback(const OnOpenCallback& inOnOpenCallback) override;
@@ -88,8 +78,6 @@ public:
   AbstractWebSocketConnection& setOnMessageCallback(const OnMessageCallback& inOnMessageCallback) override;
 
 public:
-  // void connect(const char* url);
-
   void disconnect() override;
 
 public:
@@ -104,7 +92,11 @@ private:
   void _doWrite();
   void _doRead();
 
+  void _failed(beast::error_code ec, char const* what, bool isThreadSafe);
+  void _stop(bool isThreadSafe);
+
 private:
+  bool _threadIsRunning = false;
   bool _isConnected = false;
   net::io_context _ioc;
   std::thread _thread;

@@ -23,13 +23,18 @@ Application::connect(std::string_view inHost, std::string_view inPort) {
     _webSocket->sendUtf8Text("ping!");
   });
 
-  _webSocket->setOnErrorCallback([]() {
+  _webSocket->setOnErrorCallback([this](std::string_view message) {
     D_LOG_OUT("> error");
+    D_LOG_OUT(">>> message (size=" << message.size() << ") \"" << message << " \"");
+
+    _isDone = true;
   });
 
-  _webSocket->setOnCloseCallback([](std::string_view reason) {
+  _webSocket->setOnCloseCallback([this](std::string_view reason) {
     D_LOG_OUT("> disconnected");
     D_LOG_OUT(">>> reason (size=" << reason.size() << ") \"" << reason << " \"");
+
+    _isDone = true;
   });
 
   _webSocket->setOnMessageCallback([](const uint32_t sizeReceived, const uint8_t* dataReceived) {
@@ -45,4 +50,9 @@ Application::connect(std::string_view inHost, std::string_view inPort) {
   });
 
   _webSocket->connect(inHost, inPort);
+}
+
+bool Application::isDone() const
+{
+  return _isDone;
 }

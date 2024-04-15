@@ -8,7 +8,7 @@
 class AbstractWebSocketConnection {
 public:
   using OnOpenCallback = std::function<void()>;
-  using OnErrorCallback = std::function<void()>;
+  using OnErrorCallback = std::function<void(std::string_view)>;
   using OnCloseCallback = std::function<void(std::string_view)>;
   using OnMessageCallback = std::function<void(uint32_t sizeReceived, const uint8_t* dataReceived)>;
 

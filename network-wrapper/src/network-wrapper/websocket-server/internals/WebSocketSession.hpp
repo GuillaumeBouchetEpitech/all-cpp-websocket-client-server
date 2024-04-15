@@ -1,6 +1,10 @@
 
 #pragma once
 
+#if defined __EMSCRIPTEN__
+#error this file should only be included for a native build
+#endif
+
 #include "../IWebSocketSession.hpp"
 #include "../callbacks.hpp"
 
@@ -42,6 +46,7 @@ private:
   void _doRead();
   void _onRead(beast::error_code ec, std::size_t bytes_transferred);
   void _onWrite(beast::error_code ec, std::size_t bytes_transferred);
+  void _doWrite();
 
 private:
   websocket::stream<beast::tcp_stream> _ws;
