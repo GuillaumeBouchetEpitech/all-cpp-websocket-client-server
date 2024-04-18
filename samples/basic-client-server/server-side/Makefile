@@ -24,7 +24,7 @@ NAME_APP=	$(DIR_APP)/exec
 
 DIR_SRC=	src
 DIR_APP_SRC=	$(DIR_SRC)/application
-DIR_NETOWRK_WRAPPER_LIB=../network-wrapper
+DIR_NETOWRK_WRAPPER_LIB=../../../network-wrapper
 
 #### /DIRS
 

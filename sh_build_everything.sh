@@ -171,7 +171,7 @@ then
 
   echo "client-side is not built or not up to date with the latest source code"
 
-  cd ./client-side
+  cd ./samples/basic-client-server/client-side
   make build_platform="native" build_mode="release" all -j4
   cd $CURRENT_DIR
 
@@ -194,7 +194,7 @@ then
 
   echo "client-side is not built or not up to date with the latest source code"
 
-  cd ./client-side
+  cd ./samples/basic-client-server/client-side
   make build_platform="web-wasm" build_mode="release" all -j4
   cd $CURRENT_DIR
 
@@ -210,7 +210,7 @@ echo "# building web-wasm-loader (TypeScript -> JavaScript)"
 echo "#"
 echo ""
 
-cd ./client-side/
+cd ./samples/basic-client-server/client-side/
 
 if [ -f "./dist/index.js" && -f "./dist/index.html" ]
 then
@@ -269,7 +269,7 @@ echo "# building server-side (C++ -> binary)"
 echo "#"
 echo ""
 
-cd ./server-side
+cd ./samples/basic-client-server/server-side
 echo "building server-side - application"
 make build_mode="release" application -j4
 # make build_mode="debug" application -j4

@@ -44,7 +44,7 @@ endif
 
 DIR_SRC=	src/application
 
-DIR_NETOWRK_WRAPPER_LIB=	../network-wrapper
+DIR_NETOWRK_WRAPPER_LIB=	../../../network-wrapper
 
 #### /DIRS
 
