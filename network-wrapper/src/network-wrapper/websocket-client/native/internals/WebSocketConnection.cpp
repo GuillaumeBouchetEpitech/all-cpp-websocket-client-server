@@ -40,6 +40,7 @@ WebSocketConnection::WebSocketConnection()
   , _resolver(net::make_strand(_ioc))
   , _ws(net::make_strand(_ioc))
 {
+  _startThread();
 }
 
 
@@ -48,6 +49,7 @@ WebSocketConnection::~WebSocketConnection() {
   std::cerr << "WebSocketConnection dtor" << std::endl;
 
   disconnect();
+  _stopThread();
 }
 
 AbstractWebSocketConnection&
@@ -88,13 +90,10 @@ WebSocketConnection::connect(
   _ipAddress = ipAddress;
   _port = port;
 
-
-  _thread = std::thread([this]()
+  _workerThread->execute([this]()
   {
-    _ioc.run();
-    _threadIsRunning = false;
+    this->_ioc.run();
   });
-  _threadIsRunning = true;
 
   // connect() -> on_resolve() -> on_connect()
 
@@ -113,9 +112,7 @@ WebSocketConnection::on_resolve(
   tcp::resolver::results_type results)
 {
   if (ec) {
-    // cannot join the thread here -> deadlock
-    constexpr bool isThreadSafe = false;
-    return _failed(ec, "resolve", isThreadSafe);
+    return _failed(ec, "resolve");
   }
 
   // Set the timeout for the operation
@@ -135,9 +132,7 @@ WebSocketConnection::on_connect(
   tcp::resolver::results_type::endpoint_type
 ) {
   if (ec) {
-    // cannot join the thread here -> deadlock
-    constexpr bool isThreadSafe = false;
-    return _failed(ec, "connect", isThreadSafe);
+    return _failed(ec, "connect");
   }
 
   // Turn off the timeout on the tcp_stream, because
@@ -169,9 +164,7 @@ void
 WebSocketConnection::on_handshake(beast::error_code ec)
 {
   if(ec) {
-    // cannot join the thread here -> deadlock
-    constexpr bool isThreadSafe = false;
-    return _failed(ec, "handshake", isThreadSafe);
+    return _failed(ec, "handshake");
   }
 
   _isConnected = true;
@@ -198,7 +191,7 @@ WebSocketConnection::_doRead() {
 }
 
 void
-WebSocketConnection::_failed(beast::error_code ec, char const* what, bool isThreadSafe)
+WebSocketConnection::_failed(beast::error_code ec, char const* what)
 {
   std::cerr << what << ": " << ec.message();
   if (_onErrorCallback) {
@@ -208,11 +201,11 @@ WebSocketConnection::_failed(beast::error_code ec, char const* what, bool isThre
   // alternative disconnect
   _isConnected = false;
 
-  _stop(isThreadSafe);
+  _stop();
 }
 
 void
-WebSocketConnection::_stop(bool isThreadSafe)
+WebSocketConnection::_stop()
 {
   if (!_isConnected) {
     return;
@@ -220,15 +213,6 @@ WebSocketConnection::_stop(bool isThreadSafe)
   _isConnected = false;
 
   _ioc.stop();
-
-  if (!_threadIsRunning || !isThreadSafe) {
-    return;
-  }
-
-  if (_thread.joinable()) {
-    _thread.join();
-  }
-  _threadIsRunning = false;
 }
 
 void
@@ -243,9 +227,7 @@ WebSocketConnection::on_read(
   }
 
   if(ec) {
-    // cannot join the thread here -> deadlock
-    constexpr bool isThreadSafe = false;
-    return _failed(ec, "read", isThreadSafe);
+    return _failed(ec, "read");
   }
 
   if (_onMessageCallback) {
@@ -299,7 +281,7 @@ WebSocketConnection::disconnect() {
 
   _ws.close(websocket::close_code::normal);
 
-  _stop(true);
+  _stop();
 }
 
 void
@@ -312,9 +294,7 @@ WebSocketConnection::_onWrite(beast::error_code ec, std::size_t bytes_transferre
   }
 
   if (ec) {
-    // cannot join the thread here -> deadlock
-    constexpr bool isThreadSafe = false;
-    return _failed(ec, "write", isThreadSafe);
+    return _failed(ec, "write");
   }
 
   // remove the buffer we just sent
@@ -347,5 +327,19 @@ WebSocketConnection::_doWrite()
 //   // The make_printable() function helps print a ConstBufferSequence
 //   std::cout << beast::make_printable(_readBuffer.data()) << std::endl;
 // }
+
+
+
+void WebSocketConnection::_startThread()
+{
+  _workerThread = AbstractWorkerThread::create();
+}
+
+void WebSocketConnection::_stopThread()
+{
+  _workerThread->quit();
+  _workerThread.reset(nullptr);
+}
+
 
 

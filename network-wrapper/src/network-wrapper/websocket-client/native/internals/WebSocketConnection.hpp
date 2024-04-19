@@ -7,6 +7,8 @@
 
 #include "../../AbstractWebSocketConnection.hpp"
 
+#include "worker-thread/AbstractWorkerThread.hpp"
+
 #include <boost/beast/core.hpp>
 #include <boost/beast/websocket.hpp>
 #include <boost/asio/strand.hpp>
@@ -15,6 +17,7 @@
 #include <memory>
 #include <string>
 #include <thread>
+#include <mutex>
 #include <list>
 
 namespace beast = boost::beast;         // from <boost/beast.hpp>
@@ -92,14 +95,17 @@ private:
   void _doWrite();
   void _doRead();
 
-  void _failed(beast::error_code ec, char const* what, bool isThreadSafe);
-  void _stop(bool isThreadSafe);
+  void _failed(beast::error_code ec, char const* what);
+  void _stop();
+
+  void _startThread();
+  void _stopThread();
 
 private:
-  bool _threadIsRunning = false;
   bool _isConnected = false;
   net::io_context _ioc;
-  std::thread _thread;
+
+  std::unique_ptr<AbstractWorkerThread> _workerThread;
 
   tcp::resolver _resolver;
   websocket::stream<beast::tcp_stream> _ws;

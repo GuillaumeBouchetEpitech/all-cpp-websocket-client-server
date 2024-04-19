@@ -71,6 +71,8 @@ ALL_SRC+=	\
 		$(DIR_SRC)/http-server/internals/*.cpp \
 		$(DIR_SRC)/websocket-client/native/*.cpp \
 		$(DIR_SRC)/websocket-client/native/internals/*.cpp \
+		$(DIR_SRC)/websocket-client/native/internals/worker-thread/*.cpp \
+		$(DIR_SRC)/websocket-client/native/internals/worker-thread/internals/*.cpp \
 		$(DIR_SRC)/websocket-server/*.cpp \
 		$(DIR_SRC)/websocket-server/internals/*.cpp \
 	)
