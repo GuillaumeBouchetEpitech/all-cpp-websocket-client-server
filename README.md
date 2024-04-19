@@ -9,7 +9,7 @@
   - [The Server Side:](#the-server-side)
     - [Http Server:](#http-server)
     - [WebSocket Server:](#websocket-server)
-  - [The Network Wrapper:](#the-network-wrapper)
+  - [ The Network Wrapper:](#-the-network-wrapper)
 - [Dependencies](#dependencies)
   - [Client-Side:](#client-side)
   - [Server-Side: zlib, boost](#server-side-zlib-boost)
@@ -27,20 +27,14 @@ C++ Client-Server example
 ## The Client Side:
 * is written in C++ and compiled to WebAssembly
   * which offer the (currently) highest performance possible within a browser
-    * 1.7x slower than native speed
-    * or ~5-6 times faster than JavaScript (also devoid of GC slowdown)
+    * `1.7x slower than native speed`
+    * `or ~5-6 times faster than JavaScript` (also devoid of GC slowdown)
 * will connect to the server with a websocket inside the WebAssembly logic
   * the connection is established using a config fetched from the server-side (easily configured if needed)
-* a native version of the client is also available
-  * mostly for development and debug purpose:
+* `a native version` of the client is also available
+  * `mostly for` faster development and `debug purpose`:
     * tools like gdb and valgrind become available
-  * the code is written in a way were the only the network-wrapper websocket need to change
-    * TBD: concrete example with libcryptopp?
-    * TBD: concrete example with libSDL2?
-* most of the websocket code is located in the network-wrapper
-  * abstracted and interchangeable between native/wasm builds
-  * the native part rely on boost which is slow to compile
-    * the network-wrapper is compiled once, eliminating this issue
+* the network part rely on the [Network Wrapper](#network-wrapper-anchor)
 
 ```mermaid
 
@@ -120,14 +114,8 @@ C++ Client-Server example
 
 ## The Server Side:
 * is written in C++ and compiled to a native binary
-* the network (Http and WebSockets) use boost Asio beast
-  * rely on boost executor(s)
-    * which in turn, rely on boost strand
-      * [which is a more efficient way to use multi-threading](https://www.crazygaze.com/blog/2016/03/17/how-strands-work-and-why-you-should-use-them/)
-  * the number of thread(s) used can be configured
-* most of the http and websocket code is located in the network-wrapper
-  * this rely on boost which is slow to compile
-    * the network-wrapper is compiled once, eliminating this issue
+* the network rely on the [Network Wrapper](#network-wrapper-anchor)
+* the number of thread(s) used can be configured by command line arguments
 
 ### Http Server:
 * recursively explore an asset folder
@@ -253,21 +241,33 @@ C++ Client-Server example
 
 ```
 
-## The Network Wrapper:
+## <a name="network-wrapper-anchor"></a> The Network Wrapper:
 * is written in C++ and compiled to a native archive or a wasm bytecode
   * the native part contains
     * an abstracted http server
+      * host, port, total-threads (boost::strand if 2 or more threads)
     * an abstracted websocket server
+      * host, port, total-threads (boost::strand if 2 or more threads)
     * an abstracted websocket client
+      * rely on boost beast websocket
+      * use a worker thread
   * the wasm part contains
     * an abstracted websocket client
+      * rely on emscripten websocket
 * the native parts rely on boost Asio beast
   * rely on boost executor(s)
     * which in turn, rely on boost strand
       * [which is a more efficient way to use multi-threading](https://www.crazygaze.com/blog/2016/03/17/how-strands-work-and-why-you-should-use-them/)
-* abstracting it away in that kind of wrapper
-  * make boost slow compilation happens only once
+* benefit(s) of the wrapper
+  * easily reusable
+  * make boost (very) slow compilation happens only once
   * allow the client-side to work in native and wasm with nearly the same code
+
+
+* all of the network code is abstracted and located in the network-wrapper
+  * native wrapper: native archive (static library)
+  * wasm wrapper: wasm bytecode (static library)
+
 
 
 ```mermaid
@@ -290,8 +290,7 @@ mindmap
   root(("network<br>wrapper"))
     http_server)"http server"(
     ws_server)"websocket<br>server"(
-    ws_native_client{{"websocket<br>native client"}}
-    ws_wasm_client{{"websocket<br>wasm client"}}
+    ws_client)"websocket<br>native/wasm<br>client"(
 
 
 
