@@ -134,7 +134,7 @@ echo "# building sample: basic-client-server"
 echo "#"
 echo ""
 
-sh ./sh_build_sample__basic_client_server.sh
+sh ./sh_build_sample__basic-client-server.sh
 
 #
 #

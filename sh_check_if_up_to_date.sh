@@ -8,7 +8,7 @@ DST_PATH=$2
 get_latest_mtime_of_folder() {
 
     INPUT=$1
-    NOT_FOUND_MSG=$1
+    NOT_FOUND_MSG=$2
 
     if [ ! -d "$INPUT" ]; then
 
@@ -35,7 +35,7 @@ get_latest_mtime_of_folder() {
 
     # echo "##############"
 
-    eval "$2='$LASTEST_TIME'"
+    eval "$3='$LASTEST_TIME'"
 }
 
 return_dst=""
@@ -43,6 +43,9 @@ get_latest_mtime_of_folder "$DST_PATH" "outdated" return_dst
 
 return_src=""
 get_latest_mtime_of_folder "$SRC_PATH" "outdated" return_src
+
+# echo "return_dst: $return_dst"
+# echo "return_src: $return_src"
 
 DIFF=$(echo "$return_dst - $return_src" | bc)
 
