@@ -6,20 +6,22 @@
 #include "boostHeaders.hpp"
 
 WebSocketServer::WebSocketServer(
-  const std::string& ipAddress, uint16_t port, uint32_t totalThreads /*= 1*/
-  )
-  : _ioc(totalThreads), _totalThreads(totalThreads) {
+  const std::string& ipAddress,
+  uint16_t port,
+  uint32_t totalThreads, /*= 1*/
+  bool useStrands /*= false*/
+)
+  : _ioc(totalThreads)
+  , _sharedStrand(std::make_shared<net::strand<net::any_io_executor>>(net::make_strand(_ioc)))
+  , _totalThreads(totalThreads)
+  , _useStrands(useStrands)
+{
+
   if (totalThreads == 0) {
     throw std::runtime_error("total thread(s) must be > 0");
   }
 
-  // more than one thread
-  // -> the new connection gets its own boost::strand
-  // -> it will scale well across the available threads
-  // only one thread
-  // -> then it's faster NOT to use boost::strand
-  const bool useBoostStrands = (_totalThreads > 1);
-
+  const bool useBoostStrands = false; // the tcp listener doesn't need strands
   const auto boostIpAddr = net::ip::make_address(ipAddress);
   const auto boostEndpoint = boost::asio::ip::tcp::endpoint{boostIpAddr, port};
 
@@ -48,14 +50,27 @@ WebSocketServer::start() {
   stop();
 
   _mainTcpListener->setOnNewConnectionCallback([this](boost::asio::ip::tcp::socket&& newSocket) {
+
+    const bool useBoostStrands = (_totalThreads > 1 && _useStrands);
+
+    // newSocket.rate_policy().read_limit(10000); // bytes per second
+    // newSocket.rate_policy().write_limit(850000); // bytes per second
+
     // Create the session and run it
     // -> the session is not stored anywhere
     // -> since calling run() will make more shared pointer of the instance
     //    the session will not be deleted when going out of scope here...
     //    ...if anything it's just a bit misleading, hence that comment
-    std::make_shared<WebSocketSession>(
-      std::move(newSocket), _onConnectionCallback, _onDisconnectionCallback, _onMessageCallback)
-      ->run();
+    auto newSession = std::make_shared<WebSocketSession>(
+      std::move(newSocket),
+      useBoostStrands,
+      _sharedStrand,
+      _onConnectionCallback,
+      _onDisconnectionCallback,
+      _onMessageCallback
+    );
+
+    newSession->run();
   });
 
   _mainTcpListener->start();

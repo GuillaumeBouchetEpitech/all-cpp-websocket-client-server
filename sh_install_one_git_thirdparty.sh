@@ -57,7 +57,7 @@ then
     echo "=> yes: 2"
     echo ""
 
-    read USER_INPUT_PROJECT
+    read -r USER_INPUT_PROJECT
 
     case $USER_INPUT_PROJECT in
     2)
@@ -96,18 +96,19 @@ yes)
   echo "###"
   echo ""
 
-  cd $DIR_DEPENDENCIES
+  cd "$DIR_DEPENDENCIES" || exit 1
 
   # reset
-  rm -rf $CURR_DEST_DIR
+  rm -rf "$CURR_DEST_DIR" || exit 1
 
   # clone (but we only ask for one commit, which is very light)
   git clone \
     --quiet \
     --depth 1 \
-    --branch $CURR_GIT_TAG \
-    https://github.com/$CURR_GIT_URL \
-    $CURR_DEST_DIR
+    --branch "$CURR_GIT_TAG" \
+    "https://github.com/$CURR_GIT_URL" \
+    "$CURR_DEST_DIR" \
+    || exit 1
 
   if [ -d "$DIR_DEPENDENCIES/$CURR_DEST_DIR" ]
   then

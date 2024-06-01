@@ -108,6 +108,7 @@
     "cassert": "cpp",
     "stb_vorbis.c": "cpp",
     "source_location": "cpp",
-    "numbers": "cpp"
+    "numbers": "cpp",
+    "__verbose_abort": "cpp"
   }
 }

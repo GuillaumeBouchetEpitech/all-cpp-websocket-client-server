@@ -1,9 +1,13 @@
 
+
+
 #pragma once
 
 #include <functional>
 #include <string_view>
 #include <memory>
+
+
 
 class AbstractWebSocketConnection {
 public:
@@ -39,5 +43,9 @@ public:
 public:
   virtual bool isConnected() const = 0;
 
+public:
+  static std::shared_ptr<AbstractWebSocketConnection> create();
+
 };
+
 

@@ -67,8 +67,11 @@ ALL_SRC+=	\
 	$(wildcard \
 		$(DIR_SRC)/common/*.cpp \
 		$(DIR_SRC)/common/internals/*.cpp \
+		$(DIR_SRC)/common/internals/*.cpp \
+		$(DIR_SRC)/utilities/*.cpp \
 		$(DIR_SRC)/http-server/*.cpp \
 		$(DIR_SRC)/http-server/internals/*.cpp \
+		$(DIR_SRC)/websocket-client/*.cpp \
 		$(DIR_SRC)/websocket-client/native/*.cpp \
 		$(DIR_SRC)/websocket-client/native/internals/*.cpp \
 		$(DIR_SRC)/websocket-client/native/internals/worker-thread/*.cpp \
@@ -81,6 +84,7 @@ else ifeq ($(build_platform),web-wasm)
 
 ALL_SRC+=	\
 	$(wildcard \
+		$(DIR_SRC)/websocket-client/*.cpp \
 		$(DIR_SRC)/websocket-client/wasm/*.cpp \
 		$(DIR_SRC)/websocket-client/wasm/internals/*.cpp \
 	)

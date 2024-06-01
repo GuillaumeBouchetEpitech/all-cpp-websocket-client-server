@@ -10,7 +10,6 @@
 #include <memory>
 #include <string>
 
-
 #include <iostream>
 
 namespace beast = boost::beast;         // from <boost/beast.hpp>
@@ -19,7 +18,7 @@ namespace websocket = beast::websocket; // from <boost/beast/websocket.hpp>
 namespace net = boost::asio;            // from <boost/asio.hpp>
 using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
 
-SendBuffer::SendBuffer(const char* dataToSend, std::size_t dataSize) : size(dataSize) {
+WebSocketConnection::SendBuffer::SendBuffer(const char* dataToSend, std::size_t dataSize) : size(dataSize) {
   if (dataSize > max_send_buffer_size) {
     throw std::runtime_error("send buffer requested size is too big");
   }
@@ -45,9 +44,6 @@ WebSocketConnection::WebSocketConnection()
 
 
 WebSocketConnection::~WebSocketConnection() {
-
-  std::cerr << "WebSocketConnection dtor" << std::endl;
-
   disconnect();
   _stopThread();
 }
@@ -193,7 +189,7 @@ WebSocketConnection::_doRead() {
 void
 WebSocketConnection::_failed(beast::error_code ec, char const* what)
 {
-  std::cerr << what << ": " << ec.message();
+  std::cerr << "WebSocketConnection:failure \"" << what << "\": \"" << ec.message() << "\"" << std::endl;
   if (_onErrorCallback) {
     _onErrorCallback(ec.message());
   }
@@ -212,6 +208,8 @@ WebSocketConnection::_stop()
   }
   _isConnected = false;
 
+  // the worker thread task will be completed
+  // -> but it will remain running for any other new connection attempt
   _ioc.stop();
 }
 
@@ -227,7 +225,8 @@ WebSocketConnection::on_read(
   }
 
   if(ec) {
-    return _failed(ec, "read");
+    _failed(ec, "read");
+    return;
   }
 
   if (_onMessageCallback) {
@@ -256,8 +255,9 @@ bool WebSocketConnection::sendBinary(const void* inData, std::size_t inSize)
     return false;
   }
 
-  const bool wasEmpty = _buffersToSend.empty();
+  ScopedAtomicLock lock(_atomicLock);
 
+  const bool wasEmpty = _buffersToSend.empty();
   _buffersToSend.push_back(SendBuffer(reinterpret_cast<const char*>(inData), inSize));
 
   if (wasEmpty == true) {
@@ -279,14 +279,16 @@ WebSocketConnection::disconnect() {
     return;
   }
 
-  _ws.close(websocket::close_code::normal);
-
   _stop();
+
+  _ws.close(websocket::close_code::normal);
 }
 
 void
 WebSocketConnection::_onWrite(beast::error_code ec, std::size_t bytes_transferred) {
   boost::ignore_unused(bytes_transferred);
+
+  ScopedAtomicLock lock(_atomicLock);
 
   if (!_isConnected) {
     _buffersToSend.clear();
@@ -294,15 +296,20 @@ WebSocketConnection::_onWrite(beast::error_code ec, std::size_t bytes_transferre
   }
 
   if (ec) {
-    return _failed(ec, "write");
+    _failed(ec, "write");
+    return;
   }
 
-  // remove the buffer we just sent
-  _buffersToSend.pop_front();
+  if (_buffersToSend.empty() == false) {
 
-  // more to send?
-  if (_buffersToSend.size() > 0) {
-    _doWrite();
+    // remove the buffer that got sent
+    _buffersToSend.pop_front();
+
+    // more to send?
+    if (_buffersToSend.empty() == false) {
+      _doWrite();
+    }
+
   }
 }
 

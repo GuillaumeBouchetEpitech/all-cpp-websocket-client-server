@@ -12,7 +12,7 @@
 
 #if defined D_NATIVE_BUILD
 
-#include "network-wrapper/websocket-client/native/createWebSocketConnection.hpp"
+#include "network-wrapper/websocket-client/AbstractWebSocketConnection.hpp"
 
 #include <thread>
 
@@ -23,11 +23,10 @@ int main()
   auto const host = "127.0.0.1";
   auto const port = "8888";
 
-  auto webSocket = createWebSocketConnection();
 
   Application* _myApplication = nullptr;
 
-  _myApplication = new Application(webSocket);
+  _myApplication = new Application();
   _myApplication->connect(host, port);
 
   // native dumb "main loop"
@@ -72,11 +71,28 @@ startApplication(const char* inHost, const char* inPort) {
     return;
   }
 
-  auto webSocket = createWebSocketConnection();
-
-  _myApplication = new Application(webSocket);
+  _myApplication = new Application();
   _myApplication->connect(inHost, inPort);
 }
+
+EMSCRIPTEN_KEEPALIVE
+void
+updateApplication(uint32_t inDelta) {
+  if (!_myApplication)
+    return;
+
+  _myApplication->update(inDelta);
+}
+
+EMSCRIPTEN_KEEPALIVE
+void
+renderApplication() {
+  if (!_myApplication)
+    return;
+
+  _myApplication->render();
+}
+
 }
 
 #endif

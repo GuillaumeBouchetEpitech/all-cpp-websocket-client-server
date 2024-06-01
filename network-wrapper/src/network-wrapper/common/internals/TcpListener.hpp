@@ -32,9 +32,11 @@ public:
 
 private:
   void _doAccept();
+  void _onAccept(beast::error_code ec, boost::asio::ip::tcp::socket socket);
 
 private:
   net::io_context& _ioc;
+  boost::asio::strand<net::io_context::executor_type> _sharedStrand;
   boost::asio::ip::tcp::acceptor _acceptor;
   boost::asio::ip::tcp::endpoint _endpoint;
   bool _useBoostStrands = false;

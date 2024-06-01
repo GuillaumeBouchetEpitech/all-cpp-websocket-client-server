@@ -16,7 +16,12 @@
 class WebSocketServer : public AbstractWebSocketServer {
 
 public:
-  explicit WebSocketServer(const std::string& ipAddress, uint16_t port, uint32_t totalThreads = 1);
+  explicit WebSocketServer(
+    const std::string& ipAddress,
+    uint16_t port,
+    uint32_t totalThreads = 1,
+    bool useStrands = false
+  );
 
   WebSocketServer(const WebSocketServer& other) = delete;
   WebSocketServer(WebSocketServer&& other) = delete;
@@ -36,7 +41,9 @@ public:
 
 private:
   net::io_context _ioc;
+  std::shared_ptr<net::strand<net::any_io_executor>> _sharedStrand;
   uint32_t _totalThreads;
+  bool _useStrands;
   std::shared_ptr<AbstractTcpListener> _mainTcpListener;
   std::vector<std::thread> _allThreads;
 

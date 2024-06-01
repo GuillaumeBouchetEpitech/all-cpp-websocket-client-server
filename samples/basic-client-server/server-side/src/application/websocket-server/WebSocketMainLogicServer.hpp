@@ -10,7 +10,7 @@
 
 class WebSocketMainLogicServer {
 private:
-  std::unique_ptr<AbstractWebSocketServer> _webSocketServer;
+  std::shared_ptr<AbstractWebSocketServer> _webSocketServer;
   WebSocketSessionManager _sessionManager;
 
   int32_t _lastPlayerId = 1;

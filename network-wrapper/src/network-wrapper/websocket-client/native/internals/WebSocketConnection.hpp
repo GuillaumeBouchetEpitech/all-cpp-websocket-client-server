@@ -7,6 +7,10 @@
 
 #include "../../AbstractWebSocketConnection.hpp"
 
+
+#include "../../../utilities/TestAndSetAtomicLock.hpp"
+
+
 #include "worker-thread/AbstractWorkerThread.hpp"
 
 #include <boost/beast/core.hpp>
@@ -17,7 +21,7 @@
 #include <memory>
 #include <string>
 #include <thread>
-#include <mutex>
+// #include <mutex>
 #include <list>
 
 namespace beast = boost::beast;         // from <boost/beast.hpp>
@@ -30,19 +34,20 @@ using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
 
 constexpr std::size_t max_send_buffer_size = 255;
 
-struct SendBuffer {
-  std::size_t size = 0;
-  char data[max_send_buffer_size];
-
-  SendBuffer(const char* data, std::size_t size);
-};
-
 
 //------------------------------------------------------------------------------
 
 // Sends a WebSocket message and prints the response
 class WebSocketConnection : public AbstractWebSocketConnection, public std::enable_shared_from_this<WebSocketConnection>
 {
+private:
+  struct SendBuffer {
+    std::size_t size = 0;
+    char data[max_send_buffer_size];
+
+    SendBuffer(const char* data, std::size_t size);
+  };
+
 public:
   // Resolver and socket require an io_context
   explicit
@@ -112,6 +117,8 @@ private:
   beast::flat_buffer _readBuffer;
   std::string _ipAddress;
   std::string _port;
+
+  TestAndSetAtomicLock _atomicLock;
   std::list<SendBuffer> _buffersToSend;
 
 private:

@@ -10,13 +10,7 @@ HttpServer::HttpServer(const std::string& ipAddress, const uint16_t port, const 
     throw std::runtime_error("total thread(s) must be > 0");
   }
 
-  // more than one thread
-  // -> the new connection gets its own boost::strand
-  // -> it will scale well across the available threads
-  // only one thread
-  // -> then it's faster NOT to use boost::strand
-  const bool useBoostStrands = (_totalThreads > 1);
-
+  const bool useBoostStrands = false;  // the tcp listener doesn't need strands
   const auto boostIpAddr = net::ip::make_address(ipAddress);
   const auto boostEndpoint = boost::asio::ip::tcp::endpoint{boostIpAddr, port};
 

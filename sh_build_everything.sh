@@ -1,5 +1,7 @@
 #!/bin/bash
 
+clear
+
 CURRENT_DIR=$PWD
 
 #
@@ -34,7 +36,7 @@ echo ""
 DIR_THIRDPARTIES=$PWD/thirdparties
 DIR_DEPENDENCIES=$DIR_THIRDPARTIES/dependencies
 
-mkdir -p $DIR_DEPENDENCIES
+mkdir -p "$DIR_DEPENDENCIES"
 
 #
 #
@@ -67,7 +69,7 @@ func_ensure_wasm_compiler() {
 
     # will not do anything if already present
     sh sh_install_one_git_thirdparty.sh \
-      $DIR_DEPENDENCIES \
+      "$DIR_DEPENDENCIES" \
       "EMSDK" \
       "emsdk" \
       "emscripten-core/emsdk" \
@@ -75,36 +77,36 @@ func_ensure_wasm_compiler() {
       "not-interactive"
 
     # goto local install emscripten folder
-    cd $DIR_DEPENDENCIES/emsdk
+    cd "$DIR_DEPENDENCIES/emsdk" || exit 1
 
   else
 
     echo " -> already installed"
 
     # goto local install emscripten folder
-    cd $EMSDK
+    cd "$EMSDK" || exit 1
   fi
 
   echo " -> ensuring the correct version is installed"
 
-  ./emsdk install $EMSDK_VERSION
+  ./emsdk install $EMSDK_VERSION || exit 1
 
   echo " -> activating the correct version"
 
-  ./emsdk activate --embedded $EMSDK_VERSION
+  ./emsdk activate --embedded $EMSDK_VERSION || exit 1
 
-  . ./emsdk_env.sh
+  . "./emsdk_env.sh" || exit 1
 
   # sometimes required? (suspected hiccups in emsdk)
   # em++ --clear-cache
 
-  cd $CURRENT_DIR
+  cd "$CURRENT_DIR" || exit 1
 
   echo " -> success, C++ to WebAssembly compiler is ready"
 
 }
 
-func_ensure_wasm_compiler
+func_ensure_wasm_compiler || exit 1
 
 #
 #
@@ -118,9 +120,10 @@ echo "# building network-wrapper (C++ -> Native)"
 echo "#"
 echo ""
 
-cd ./network-wrapper
-make build_platform="native" build_mode="release" all -j4
-cd $CURRENT_DIR
+cd ./network-wrapper || exit 1
+make build_platform="native" build_mode="release" all -j4 || exit 1
+# make build_platform="native" build_mode="debug" all -j4 || exit 1
+cd "$CURRENT_DIR" || exit 1
 
 #
 #
@@ -134,7 +137,7 @@ echo "# building sample: basic-client-server"
 echo "#"
 echo ""
 
-sh ./sh_build_sample__basic-client-server.sh
+sh ./sh_build_sample__basic-client-server.sh || exit 1
 
 #
 #

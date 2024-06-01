@@ -1,7 +1,6 @@
 
 #pragma once
 
-// #include "network-wrapper/AbstractWebSocketConnection.hpp"
 #include "network-wrapper/websocket-client/AbstractWebSocketConnection.hpp"
 
 #include <string_view>
@@ -10,11 +9,15 @@
 class Application {
 
 public:
-  Application(std::shared_ptr<AbstractWebSocketConnection> webSocket);
+  Application();
   ~Application() = default;
 
 public:
   void connect(std::string_view inHost, std::string_view inPort);
+
+public:
+  void update(uint32_t deltaTime);
+  void render();
 
 public:
   bool isDone() const;

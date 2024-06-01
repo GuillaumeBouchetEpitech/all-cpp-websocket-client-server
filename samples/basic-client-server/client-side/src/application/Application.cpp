@@ -3,10 +3,9 @@
 
 #include "utilities/TraceLogger.hpp"
 
-Application::Application(std::shared_ptr<AbstractWebSocketConnection> webSocket)
-  : _webSocket(webSocket)
+Application::Application()
 {
-
+  _webSocket = AbstractWebSocketConnection::create();
 }
 
 void
@@ -50,6 +49,15 @@ Application::connect(std::string_view inHost, std::string_view inPort) {
   });
 
   _webSocket->connect(inHost, inPort);
+}
+
+void Application::update(uint32_t deltaTime)
+{
+  static_cast<void>(deltaTime); // unused
+}
+
+void Application::render()
+{
 }
 
 bool Application::isDone() const

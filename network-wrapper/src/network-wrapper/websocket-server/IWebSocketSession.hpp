@@ -12,4 +12,5 @@ public:
 
 public:
   virtual void write(const char* data, std::size_t length) = 0;
+  virtual void disconnect() = 0;
 };
