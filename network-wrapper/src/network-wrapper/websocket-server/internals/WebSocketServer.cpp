@@ -6,16 +6,11 @@
 #include "boostHeaders.hpp"
 
 WebSocketServer::WebSocketServer(
-  const std::string& ipAddress,
-  uint16_t port,
-  uint32_t totalThreads, /*= 1*/
-  bool useStrands /*= false*/
-)
-  : _ioc(totalThreads)
-  , _sharedStrand(std::make_shared<net::strand<net::any_io_executor>>(net::make_strand(_ioc)))
-  , _totalThreads(totalThreads)
-  , _useStrands(useStrands)
-{
+  const std::string& ipAddress, uint16_t port, uint32_t totalThreads, /*= 1*/
+  bool useStrands                                                     /*= false*/
+  )
+  : _ioc(totalThreads), _sharedStrand(std::make_shared<net::strand<net::any_io_executor>>(net::make_strand(_ioc))),
+    _totalThreads(totalThreads), _useStrands(useStrands) {
 
   if (totalThreads == 0) {
     throw std::runtime_error("total thread(s) must be > 0");
@@ -50,7 +45,6 @@ WebSocketServer::start() {
   stop();
 
   _mainTcpListener->setOnNewConnectionCallback([this](boost::asio::ip::tcp::socket&& newSocket) {
-
     const bool useBoostStrands = (_totalThreads > 1 && _useStrands);
 
     // newSocket.rate_policy().read_limit(10000); // bytes per second
@@ -62,13 +56,8 @@ WebSocketServer::start() {
     //    the session will not be deleted when going out of scope here...
     //    ...if anything it's just a bit misleading, hence that comment
     auto newSession = std::make_shared<WebSocketSession>(
-      std::move(newSocket),
-      useBoostStrands,
-      _sharedStrand,
-      _onConnectionCallback,
-      _onDisconnectionCallback,
-      _onMessageCallback
-    );
+      std::move(newSocket), useBoostStrands, _sharedStrand, _onConnectionCallback, _onDisconnectionCallback,
+      _onMessageCallback);
 
     newSession->run();
   });

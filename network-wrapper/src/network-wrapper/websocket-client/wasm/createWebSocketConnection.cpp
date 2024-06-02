@@ -4,7 +4,6 @@
 #include "./internals/WebSocketConnection.hpp"
 
 std::shared_ptr<AbstractWebSocketConnection>
-createWebSocketConnection()
-{
+createWebSocketConnection() {
   return std::make_shared<WebSocketConnection>();
 }

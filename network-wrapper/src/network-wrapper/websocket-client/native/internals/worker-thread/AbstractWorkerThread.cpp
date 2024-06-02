@@ -3,8 +3,7 @@
 
 #include "./internals/WorkerThread.hpp"
 
-std::unique_ptr<AbstractWorkerThread> AbstractWorkerThread::create()
-{
+std::unique_ptr<AbstractWorkerThread>
+AbstractWorkerThread::create() {
   return std::make_unique<WorkerThread>(false);
 }
-

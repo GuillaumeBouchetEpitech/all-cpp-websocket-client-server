@@ -1,8 +1,8 @@
 
 #include "HttpServer.hpp"
 
-#include <memory>
 #include <iostream>
+#include <memory>
 
 HttpServer::HttpServer(const std::string& ipAddress, const uint16_t port, const uint32_t totalThreads /*= 1*/)
   : _ioc(totalThreads), _totalThreads(totalThreads) {
@@ -10,7 +10,7 @@ HttpServer::HttpServer(const std::string& ipAddress, const uint16_t port, const 
     throw std::runtime_error("total thread(s) must be > 0");
   }
 
-  const bool useBoostStrands = false;  // the tcp listener doesn't need strands
+  const bool useBoostStrands = false; // the tcp listener doesn't need strands
   const auto boostIpAddr = net::ip::make_address(ipAddress);
   const auto boostEndpoint = boost::asio::ip::tcp::endpoint{boostIpAddr, port};
 

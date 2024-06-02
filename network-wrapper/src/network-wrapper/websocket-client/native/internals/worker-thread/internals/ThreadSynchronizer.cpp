@@ -25,7 +25,8 @@ ThreadSynchronizer::ScopedLockedNotifier::~ScopedLockedNotifier() {
 //
 //
 
-bool ThreadSynchronizer::waitUntilNotified(std::unique_lock<std::mutex>& lock, float seconds /*= 0.0f*/) {
+bool
+ThreadSynchronizer::waitUntilNotified(std::unique_lock<std::mutex>& lock, float seconds /*= 0.0f*/) {
   _isNotified = false;
 
   // no need to wait for a timeout
@@ -48,16 +49,23 @@ bool ThreadSynchronizer::waitUntilNotified(std::unique_lock<std::mutex>& lock, f
   return true; // we did not time out
 }
 
-void ThreadSynchronizer::notify() {
+void
+ThreadSynchronizer::notify() {
   _isNotified = true;
   _condVar.notify_one();
 }
 
-std::unique_lock<std::mutex> ThreadSynchronizer::makeScopedLock() { return std::unique_lock<std::mutex>(_mutex); }
+std::unique_lock<std::mutex>
+ThreadSynchronizer::makeScopedLock() {
+  return std::unique_lock<std::mutex>(_mutex);
+}
 
-ThreadSynchronizer::ScopedLockedNotifier ThreadSynchronizer::makeScopedLockNotifier() {
+ThreadSynchronizer::ScopedLockedNotifier
+ThreadSynchronizer::makeScopedLockNotifier() {
   return ScopedLockedNotifier(*this);
 }
 
-bool ThreadSynchronizer::isNotified() const { return _isNotified; }
-
+bool
+ThreadSynchronizer::isNotified() const {
+  return _isNotified;
+}

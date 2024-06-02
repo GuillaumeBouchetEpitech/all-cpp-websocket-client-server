@@ -3,10 +3,7 @@
 
 #include "utilities/TraceLogger.hpp"
 
-Application::Application()
-{
-  _webSocket = AbstractWebSocketConnection::create();
-}
+Application::Application() { _webSocket = AbstractWebSocketConnection::create(); }
 
 void
 Application::connect(std::string_view inHost, std::string_view inPort) {
@@ -15,7 +12,6 @@ Application::connect(std::string_view inHost, std::string_view inPort) {
   }
 
   _webSocket->setOnOpenCallback([this]() {
-
     D_LOG_OUT("> connected");
     D_LOG_OUT("> sending utf8 message: \"ping!\"");
 
@@ -37,7 +33,6 @@ Application::connect(std::string_view inHost, std::string_view inPort) {
   });
 
   _webSocket->setOnMessageCallback([](const uint32_t sizeReceived, const uint8_t* dataReceived) {
-
     auto tmpBuffer = std::make_unique<char[]>(sizeReceived + 1);
 
     std::memset(tmpBuffer.get(), 0, sizeReceived + 1);
@@ -51,16 +46,15 @@ Application::connect(std::string_view inHost, std::string_view inPort) {
   _webSocket->connect(inHost, inPort);
 }
 
-void Application::update(uint32_t deltaTime)
-{
+void
+Application::update(uint32_t deltaTime) {
   static_cast<void>(deltaTime); // unused
 }
 
-void Application::render()
-{
-}
+void
+Application::render() {}
 
-bool Application::isDone() const
-{
+bool
+Application::isDone() const {
   return _isDone;
 }

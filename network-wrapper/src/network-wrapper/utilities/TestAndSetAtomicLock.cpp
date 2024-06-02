@@ -3,13 +3,14 @@
 
 // https://rigtorp.se/spinlock/
 
-void TestAndSetAtomicLock::lock()
-{
-  while(lock_.exchange(true, std::memory_order_acquire));
+void
+TestAndSetAtomicLock::lock() {
+  while (lock_.exchange(true, std::memory_order_acquire))
+    ;
 }
 
-void TestAndSetAtomicLock::unlock()
-{
+void
+TestAndSetAtomicLock::unlock() {
   lock_.store(false, std::memory_order_release);
 }
 
@@ -17,15 +18,6 @@ void TestAndSetAtomicLock::unlock()
 //
 //
 
-ScopedAtomicLock::ScopedAtomicLock(TestAndSetAtomicLock& atomicLock)
-  : _atomicLock(atomicLock)
-{
-  _atomicLock.lock();
-}
+ScopedAtomicLock::ScopedAtomicLock(TestAndSetAtomicLock& atomicLock) : _atomicLock(atomicLock) { _atomicLock.lock(); }
 
-ScopedAtomicLock::~ScopedAtomicLock()
-{
-  _atomicLock.unlock();
-}
-
-
+ScopedAtomicLock::~ScopedAtomicLock() { _atomicLock.unlock(); }

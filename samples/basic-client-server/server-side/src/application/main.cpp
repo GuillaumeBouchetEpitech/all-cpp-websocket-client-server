@@ -12,7 +12,7 @@ std::string
 _buildWebSocketUrl(const std::string_view ipAddress, uint16_t port) {
   std::stringstream sstr;
   sstr << "{";
-  sstr << " \"host\": \"" << ipAddress  << "\",";
+  sstr << " \"host\": \"" << ipAddress << "\",";
   sstr << " \"port\": \"" << std::to_string(port) << "\"";
   sstr << " }";
   return sstr.str();

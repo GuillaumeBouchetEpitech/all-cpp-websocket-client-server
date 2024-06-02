@@ -21,27 +21,16 @@ WebSocketSession::SendBuffer::SendBuffer(const char* dataToSend, std::size_t dat
 
 // Take ownership of the socket
 WebSocketSession::WebSocketSession(
-  boost::asio::ip::tcp::socket&& socket,
-  bool useBoostStrands,
-  std::shared_ptr<net::strand<net::any_io_executor>> strand,
-  const ws_callbacks::OnConnection& onConnectionCallback,
-  const ws_callbacks::OnDisconnection& onDisconnectionCallback,
-  const ws_callbacks::OnMessage& onMessageCallback
-)
-: _ws(std::move(socket))
-, _strand(strand)
-, _useBoostStrands(useBoostStrands)
-, _onConnectionCallback(onConnectionCallback)
-, _onDisconnectionCallback(onDisconnectionCallback)
-, _onMessageCallback(onMessageCallback)
-{
+  boost::asio::ip::tcp::socket&& socket, bool useBoostStrands,
+  std::shared_ptr<net::strand<net::any_io_executor>> strand, const ws_callbacks::OnConnection& onConnectionCallback,
+  const ws_callbacks::OnDisconnection& onDisconnectionCallback, const ws_callbacks::OnMessage& onMessageCallback)
+  : _ws(std::move(socket)), _strand(strand), _useBoostStrands(useBoostStrands),
+    _onConnectionCallback(onConnectionCallback), _onDisconnectionCallback(onDisconnectionCallback),
+    _onMessageCallback(onMessageCallback) {
   // _strand = net::make_strand(_ws.get_executor());
 }
 
-WebSocketSession::~WebSocketSession()
-{
-  disconnect();
-}
+WebSocketSession::~WebSocketSession() { disconnect(); }
 
 // Get on the correct executor
 void
@@ -142,10 +131,7 @@ WebSocketSession::_doRead() {
   auto self = shared_from_this();
 
   // Read a message into our buffer
-  _ws.async_read(
-    _buffer,
-    beast::bind_front_handler(&WebSocketSession::_onRead, self)
-  );
+  _ws.async_read(_buffer, beast::bind_front_handler(&WebSocketSession::_onRead, self));
 }
 
 void
@@ -196,8 +182,7 @@ WebSocketSession::_onWrite(beast::error_code ec, std::size_t bytes_transferred) 
 }
 
 void
-WebSocketSession::_doWrite()
-{
+WebSocketSession::_doWrite() {
   const SendBuffer& buffer = _buffersToSend.front();
 
   _ws.async_write(
@@ -206,8 +191,7 @@ WebSocketSession::_doWrite()
 }
 
 void
-WebSocketSession::_failed(beast::error_code ec, char const* what)
-{
+WebSocketSession::_failed(beast::error_code ec, char const* what) {
   std::cerr << "WebSocketSession:failure \"" << what << "\": \"" << ec.message() << "\"" << std::endl;
   // if (_onErrorCallback) {
   //   _onErrorCallback(ec.message());

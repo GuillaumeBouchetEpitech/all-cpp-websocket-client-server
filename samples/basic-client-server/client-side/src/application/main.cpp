@@ -9,20 +9,18 @@
 #include <cstring> // memset, memcpy
 #include <iostream>
 
-
 #if defined D_NATIVE_BUILD
 
 #include "network-wrapper/websocket-client/AbstractWebSocketConnection.hpp"
 
 #include <thread>
 
-int main()
-{
+int
+main() {
   std::cout << "start" << std::endl;
 
   auto const host = "127.0.0.1";
   auto const port = "8888";
-
 
   Application* _myApplication = nullptr;
 
@@ -45,7 +43,6 @@ int main()
 
 #include <emscripten/emscripten.h>
 #include <emscripten/websocket.h>
-
 
 namespace {
 
@@ -92,7 +89,6 @@ renderApplication() {
 
   _myApplication->render();
 }
-
 }
 
 #endif

@@ -120,8 +120,7 @@ WebSocketConnection::sendBinary(const void* inData, std::size_t inSize) {
 }
 
 bool
-WebSocketConnection::isConnected() const
-{
+WebSocketConnection::isConnected() const {
   return _isConnected;
 }
 
@@ -154,7 +153,7 @@ WebSocketConnection::_emOnMessage(
 void
 WebSocketConnection::_onOpen(int eventType, const EmscriptenWebSocketOpenEvent* websocketEvent) {
 
-  static_cast<void>(eventType); // unused
+  static_cast<void>(eventType);      // unused
   static_cast<void>(websocketEvent); // unused
 
   _isConnected = true;
@@ -167,7 +166,7 @@ WebSocketConnection::_onOpen(int eventType, const EmscriptenWebSocketOpenEvent* 
 void
 WebSocketConnection::_onError(int eventType, const EmscriptenWebSocketErrorEvent* websocketEvent) {
 
-  static_cast<void>(eventType); // unused
+  static_cast<void>(eventType);      // unused
   static_cast<void>(websocketEvent); // unused
 
   _isConnected = false;

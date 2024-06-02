@@ -1,10 +1,9 @@
 
 #include "WebSocketConnection.hpp"
 
-
+#include <boost/asio/strand.hpp>
 #include <boost/beast/core.hpp>
 #include <boost/beast/websocket.hpp>
-#include <boost/asio/strand.hpp>
 #include <cstdlib>
 #include <functional>
 #include <memory>
@@ -34,14 +33,9 @@ WebSocketConnection::SendBuffer::SendBuffer(const char* dataToSend, std::size_t 
 
 // Resolver and socket require an io_context
 // explicit
-WebSocketConnection::WebSocketConnection()
-  : _ioc(1U)
-  , _resolver(net::make_strand(_ioc))
-  , _ws(net::make_strand(_ioc))
-{
+WebSocketConnection::WebSocketConnection() : _ioc(1U), _resolver(net::make_strand(_ioc)), _ws(net::make_strand(_ioc)) {
   _startThread();
 }
-
 
 WebSocketConnection::~WebSocketConnection() {
   disconnect();
@@ -72,41 +66,26 @@ WebSocketConnection::setOnMessageCallback(const OnMessageCallback& inOnMessageCa
   return *this;
 }
 
-
-
 // Start the asynchronous operation
 void
-WebSocketConnection::connect(
-  std::string_view ipAddress,
-  std::string_view port
-) {
+WebSocketConnection::connect(std::string_view ipAddress, std::string_view port) {
   disconnect();
 
   // Save these for later
   _ipAddress = ipAddress;
   _port = port;
 
-  _workerThread->execute([this]()
-  {
-    this->_ioc.run();
-  });
+  _workerThread->execute([this]() { this->_ioc.run(); });
 
   // connect() -> on_resolve() -> on_connect()
 
   // Look up the domain name
   _resolver.async_resolve(
-    _ipAddress,
-    _port,
-    beast::bind_front_handler(
-      &WebSocketConnection::on_resolve,
-      shared_from_this()));
+    _ipAddress, _port, beast::bind_front_handler(&WebSocketConnection::on_resolve, shared_from_this()));
 }
 
 void
-WebSocketConnection::on_resolve(
-  beast::error_code ec,
-  tcp::resolver::results_type results)
-{
+WebSocketConnection::on_resolve(beast::error_code ec, tcp::resolver::results_type results) {
   if (ec) {
     return _failed(ec, "resolve");
   }
@@ -116,17 +95,11 @@ WebSocketConnection::on_resolve(
 
   // Make the connection on the IP address we get from a lookup
   beast::get_lowest_layer(_ws).async_connect(
-    results,
-    beast::bind_front_handler(
-      &WebSocketConnection::on_connect,
-      shared_from_this()));
+    results, beast::bind_front_handler(&WebSocketConnection::on_connect, shared_from_this()));
 }
 
 void
-WebSocketConnection::on_connect(
-  beast::error_code ec,
-  tcp::resolver::results_type::endpoint_type
-) {
+WebSocketConnection::on_connect(beast::error_code ec, tcp::resolver::results_type::endpoint_type) {
   if (ec) {
     return _failed(ec, "connect");
   }
@@ -136,30 +109,21 @@ WebSocketConnection::on_connect(
   beast::get_lowest_layer(_ws).expires_never();
 
   // Set suggested timeout settings for the websocket
-  _ws.set_option(
-    websocket::stream_base::timeout::suggested(
-      beast::role_type::client));
+  _ws.set_option(websocket::stream_base::timeout::suggested(beast::role_type::client));
 
   // Set a decorator to change the User-Agent of the handshake
-  _ws.set_option(websocket::stream_base::decorator(
-    [](websocket::request_type& req)
-    {
-      req.set(http::field::user_agent,
-        std::string(BOOST_BEAST_VERSION_STRING) +
-          " websocket-client-async");
-    }));
+  _ws.set_option(websocket::stream_base::decorator([](websocket::request_type& req) {
+    req.set(http::field::user_agent, std::string(BOOST_BEAST_VERSION_STRING) + " websocket-client-async");
+  }));
 
   // Perform the websocket handshake
-  _ws.async_handshake(_ipAddress, "/",
-    beast::bind_front_handler(
-      &WebSocketConnection::on_handshake,
-      shared_from_this()));
+  _ws.async_handshake(
+    _ipAddress, "/", beast::bind_front_handler(&WebSocketConnection::on_handshake, shared_from_this()));
 }
 
 void
-WebSocketConnection::on_handshake(beast::error_code ec)
-{
-  if(ec) {
+WebSocketConnection::on_handshake(beast::error_code ec) {
+  if (ec) {
     return _failed(ec, "handshake");
   }
 
@@ -178,17 +142,11 @@ WebSocketConnection::_doRead() {
   auto self = shared_from_this();
 
   // Read a message into our buffer
-  _ws.async_read(
-    _readBuffer,
-    beast::bind_front_handler(
-      &WebSocketConnection::on_read,
-      shared_from_this())
-    );
+  _ws.async_read(_readBuffer, beast::bind_front_handler(&WebSocketConnection::on_read, shared_from_this()));
 }
 
 void
-WebSocketConnection::_failed(beast::error_code ec, char const* what)
-{
+WebSocketConnection::_failed(beast::error_code ec, char const* what) {
   std::cerr << "WebSocketConnection:failure \"" << what << "\": \"" << ec.message() << "\"" << std::endl;
   if (_onErrorCallback) {
     _onErrorCallback(ec.message());
@@ -201,8 +159,7 @@ WebSocketConnection::_failed(beast::error_code ec, char const* what)
 }
 
 void
-WebSocketConnection::_stop()
-{
+WebSocketConnection::_stop() {
   if (!_isConnected) {
     return;
   }
@@ -214,17 +171,14 @@ WebSocketConnection::_stop()
 }
 
 void
-WebSocketConnection::on_read(
-    beast::error_code ec,
-    std::size_t bytes_transferred)
-{
+WebSocketConnection::on_read(beast::error_code ec, std::size_t bytes_transferred) {
   static_cast<void>(bytes_transferred); // unused
 
   if (!_isConnected) {
     return;
   }
 
-  if(ec) {
+  if (ec) {
     _failed(ec, "read");
     return;
   }
@@ -244,13 +198,12 @@ WebSocketConnection::on_read(
   _doRead();
 }
 
-
-bool WebSocketConnection::sendUtf8Text(const char* inText)
-{
+bool
+WebSocketConnection::sendUtf8Text(const char* inText) {
   return sendBinary(reinterpret_cast<const void*>(inText), std::strlen(inText));
 }
-bool WebSocketConnection::sendBinary(const void* inData, std::size_t inSize)
-{
+bool
+WebSocketConnection::sendBinary(const void* inData, std::size_t inSize) {
   if (!_isConnected) {
     return false;
   }
@@ -267,8 +220,7 @@ bool WebSocketConnection::sendBinary(const void* inData, std::size_t inSize)
 }
 
 bool
-WebSocketConnection::isConnected() const
-{
+WebSocketConnection::isConnected() const {
   return _isConnected;
 }
 
@@ -309,13 +261,11 @@ WebSocketConnection::_onWrite(beast::error_code ec, std::size_t bytes_transferre
     if (_buffersToSend.empty() == false) {
       _doWrite();
     }
-
   }
 }
 
 void
-WebSocketConnection::_doWrite()
-{
+WebSocketConnection::_doWrite() {
   const SendBuffer& buffer = _buffersToSend.front();
 
   _ws.async_write(
@@ -335,18 +285,13 @@ WebSocketConnection::_doWrite()
 //   std::cout << beast::make_printable(_readBuffer.data()) << std::endl;
 // }
 
-
-
-void WebSocketConnection::_startThread()
-{
+void
+WebSocketConnection::_startThread() {
   _workerThread = AbstractWorkerThread::create();
 }
 
-void WebSocketConnection::_stopThread()
-{
+void
+WebSocketConnection::_stopThread() {
   _workerThread->quit();
   _workerThread.reset(nullptr);
 }
-
-
-

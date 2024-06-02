@@ -3,9 +3,7 @@
 
 #include <chrono> // std::chrono::milliseconds
 
-WorkerThread::WorkerThread(bool inAvoidBlocking)
-  : _avoidBlocking(inAvoidBlocking)
-{
+WorkerThread::WorkerThread(bool inAvoidBlocking) : _avoidBlocking(inAvoidBlocking) {
 
   if (_avoidBlocking == false) {
     auto setupLock = _setupSynchronizer.makeScopedLock();
@@ -41,7 +39,8 @@ WorkerThread::~WorkerThread() { quit(); }
 //
 //
 
-void WorkerThread::execute(const AbstractWorkerThread::WorkCallback& inWorkCallback) {
+void
+WorkerThread::execute(const AbstractWorkerThread::WorkCallback& inWorkCallback) {
   auto lockNotifier = _taskSynchronizer.makeScopedLockNotifier();
 
   // this part is locked and will notify at the end of the scope
@@ -49,7 +48,8 @@ void WorkerThread::execute(const AbstractWorkerThread::WorkCallback& inWorkCallb
   _workCallback = inWorkCallback;
 }
 
-void WorkerThread::quit() {
+void
+WorkerThread::quit() {
   if (!_isRunning)
     return;
 
@@ -69,14 +69,21 @@ void WorkerThread::quit() {
 //
 //
 
-bool WorkerThread::isRunning() const { return _isRunning; }
+bool
+WorkerThread::isRunning() const {
+  return _isRunning;
+}
 
-bool WorkerThread::isAvailable() const { return !_taskSynchronizer.isNotified(); }
+bool
+WorkerThread::isAvailable() const {
+  return !_taskSynchronizer.isNotified();
+}
 
 //
 //
 
-void WorkerThread::_threadedMethod() {
+void
+WorkerThread::_threadedMethod() {
 
   auto taskLock = _taskSynchronizer.makeScopedLock();
 
