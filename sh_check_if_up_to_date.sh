@@ -20,7 +20,7 @@ get_latest_mtime_of_folder() {
 
     # echo "##############"
 
-    ALL_FILES=$(find $INPUT -printf '%T@  %TY-%Tm-%Td %TH-%TM  %p\n')
+    ALL_FILES=$(find "$INPUT" -printf '%T@  %TY-%Tm-%Td %TH-%TM  %p\n')
     # echo "$ALL_FILES"
 
     # echo "##############"
@@ -49,7 +49,7 @@ get_latest_mtime_of_folder "$SRC_PATH" "outdated" return_src
 
 DIFF=$(echo "$return_dst - $return_src" | bc)
 
-if [ $DIFF -lt 0 ]
+if [ "$DIFF" -lt 0 ]
 then
 
     # echo "SRC is newer than DST, should build"
