@@ -27,7 +27,6 @@ WebSocketSession::WebSocketSession(
   : _ws(std::move(socket)), _strand(strand), _useBoostStrands(useBoostStrands),
     _onConnectionCallback(onConnectionCallback), _onDisconnectionCallback(onDisconnectionCallback),
     _onMessageCallback(onMessageCallback) {
-  // _strand = net::make_strand(_ws.get_executor());
 }
 
 WebSocketSession::~WebSocketSession() { disconnect(); }

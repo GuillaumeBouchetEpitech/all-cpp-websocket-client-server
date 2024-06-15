@@ -7,10 +7,16 @@
 #include <iostream>
 #include <sstream>
 
-WebSocketMainLogicServer::WebSocketMainLogicServer(const std::string& ipAddress, uint16_t port, uint32_t totalThreads) {
+
+WebSocketMainLogicServer::WebSocketMainLogicServer(
+  const std::string& ipAddress,
+  uint16_t port, uint32_t totalThreads, bool useStrands
+)
+  : _sessionManager(totalThreads > 1 && useStrands == false) // is locking?
+{
   _allPlayersData.reserve(1024);
 
-  _webSocketServer = AbstractWebSocketServer::create(ipAddress, port, totalThreads);
+  _webSocketServer = AbstractWebSocketServer::create(ipAddress, port, totalThreads, useStrands);
   _webSocketServer->setOnConnectionCallback([this](std::shared_ptr<IWebSocketSession> newWsSession) {
     std::cout << "[WS] new client" << std::endl;
 

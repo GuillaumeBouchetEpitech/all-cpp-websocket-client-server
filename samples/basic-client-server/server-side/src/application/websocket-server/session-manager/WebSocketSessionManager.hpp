@@ -17,8 +17,10 @@ private:
 
   mutable std::shared_mutex _mutex;
 
+  bool _isLocking;
+
 public:
-  WebSocketSessionManager();
+  WebSocketSessionManager(bool isLocking);
   WebSocketSessionManager(const WebSocketSessionManager& other) = delete;
   WebSocketSessionManager(WebSocketSessionManager&& other) = delete;
   WebSocketSessionManager& operator=(const WebSocketSessionManager& other) = delete;
