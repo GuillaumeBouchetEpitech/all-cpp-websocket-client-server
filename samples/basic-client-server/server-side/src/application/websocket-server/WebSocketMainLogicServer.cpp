@@ -7,11 +7,8 @@
 #include <iostream>
 #include <sstream>
 
-
 WebSocketMainLogicServer::WebSocketMainLogicServer(
-  const std::string& ipAddress,
-  uint16_t port, uint32_t totalThreads, bool useStrands
-)
+  const std::string& ipAddress, uint16_t port, uint32_t totalThreads, bool useStrands)
   : _sessionManager(totalThreads > 1 && useStrands == false) // is locking?
 {
   _allPlayersData.reserve(1024);

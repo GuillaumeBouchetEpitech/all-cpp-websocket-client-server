@@ -5,11 +5,7 @@
 
 #include <mutex>
 
-WebSocketSessionManager::WebSocketSessionManager(bool isLocking)
-  : _isLocking(isLocking)
-{
-  _allSessions.reserve(1024);
-}
+WebSocketSessionManager::WebSocketSessionManager(bool isLocking) : _isLocking(isLocking) { _allSessions.reserve(1024); }
 
 void
 WebSocketSessionManager::addSession(SessionPtr wsSession) {
@@ -24,7 +20,6 @@ WebSocketSessionManager::addSession(SessionPtr wsSession) {
   } else {
 
     _allSessions.push_back(wsSession);
-
   }
 }
 
@@ -47,7 +42,6 @@ WebSocketSessionManager::removeSession(SessionPtr wsSession) {
     if (!wasRemoved) {
       throw std::runtime_error("websocket session to remove was not found");
     }
-
   }
 }
 
@@ -68,7 +62,6 @@ WebSocketSessionManager::forEachSession(const std::function<void(SessionPtr)>& c
     for (std::size_t index = 0; index < _allSessions.size(); ++index) {
       callback(_allSessions[index]);
     }
-
   }
 }
 
@@ -89,6 +82,5 @@ WebSocketSessionManager::forEachSession(const std::function<void(SessionPtr)>& c
     for (std::size_t index = 0; index < _allSessions.size(); ++index) {
       callback(_allSessions[index]);
     }
-
   }
 }
