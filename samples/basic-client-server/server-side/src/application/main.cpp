@@ -43,8 +43,10 @@ main(int argc, char* argv[]) {
   std::cout << "  http-threads: \"" << argv[4] << "\"" << std::endl;
   std::cout << "  ws-threads:   \"" << argv[5] << "\"" << std::endl;
 
+  constexpr bool useStrands = true;
+
   HttpFileServer httpFileServer("./files", ipAddress, httpPort, httpThreads);
-  WebSocketMainLogicServer webSocketServer(ipAddress, wsPort, wsThreads);
+  WebSocketMainLogicServer webSocketServer(ipAddress, wsPort, wsThreads, useStrands);
 
   //
   // handle web socket config route
