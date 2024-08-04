@@ -25,6 +25,7 @@ public:
   void stop();
 
 private:
+  void _onNewConnection(const http_callbacks::request& request, http_callbacks::response& response);
   void _onGetRequest(const http_callbacks::request& request, http_callbacks::response& response);
 
   static bool _isGzipCompressionPossible(const FileCacheEntry& cache, const http_callbacks::request& request);

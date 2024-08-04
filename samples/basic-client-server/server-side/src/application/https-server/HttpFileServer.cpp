@@ -18,28 +18,11 @@ HttpFileServer::~HttpFileServer() { _httpServer->stop(); }
 
 void
 HttpFileServer::start() {
-  _httpServer->setOnConnectionCallback(
-    [this](const http_callbacks::request& request, http_callbacks::response& response) {
-      response.version(request.version());
-      response.keep_alive(false);
 
-      switch (request.method()) {
-      case boost::beast::http::verb::get: {
-        _onGetRequest(request, response);
-        break;
-      }
+  // feels easier to follow than directly using lambdas
+  auto onNewConnection = std::bind(&HttpFileServer::_onNewConnection, this, std::placeholders::_1, std::placeholders::_2);
 
-      default: {
-        // We return responses indicating an error if
-        // we do not recognize the request method.
-        response.result(boost::beast::http::status::bad_request);
-        response.set(boost::beast::http::field::content_type, "text/plain");
-        boost::beast::ostream(response.body())
-          << "Invalid request-method '" << std::string(request.method_string()) << "'";
-        break;
-      }
-      }
-    });
+  _httpServer->setOnConnectionCallback(onNewConnection);
 
   _httpServer->start();
 }
@@ -52,6 +35,30 @@ HttpFileServer::stop() {
 void
 HttpFileServer::setCustomHandler(const CustomHandler& handler) {
   _customHandler = handler;
+}
+
+void
+HttpFileServer::_onNewConnection(const http_callbacks::request& request, http_callbacks::response& response)
+{
+  response.version(request.version());
+  response.keep_alive(false);
+
+  switch (request.method()) {
+    case boost::beast::http::verb::get: {
+      _onGetRequest(request, response);
+      break;
+    }
+
+    default: {
+      // We return responses indicating an error if
+      // we do not recognize the request method.
+      response.result(boost::beast::http::status::bad_request);
+      response.set(boost::beast::http::field::content_type, "text/plain");
+      boost::beast::ostream(response.body())
+        << "Invalid request-method '" << std::string(request.method_string()) << "'";
+      break;
+    }
+  }
 }
 
 void

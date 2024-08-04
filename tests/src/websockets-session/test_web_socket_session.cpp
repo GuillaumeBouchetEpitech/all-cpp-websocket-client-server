@@ -80,23 +80,23 @@ _runServer(uint32_t totalMsg = 10000U, const uint32_t totalThreads = 4, const bo
   //
   //
 
-  std::shared_ptr<AbstractWebSocketConnection> _webSocket = AbstractWebSocketConnection::create();
+  std::shared_ptr<AbstractWebSocketConnection> _webSocketClient = AbstractWebSocketConnection::create();
 
-  _webSocket->setOnOpenCallback([&_webSocket]() {
+  _webSocketClient->setOnOpenCallback([&_webSocketClient]() {
     // std::cout << "[CLIENT] connected" << std::endl;
   });
 
-  _webSocket->setOnErrorCallback([](std::string_view message) {
+  _webSocketClient->setOnErrorCallback([](std::string_view message) {
     std::cerr << "[CLIENT] error" << std::endl;
     std::cerr << "[CLIENT]   reason (size=" << message.size() << ") \"" << message << " \"" << std::endl;
   });
 
-  _webSocket->setOnCloseCallback([](std::string_view reason) {
+  _webSocketClient->setOnCloseCallback([](std::string_view reason) {
     std::cout << "[CLIENT] disconnected" << std::endl;
     std::cout << "[CLIENT]   reason (size=" << reason.size() << ") \"" << reason << " \"" << std::endl;
   });
 
-  _webSocket->setOnMessageCallback(
+  _webSocketClient->setOnMessageCallback(
     [useStrands, &_clientMutex, &clientReceived](const uint32_t sizeReceived, const uint8_t* dataReceived) {
       // std::cout << "[CLIENT] new message -> " << std::string_view(reinterpret_cast<const char*>(dataReceived),
       // sizeReceived) << std::endl;
@@ -131,19 +131,19 @@ _runServer(uint32_t totalMsg = 10000U, const uint32_t totalThreads = 4, const bo
 
   std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
-  ASSERT_EQ(_webSocket->isConnected(), false);
+  ASSERT_EQ(_webSocketClient->isConnected(), false);
 
-  _webSocket->connect(ipAddress, portStr);
+  _webSocketClient->connect(ipAddress, portStr);
 
   std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
-  ASSERT_EQ(_webSocket->isConnected(), true);
+  ASSERT_EQ(_webSocketClient->isConnected(), true);
 
   serverReceived.reserve(totalMsg); // pre-allocate
   clientReceived.reserve(totalMsg); // pre-allocate
 
   for (uint32_t ii = 0; ii < totalMsg; ++ii) {
-    _webSocket->sendUtf8Text("ping!");
+    _webSocketClient->sendUtf8Text("ping!");
   }
 
   for (int32_t ii = 0; ii < 10; ++ii) {
@@ -176,7 +176,7 @@ _runServer(uint32_t totalMsg = 10000U, const uint32_t totalThreads = 4, const bo
   }
 
   std::cerr << "webSocket->disconnect()" << std::endl;
-  _webSocket->disconnect();
+  _webSocketClient->disconnect();
   std::this_thread::sleep_for(std::chrono::milliseconds(100));
   std::cerr << " -> DONE" << std::endl;
 

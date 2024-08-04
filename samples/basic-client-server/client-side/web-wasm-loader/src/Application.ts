@@ -2,12 +2,38 @@ import Logger from './Logger';
 import { scriptLoadingUtility } from './helpers/index';
 import { isWasmSupported, isWebSocketSupported } from './environment/index';
 
+//
+//
+//
+
+interface IModuleArgs {
+  locateFile: (url: string) => string;
+  print: (text: string) => void;
+  printErr: (text: string) => void;
+  setStatus: (text: string) => void;
+  onRuntimeInitialized: () => void;
+  noInitialRun: boolean;
+  noExitRuntime: boolean;
+}
+
+interface IMyModule extends IModuleArgs {
+  cwrap: (name: string, returnVal: string | undefined, args: string[]) => any;
+  allocateUTF8: (value: string) => number;
+  _free: (value: number) => void;
+}
+
+declare function clientWeb(args: IModuleArgs): Promise<IMyModule>
+
+//
+//
+//
+
 export class Application {
   private _isInitialized: boolean = false;
   private _isAborted: boolean = false;
   private _onProgress: (percent: number) => void;
 
-  private _module: any;
+  private _module: IMyModule;
 
   private _wasmApplicationStartFunc: (inHostStrPtr: number, inPortStrPtr: number) => void;
 
@@ -52,7 +78,7 @@ export class Application {
     const downloadingDataRegExp = /Downloading data\.\.\. \(([0-9]*)\/([0-9]*)\)/;
     let lastProgressLevel = 0;
 
-    const moduleArgs = {
+    const moduleArgs: IModuleArgs = {
       locateFile: (url: string) => `${wasmFolder}/${url}`,
       print: (text: string) => {
         inLogger.log(`[C++][out] ${text}`);
@@ -91,7 +117,7 @@ export class Application {
       noExitRuntime: true
     };
 
-    // @ts-ignore
+    // "clientWeb" -> from the wasm module, defined in the Makefile
     this._module = await clientWeb(moduleArgs);
 
     const loadStopTime = Date.now();
@@ -143,13 +169,17 @@ export class Application {
   }
 
   abort(): void {
-    if (!this._isInitialized || this._isAborted) return;
+    if (!this._isInitialized || this._isAborted) {
+      return;
+    }
 
     this._isAborted = true;
     const currModule = this._module;
     if (currModule) {
       currModule.setStatus = (text: string) => {
-        if (text) console.error(`[JS][wasm][aborted] ${text}`);
+        if (text) {
+          console.error(`[JS][wasm][aborted] ${text}`);
+        }
       };
     }
   }

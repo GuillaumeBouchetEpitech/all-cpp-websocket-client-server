@@ -29,4 +29,10 @@ public:
 public:
   void start();
   void stop();
+
+private:
+  void _onNewClient(std::shared_ptr<IWebSocketSession> newWsSession);
+  void _onNewMessage(std::shared_ptr<IWebSocketSession> wsSession, const char* dataPtr, std::size_t dataLength);
+  void _onLostClient(std::shared_ptr<IWebSocketSession> disconnectedWsSession);
+
 };
