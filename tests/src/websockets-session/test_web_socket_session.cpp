@@ -40,9 +40,10 @@ _runServer(uint32_t totalMsg = 10000U, const uint32_t totalThreads = 4, const bo
   });
 
   _webSocketServer->setOnMessageCallback(
-    [useStrands, &_serverMutex,
-     &serverReceived](std::shared_ptr<IWebSocketSession> wsSession, const char* dataPtr, std::size_t dataLength) {
-      // std::cout << "[SERVER] client messaged -> " << std::string_view(dataPtr, dataLength) << std::endl;
+    [useStrands, &_serverMutex, &serverReceived](
+      std::shared_ptr<IWebSocketSession> wsSession, const char* dataPtr, std::size_t dataLength) {
+      // std::cout << "[SERVER] client messaged -> " <<
+      // std::string_view(dataPtr, dataLength) << std::endl;
 
       std::string_view messageToSend = "pong!";
 
@@ -98,7 +99,8 @@ _runServer(uint32_t totalMsg = 10000U, const uint32_t totalThreads = 4, const bo
 
   _webSocketClient->setOnMessageCallback(
     [useStrands, &_clientMutex, &clientReceived](const uint32_t sizeReceived, const uint8_t* dataReceived) {
-      // std::cout << "[CLIENT] new message -> " << std::string_view(reinterpret_cast<const char*>(dataReceived),
+      // std::cout << "[CLIENT] new message -> " <<
+      // std::string_view(reinterpret_cast<const char*>(dataReceived),
       // sizeReceived) << std::endl;
 
       if (useStrands) {

@@ -6,8 +6,10 @@
 #include "boostHeaders.hpp"
 
 WebSocketServer::WebSocketServer(
-  const std::string& ipAddress, uint16_t port, uint32_t totalThreads, /*= 1*/
-  bool useStrands                                                     /*= false*/
+  const std::string& ipAddress,
+  uint16_t port,
+  uint32_t totalThreads, /*= 1*/
+  bool useStrands        /*= false*/
   )
   : _ioc(totalThreads), _sharedStrand(std::make_shared<net::strand<net::any_io_executor>>(net::make_strand(_ioc))),
     _totalThreads(totalThreads), _useStrands(useStrands) {
@@ -56,7 +58,11 @@ WebSocketServer::start() {
     //    the session will not be deleted when going out of scope here...
     //    ...if anything it's just a bit misleading, hence that comment
     auto newSession = std::make_shared<WebSocketSession>(
-      std::move(newSocket), useBoostStrands, _sharedStrand, _onConnectionCallback, _onDisconnectionCallback,
+      std::move(newSocket),
+      useBoostStrands,
+      _sharedStrand,
+      _onConnectionCallback,
+      _onDisconnectionCallback,
       _onMessageCallback);
 
     newSession->run();

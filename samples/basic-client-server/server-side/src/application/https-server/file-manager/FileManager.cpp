@@ -168,7 +168,9 @@ FileManager::_loadFile(const std::string& filename, const std::string& requestPa
 
 void
 FileManager::_getLastModifiedTime(
-  const std::string_view& filename, const std::string_view& format, std::string& outLastModified) {
+  const std::string_view& filename,
+  const std::string_view& format,
+  std::string& outLastModified) {
   fs::file_time_type file_time = fs::last_write_time(filename);
 
   auto sctp = std::chrono::time_point_cast<std::chrono::system_clock::duration>(

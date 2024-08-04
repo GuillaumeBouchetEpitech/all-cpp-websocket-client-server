@@ -8,7 +8,10 @@
 #include <sstream>
 
 WebSocketMainLogicServer::WebSocketMainLogicServer(
-  const std::string& ipAddress, uint16_t port, uint32_t totalThreads, bool useStrands)
+  const std::string& ipAddress,
+  uint16_t port,
+  uint32_t totalThreads,
+  bool useStrands)
   : _sessionManager(totalThreads > 1 && useStrands == false) // is locking?
 {
   _allPlayersData.reserve(1024);
@@ -17,7 +20,12 @@ WebSocketMainLogicServer::WebSocketMainLogicServer(
 
   // feels easier to follow than directly using lambdas
   auto onNewClient = std::bind(&WebSocketMainLogicServer::_onNewClient, this, std::placeholders::_1);
-  auto onNewMessage = std::bind(&WebSocketMainLogicServer::_onNewMessage, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
+  auto onNewMessage = std::bind(
+    &WebSocketMainLogicServer::_onNewMessage,
+    this,
+    std::placeholders::_1,
+    std::placeholders::_2,
+    std::placeholders::_3);
   auto onLostClient = std::bind(&WebSocketMainLogicServer::_onLostClient, this, std::placeholders::_1);
 
   _webSocketServer->setOnConnectionCallback(onNewClient);
@@ -41,8 +49,8 @@ WebSocketMainLogicServer::stop() {
 //
 //
 
-void WebSocketMainLogicServer::_onNewClient(std::shared_ptr<IWebSocketSession> newWsSession)
-{
+void
+WebSocketMainLogicServer::_onNewClient(std::shared_ptr<IWebSocketSession> newWsSession) {
   std::cout << "[WS] new client" << std::endl;
 
   //
@@ -88,8 +96,11 @@ void WebSocketMainLogicServer::_onNewClient(std::shared_ptr<IWebSocketSession> n
 //
 //
 
-void WebSocketMainLogicServer::_onNewMessage(std::shared_ptr<IWebSocketSession> wsSession, const char* dataPtr, std::size_t dataLength)
-{
+void
+WebSocketMainLogicServer::_onNewMessage(
+  std::shared_ptr<IWebSocketSession> wsSession,
+  const char* dataPtr,
+  std::size_t dataLength) {
   std::string_view messageReceived(dataPtr, dataLength);
 
   const PlayerData* currPlayerData = static_cast<PlayerData*>(wsSession->userData);
@@ -132,8 +143,8 @@ void WebSocketMainLogicServer::_onNewMessage(std::shared_ptr<IWebSocketSession> 
 //
 //
 
-void WebSocketMainLogicServer::_onLostClient(std::shared_ptr<IWebSocketSession> disconnectedWsSession)
-{
+void
+WebSocketMainLogicServer::_onLostClient(std::shared_ptr<IWebSocketSession> disconnectedWsSession) {
   std::cout << "[WS] client disconnected" << std::endl;
 
   PlayerData* currPlayerData = static_cast<PlayerData*>(disconnectedWsSession->userData);
@@ -150,9 +161,8 @@ void WebSocketMainLogicServer::_onLostClient(std::shared_ptr<IWebSocketSession> 
   // remove data of the disconnected player
 
   stdVectorNoReallocEraseByCallback<std::shared_ptr<PlayerData>>(
-    _allPlayersData, [currPlayerData](const std::shared_ptr<PlayerData>& currData) -> bool {
-      return currData.get() == currPlayerData;
-    });
+    _allPlayersData,
+    [currPlayerData](const std::shared_ptr<PlayerData>& currData) -> bool { return currData.get() == currPlayerData; });
 
   //
   //

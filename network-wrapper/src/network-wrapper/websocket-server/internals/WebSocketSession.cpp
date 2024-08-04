@@ -21,9 +21,12 @@ WebSocketSession::SendBuffer::SendBuffer(const char* dataToSend, std::size_t dat
 
 // Take ownership of the socket
 WebSocketSession::WebSocketSession(
-  boost::asio::ip::tcp::socket&& socket, bool useBoostStrands,
-  std::shared_ptr<net::strand<net::any_io_executor>> strand, const ws_callbacks::OnConnection& onConnectionCallback,
-  const ws_callbacks::OnDisconnection& onDisconnectionCallback, const ws_callbacks::OnMessage& onMessageCallback)
+  boost::asio::ip::tcp::socket&& socket,
+  bool useBoostStrands,
+  std::shared_ptr<net::strand<net::any_io_executor>> strand,
+  const ws_callbacks::OnConnection& onConnectionCallback,
+  const ws_callbacks::OnDisconnection& onDisconnectionCallback,
+  const ws_callbacks::OnMessage& onMessageCallback)
   : _ws(std::move(socket)), _strand(strand), _useBoostStrands(useBoostStrands),
     _onConnectionCallback(onConnectionCallback), _onDisconnectionCallback(onDisconnectionCallback),
     _onMessageCallback(onMessageCallback) {}

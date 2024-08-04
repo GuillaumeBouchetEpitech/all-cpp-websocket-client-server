@@ -9,7 +9,10 @@
 #include <iostream>
 
 HttpFileServer::HttpFileServer(
-  const std::string& basePath, const std::string& ipAddress, uint16_t httpPort, uint32_t totalThreads)
+  const std::string& basePath,
+  const std::string& ipAddress,
+  uint16_t httpPort,
+  uint32_t totalThreads)
   : _fileManager(basePath) {
   _httpServer = AbstractHttpServer::create(ipAddress, httpPort, totalThreads);
 }
@@ -20,7 +23,8 @@ void
 HttpFileServer::start() {
 
   // feels easier to follow than directly using lambdas
-  auto onNewConnection = std::bind(&HttpFileServer::_onNewConnection, this, std::placeholders::_1, std::placeholders::_2);
+  auto onNewConnection =
+    std::bind(&HttpFileServer::_onNewConnection, this, std::placeholders::_1, std::placeholders::_2);
 
   _httpServer->setOnConnectionCallback(onNewConnection);
 
@@ -38,26 +42,24 @@ HttpFileServer::setCustomHandler(const CustomHandler& handler) {
 }
 
 void
-HttpFileServer::_onNewConnection(const http_callbacks::request& request, http_callbacks::response& response)
-{
+HttpFileServer::_onNewConnection(const http_callbacks::request& request, http_callbacks::response& response) {
   response.version(request.version());
   response.keep_alive(false);
 
   switch (request.method()) {
-    case boost::beast::http::verb::get: {
-      _onGetRequest(request, response);
-      break;
-    }
+  case boost::beast::http::verb::get: {
+    _onGetRequest(request, response);
+    break;
+  }
 
-    default: {
-      // We return responses indicating an error if
-      // we do not recognize the request method.
-      response.result(boost::beast::http::status::bad_request);
-      response.set(boost::beast::http::field::content_type, "text/plain");
-      boost::beast::ostream(response.body())
-        << "Invalid request-method '" << std::string(request.method_string()) << "'";
-      break;
-    }
+  default: {
+    // We return responses indicating an error if
+    // we do not recognize the request method.
+    response.result(boost::beast::http::status::bad_request);
+    response.set(boost::beast::http::field::content_type, "text/plain");
+    boost::beast::ostream(response.body()) << "Invalid request-method '" << std::string(request.method_string()) << "'";
+    break;
+  }
   }
 }
 

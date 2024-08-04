@@ -144,7 +144,9 @@ WebSocketConnection::_emOnClose(int eventType, const EmscriptenWebSocketCloseEve
 }
 EM_BOOL
 WebSocketConnection::_emOnMessage(
-  int eventType, const EmscriptenWebSocketMessageEvent* websocketEvent, void* userData) {
+  int eventType,
+  const EmscriptenWebSocketMessageEvent* websocketEvent,
+  void* userData) {
   WebSocketConnection* self = static_cast<WebSocketConnection*>(userData);
   self->_onMessage(eventType, websocketEvent);
   return EM_TRUE;

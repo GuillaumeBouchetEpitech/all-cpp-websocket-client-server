@@ -55,18 +55,18 @@ main(int argc, char* argv[]) {
   const std::string_view webSocketConfigPath = "/web-socket-config.json";
   const std::string webSocketConfigPayload = _buildWebSocketUrl(ipAddress, wsPort);
 
-  auto customHandler = [&webSocketConfigPath, &webSocketConfigPayload](
-                         const std::string& path, const http_callbacks::request& request,
-                         http_callbacks::response& response) {
-    static_cast<void>(request); // unused
+  auto customHandler =
+    [&webSocketConfigPath, &webSocketConfigPayload](
+      const std::string& path, const http_callbacks::request& request, http_callbacks::response& response) {
+      static_cast<void>(request); // unused
 
-    if (path == webSocketConfigPath) {
-      response.set(boost::beast::http::field::content_type, "application/json");
-      boost::beast::ostream(response.body()) << webSocketConfigPayload;
-      return true;
-    }
-    return false;
-  };
+      if (path == webSocketConfigPath) {
+        response.set(boost::beast::http::field::content_type, "application/json");
+        boost::beast::ostream(response.body()) << webSocketConfigPayload;
+        return true;
+      }
+      return false;
+    };
   httpFileServer.setCustomHandler(customHandler);
 
   //
