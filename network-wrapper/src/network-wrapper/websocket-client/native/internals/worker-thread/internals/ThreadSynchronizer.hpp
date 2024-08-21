@@ -40,8 +40,8 @@ public:
   void notify();
 
 public:
-  std::unique_lock<std::mutex> makeScopedLock();
-  ScopedLockedNotifier makeScopedLockNotifier();
-  bool isNotified() const;
+  [[nodiscard]] std::unique_lock<std::mutex> makeScopedLock();
+  [[nodiscard]] ScopedLockedNotifier makeScopedLockNotifier();
+  [[nodiscard]] bool isNotified() const;
 };
 

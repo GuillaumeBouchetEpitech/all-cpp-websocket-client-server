@@ -34,8 +34,8 @@ public:
   void quit() override;
 
 public:
-  bool isRunning() const override;
-  bool isAvailable() const override;
+  [[nodiscard]] bool isRunning() const override;
+  [[nodiscard]] bool isAvailable() const override;
 
 private:
   void _threadedMethod();

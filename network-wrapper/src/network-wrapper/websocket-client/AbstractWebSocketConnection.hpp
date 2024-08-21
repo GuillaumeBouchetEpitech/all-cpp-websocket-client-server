@@ -41,10 +41,10 @@ public:
   virtual bool sendBinary(const void* inData, std::size_t inSize) = 0;
 
 public:
-  virtual bool isConnected() const = 0;
+  [[nodiscard]] virtual bool isConnected() const = 0;
 
 public:
-  static std::shared_ptr<AbstractWebSocketConnection> create();
+  [[nodiscard]] static std::shared_ptr<AbstractWebSocketConnection> create();
 
 };
 

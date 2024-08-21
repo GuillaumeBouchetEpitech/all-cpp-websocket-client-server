@@ -23,8 +23,8 @@ public:
   virtual void quit() = 0;
 
 public:
-  virtual bool isRunning() const = 0;
-  virtual bool isAvailable() const = 0;
+  [[nodiscard]] virtual bool isRunning() const = 0;
+  [[nodiscard]] virtual bool isAvailable() const = 0;
 
 public:
   static std::unique_ptr<AbstractWorkerThread> create();

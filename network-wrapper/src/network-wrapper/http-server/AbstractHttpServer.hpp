@@ -25,6 +25,6 @@ public:
   virtual void stop() = 0;
 
 public:
-  static std::shared_ptr<AbstractHttpServer>
+  [[nodiscard]] static std::shared_ptr<AbstractHttpServer>
   create(const std::string& ipAddress, uint16_t port, uint32_t totalThreads = 1);
 };

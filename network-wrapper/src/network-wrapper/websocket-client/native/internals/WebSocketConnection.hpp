@@ -93,7 +93,7 @@ public:
   bool sendBinary(const void* inData, std::size_t inSize) override;
 
 public:
-  bool isConnected() const override;
+  [[nodiscard]] bool isConnected() const override;
 
 private:
   void _onWrite(beast::error_code ec, std::size_t bytes_transferred);

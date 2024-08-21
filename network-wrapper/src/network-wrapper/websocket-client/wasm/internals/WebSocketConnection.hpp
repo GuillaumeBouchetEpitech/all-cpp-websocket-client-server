@@ -47,7 +47,7 @@ public:
   bool sendBinary(const void* inData, std::size_t inSize) override;
 
 public:
-  bool isConnected() const override;
+  [[nodiscard]] bool isConnected() const override;
 
 private:
   static EM_BOOL _emOnOpen(int eventType, const EmscriptenWebSocketOpenEvent* websocketEvent, void* userData);
