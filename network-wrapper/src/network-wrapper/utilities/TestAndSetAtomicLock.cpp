@@ -5,6 +5,7 @@
 
 void
 TestAndSetAtomicLock::lock() {
+  // spin lock
   while (lock_.exchange(true, std::memory_order_acquire))
     ;
 }

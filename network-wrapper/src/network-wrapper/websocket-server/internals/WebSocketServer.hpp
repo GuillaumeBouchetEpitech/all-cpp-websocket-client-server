@@ -47,7 +47,5 @@ private:
   std::shared_ptr<AbstractTcpListener> _mainTcpListener;
   std::vector<std::thread> _allThreads;
 
-  ws_callbacks::OnConnection _onConnectionCallback;
-  ws_callbacks::OnDisconnection _onDisconnectionCallback;
-  ws_callbacks::OnMessage _onMessageCallback;
+  ws_callbacks::AllCallbacks _allCallbacks;
 };

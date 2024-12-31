@@ -18,8 +18,8 @@ namespace {
 void
 _runServer(uint32_t totalMsg = 10000U, const uint32_t totalThreads = 4, const bool useStrands = true) {
 
-  const std::string& ipAddress = "127.0.0.1";
-  const uint16_t port = 18000;
+  const std::string ipAddress = "127.0.0.1";
+  constexpr uint16_t port = 18000;
   const std::string portStr = std::to_string(port);
 
   std::mutex _serverMutex;
@@ -200,27 +200,27 @@ _runServer(uint32_t totalMsg = 10000U, const uint32_t totalThreads = 4, const bo
 
 TEST(web_socket_session, simple_session_10000_ping_pong_messages_1_thread) {
 
-  const uint32_t totalMsg = 10000;
-  const uint32_t totalThreads = 1;
-  const bool useStrands = true; // will be ignored internally
+  constexpr uint32_t totalMsg = 10000;
+  constexpr uint32_t totalThreads = 1;
+  constexpr bool useStrands = true; // will be ignored -> only 1 thread
 
   _runServer(totalMsg, totalThreads, useStrands);
 }
 
 TEST(web_socket_session, simple_session_10000_ping_pong_messages_4_thread_strand_used) {
 
-  const uint32_t totalMsg = 10000;
-  const uint32_t totalThreads = 4;
-  const bool useStrands = true;
+  constexpr uint32_t totalMsg = 10000;
+  constexpr uint32_t totalThreads = 4;
+  constexpr bool useStrands = true; // useful -> 4 threads this time
 
   _runServer(totalMsg, totalThreads, useStrands);
 }
 
 TEST(web_socket_session, simple_session_10000_ping_pong_messages_4_thread_strand_not_used) {
 
-  const uint32_t totalMsg = 10000;
-  const uint32_t totalThreads = 4;
-  const bool useStrands = false;
+  constexpr uint32_t totalMsg = 10000;
+  constexpr uint32_t totalThreads = 4;
+  constexpr bool useStrands = false; // must lock manually -> 4  threads
 
   _runServer(totalMsg, totalThreads, useStrands);
 }

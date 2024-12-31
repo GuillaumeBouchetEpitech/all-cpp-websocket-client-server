@@ -86,8 +86,11 @@ main(int argc, char* argv[]) {
   //
   // loop forever...
   // that could be where a shell would be setup...
-  // ...or anything else allowing any kind of user input(s) (admin commands,
-  // etc.)
+  // ...or anything else allowing any kind of user input(s)
+  // ex:
+  // -> admin commands
+  // -> game loop
+  // -> etc.
   //
 
   while (true) {

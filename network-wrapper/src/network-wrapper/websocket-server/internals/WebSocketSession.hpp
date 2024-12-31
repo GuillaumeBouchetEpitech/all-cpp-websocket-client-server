@@ -5,28 +5,23 @@
 #error this file should only be included for a native build
 #endif
 
-#include "../../utilities/TestAndSetAtomicLock.hpp"
+#include "../../utilities/SafeQueue.hpp"
 
 #include "../IWebSocketSession.hpp"
 #include "../callbacks.hpp"
 
 #include "boostHeaders.hpp"
 
-#include <list>
-#include <memory>
-#include <mutex>
 
-constexpr std::size_t max_send_buffer_size = 255;
-
-// Echoes back all received WebSocket messages
 class WebSocketSession : public IWebSocketSession, public std::enable_shared_from_this<WebSocketSession> {
 
 private:
   struct SendBuffer {
     std::size_t size = 0;
-    char data[max_send_buffer_size];
+    std::unique_ptr<char[]> data;
 
     SendBuffer(const char* data, std::size_t size);
+    ~SendBuffer() = default;
   };
 
 
@@ -39,9 +34,8 @@ public:
     boost::asio::ip::tcp::socket&& socket,
     bool useBoostStrands,
     std::shared_ptr<net::strand<net::any_io_executor>> strand,
-    const ws_callbacks::OnConnection& onConnectionCallback,
-    const ws_callbacks::OnDisconnection& onDisconnectionCallback,
-    const ws_callbacks::OnMessage& onMessageCallback);
+    const ws_callbacks::AllCallbacks& allCallbacks
+    );
 
   WebSocketSession(const WebSocketSession& other) = delete;
   WebSocketSession& operator=(const WebSocketSession& other) = delete;
@@ -64,19 +58,18 @@ private:
   void _onRead(beast::error_code ec, std::size_t bytes_transferred);
   void _onWrite(beast::error_code ec, std::size_t bytes_transferred);
   void _doWrite();
-  void _failed(beast::error_code ec, char const* what);
+  void _connectionError(beast::error_code ec, char const* what);
 
 private:
   bool _isConnected = true;
   websocket::stream<beast::tcp_stream> _ws;
   std::shared_ptr<net::strand<net::any_io_executor>> _strand;
   bool _useBoostStrands;
-  beast::flat_buffer _buffer;
-  const ws_callbacks::OnConnection& _onConnectionCallback;
-  const ws_callbacks::OnDisconnection& _onDisconnectionCallback;
-  const ws_callbacks::OnMessage& _onMessageCallback;
+  beast::flat_buffer _readBuffer;
 
-  // std::mutex _writeMutex;
-  TestAndSetAtomicLock _atomicLock;
-  std::list<SendBuffer> _buffersToSend;
+  SafeQueue<SendBuffer> _sendBufferSafeQueue;
+
+  const ws_callbacks::AllCallbacks& _allCallbacks;
+
+
 };

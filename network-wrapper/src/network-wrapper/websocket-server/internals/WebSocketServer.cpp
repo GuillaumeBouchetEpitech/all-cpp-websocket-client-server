@@ -29,17 +29,17 @@ WebSocketServer::~WebSocketServer() { stop(); }
 
 void
 WebSocketServer::setOnConnectionCallback(const ws_callbacks::OnConnection& onConnectionCallback) {
-  _onConnectionCallback = onConnectionCallback;
+  _allCallbacks.onConnection = onConnectionCallback;
 }
 
 void
 WebSocketServer::setOnDisconnectionCallback(const ws_callbacks::OnDisconnection& onDisconnectionCallback) {
-  _onDisconnectionCallback = onDisconnectionCallback;
+  _allCallbacks.onDisconnection = onDisconnectionCallback;
 }
 
 void
 WebSocketServer::setOnMessageCallback(const ws_callbacks::OnMessage& onMessageCallback) {
-  _onMessageCallback = onMessageCallback;
+  _allCallbacks.onMessage = onMessageCallback;
 }
 
 void
@@ -61,9 +61,8 @@ WebSocketServer::start() {
       std::move(newSocket),
       useBoostStrands,
       _sharedStrand,
-      _onConnectionCallback,
-      _onDisconnectionCallback,
-      _onMessageCallback);
+      _allCallbacks
+    );
 
     newSession->run();
   });
@@ -71,8 +70,9 @@ WebSocketServer::start() {
   _mainTcpListener->start();
 
   // Run the I/O service on the requested number of threads
-  _allThreads.reserve(_totalThreads);
+  _allThreads.reserve(_totalThreads); // pre-allocate
   for (uint32_t index = 0; index < _totalThreads; ++index) {
+    // emplace_back ensure the thread no move/realloc
     _allThreads.emplace_back([this]() { _ioc.run(); });
   }
 }

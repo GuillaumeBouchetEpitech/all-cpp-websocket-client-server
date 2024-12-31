@@ -5,12 +5,15 @@
 
 //------------------------------------------------------------------------------
 
-WebSocketSession::SendBuffer::SendBuffer(const char* dataToSend, std::size_t dataSize) : size(dataSize) {
-  if (dataSize > max_send_buffer_size) {
-    throw std::runtime_error("send buffer requested size is too big");
+WebSocketSession::SendBuffer::SendBuffer(const char* dataToSend, std::size_t dataSize) {
+  if (dataSize == 0) {
+    throw std::runtime_error("send buffer requested size cannot be 0");
   }
 
-  std::memcpy(data, dataToSend, dataSize);
+  this->size = dataSize;
+  this->data = std::make_unique<char[]>(dataSize);
+
+  std::memcpy(this->data.get(), dataToSend, dataSize);
 }
 
 //
@@ -24,12 +27,14 @@ WebSocketSession::WebSocketSession(
   boost::asio::ip::tcp::socket&& socket,
   bool useBoostStrands,
   std::shared_ptr<net::strand<net::any_io_executor>> strand,
-  const ws_callbacks::OnConnection& onConnectionCallback,
-  const ws_callbacks::OnDisconnection& onDisconnectionCallback,
-  const ws_callbacks::OnMessage& onMessageCallback)
-  : _ws(std::move(socket)), _strand(strand), _useBoostStrands(useBoostStrands),
-    _onConnectionCallback(onConnectionCallback), _onDisconnectionCallback(onDisconnectionCallback),
-    _onMessageCallback(onMessageCallback) {}
+  const ws_callbacks::AllCallbacks& allCallbacks
+)
+  : _ws(std::move(socket))
+  , _strand(strand)
+  , _useBoostStrands(useBoostStrands)
+  , _allCallbacks(allCallbacks)
+{
+}
 
 WebSocketSession::~WebSocketSession() { disconnect(); }
 
@@ -64,14 +69,10 @@ WebSocketSession::disconnect() {
 void
 WebSocketSession::write(const char* data, std::size_t length) {
 
-  // std::lock_guard lock(_writeMutex);
-  ScopedAtomicLock lock(_atomicLock);
+  const std::size_t newSize = _sendBufferSafeQueue.emplaceBack(data, length);
 
-  const bool wasEmpty = _buffersToSend.empty();
-
-  _buffersToSend.push_back(SendBuffer(data, length));
-
-  if (wasEmpty == false) {
+  if (newSize > 1) {
+    // assume the next _onWrite callback will pick it up
     return;
   }
 
@@ -110,11 +111,11 @@ WebSocketSession::_onAccept(beast::error_code ec) {
   auto self = shared_from_this();
 
   if (ec) {
-    return _failed(ec, "accept");
+    return _connectionError(ec, "accept");
   }
 
-  if (_onConnectionCallback) {
-    _onConnectionCallback(self);
+  if (_allCallbacks.onConnection) {
+    _allCallbacks.onConnection(self);
   }
 
   // Read a message
@@ -132,7 +133,7 @@ WebSocketSession::_doRead() {
   auto self = shared_from_this();
 
   // Read a message into our buffer
-  _ws.async_read(_buffer, beast::bind_front_handler(&WebSocketSession::_onRead, self));
+  _ws.async_read(_readBuffer, beast::bind_front_handler(&WebSocketSession::_onRead, self));
 }
 
 void
@@ -141,23 +142,19 @@ WebSocketSession::_onRead(beast::error_code ec, std::size_t bytes_transferred) {
 
   // This indicates that the session was closed
   if (ec) {
-    return _failed(ec, "read");
+    return _connectionError(ec, "read");
   }
 
-  // if (ec) {
-  //   return fail(ec, "read");
-  // }
-
-  if (_onMessageCallback) {
-    const auto& subBuffer = _buffer.data();
+  if (_allCallbacks.onMessage) {
+    const auto& subBuffer = _readBuffer.data();
     const char* dataPtr = static_cast<const char*>(subBuffer.data());
     const std::size_t dataLength = subBuffer.size();
 
-    _onMessageCallback(shared_from_this(), dataPtr, dataLength);
+    _allCallbacks.onMessage(shared_from_this(), dataPtr, dataLength);
   }
 
   // Clear the buffer
-  _buffer.consume(_buffer.size());
+  _readBuffer.consume(_readBuffer.size());
 
   // Do another read
   _doRead();
@@ -168,31 +165,27 @@ WebSocketSession::_onWrite(beast::error_code ec, std::size_t bytes_transferred) 
   boost::ignore_unused(bytes_transferred);
 
   if (ec) {
-    return _failed(ec, "write");
+    return _connectionError(ec, "write");
   }
 
-  // std::lock_guard lock(_writeMutex);
-  ScopedAtomicLock lock(_atomicLock);
-
-  if (_buffersToSend.empty() == false) {
-    _buffersToSend.pop_front();
-    if (_buffersToSend.empty() == false) {
-      _doWrite();
-    }
+  _sendBufferSafeQueue.popFront();
+  if (_sendBufferSafeQueue.empty() == false) {
+    _doWrite();
   }
+
 }
 
 void
 WebSocketSession::_doWrite() {
-  const SendBuffer& buffer = _buffersToSend.front();
+  const SendBuffer& buffer = _sendBufferSafeQueue.peekFront();
 
   _ws.async_write(
-    boost::asio::buffer(buffer.data, buffer.size),
+    boost::asio::buffer(buffer.data.get(), buffer.size),
     beast::bind_front_handler(&WebSocketSession::_onWrite, shared_from_this()));
 }
 
 void
-WebSocketSession::_failed(beast::error_code ec, char const* what) {
+WebSocketSession::_connectionError(beast::error_code ec, char const* what) {
   std::cerr << "WebSocketSession:failure \"" << what << "\": \"" << ec.message() << "\"" << std::endl;
   // if (_onErrorCallback) {
   //   _onErrorCallback(ec.message());
@@ -201,7 +194,7 @@ WebSocketSession::_failed(beast::error_code ec, char const* what) {
   // alternative disconnect
   _isConnected = false;
 
-  if (_onDisconnectionCallback) {
-    _onDisconnectionCallback(shared_from_this());
+  if (_allCallbacks.onDisconnection) {
+    _allCallbacks.onDisconnection(shared_from_this());
   }
 }
