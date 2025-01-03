@@ -3,7 +3,7 @@
 
 #include "network-wrapper/websocket-server/AbstractWebSocketServer.hpp"
 
-#include "session-manager/WebSocketSessionManager.hpp"
+#include "session-manager/AbstractWebSocketSessionManager.hpp"
 
 #include <memory>
 #include <vector>
@@ -11,7 +11,7 @@
 class WebSocketMainLogicServer {
 private:
   std::shared_ptr<AbstractWebSocketServer> _webSocketServer;
-  WebSocketSessionManager _sessionManager;
+  std::shared_ptr<AbstractWebSocketSessionManager> _sessionManager;
 
   int32_t _lastPlayerId = 1;
 

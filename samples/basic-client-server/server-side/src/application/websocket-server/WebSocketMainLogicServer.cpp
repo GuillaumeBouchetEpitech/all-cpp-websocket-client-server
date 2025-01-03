@@ -12,11 +12,18 @@ WebSocketMainLogicServer::WebSocketMainLogicServer(
   uint16_t port,
   uint32_t totalThreads,
   bool useStrands)
-  : _sessionManager(totalThreads > 1 && useStrands == false) // is locking?
 {
   _allPlayersData.reserve(1024);
 
   _webSocketServer = AbstractWebSocketServer::create(ipAddress, port, totalThreads, useStrands);
+
+  const bool isLocking = (totalThreads > 1 && useStrands == false);
+  if (isLocking) {
+    _sessionManager = AbstractWebSocketSessionManager::createThreadSafe();
+  } else {
+    // either only one thread or the use of strands will keep it it threadsafe by default
+    _sessionManager = AbstractWebSocketSessionManager::createThreadUnsafe();
+  }
 
   // feels easier to follow than directly using lambdas
   auto onNewClient = std::bind(&WebSocketMainLogicServer::_onNewClient, this, std::placeholders::_1);
@@ -72,7 +79,7 @@ WebSocketMainLogicServer::_onNewClient(std::shared_ptr<IWebSocketSession> newWsS
     sstr << "[BROADCAST][NEW CLIENT]: " << newPlayerData->id;
     const std::string messageToSend = sstr.str();
 
-    _sessionManager.forEachSession([&messageToSend](std::shared_ptr<IWebSocketSession> currWsSession) {
+    _sessionManager->forEachSession([&messageToSend](std::shared_ptr<IWebSocketSession> currWsSession) {
       currWsSession->write(messageToSend.data(), messageToSend.size());
     });
   }
@@ -81,7 +88,7 @@ WebSocketMainLogicServer::_onNewClient(std::shared_ptr<IWebSocketSession> newWsS
   //
   // add session
 
-  _sessionManager.addSession(newWsSession);
+  _sessionManager->addSession(newWsSession);
 
   {
     std::stringstream sstr;
@@ -118,7 +125,7 @@ WebSocketMainLogicServer::_onNewMessage(
 
     std::cout << "[WS] " << messageToSend << std::endl;
 
-    _sessionManager.forEachSession([&messageToSend, wsSession](std::shared_ptr<IWebSocketSession> currWsSession) {
+    _sessionManager->forEachSession([&messageToSend, wsSession](std::shared_ptr<IWebSocketSession> currWsSession) {
       if (wsSession != currWsSession) {
         currWsSession->write(messageToSend.data(), messageToSend.size());
       }
@@ -154,7 +161,7 @@ WebSocketMainLogicServer::_onLostClient(std::shared_ptr<IWebSocketSession> disco
   //
   // remove session
 
-  _sessionManager.removeSession(disconnectedWsSession);
+  _sessionManager->removeSession(disconnectedWsSession);
 
   //
   //
@@ -172,7 +179,7 @@ WebSocketMainLogicServer::_onLostClient(std::shared_ptr<IWebSocketSession> disco
   sstr << "[BROADCAST][CLIENT LEFT][WAS \"" << playerId << "\"]";
   const std::string messageToSend = sstr.str();
 
-  _sessionManager.forEachSession([&messageToSend](std::shared_ptr<IWebSocketSession> currWsSession) {
+  _sessionManager->forEachSession([&messageToSend](std::shared_ptr<IWebSocketSession> currWsSession) {
     currWsSession->write(messageToSend.data(), messageToSend.size());
   });
 };

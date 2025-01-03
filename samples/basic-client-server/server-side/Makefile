@@ -41,6 +41,7 @@ APP_SRC+=	\
 		$(DIR_APP_SRC)/https-server/file-manager/*.cpp \
 		$(DIR_APP_SRC)/websocket-server/*.cpp \
 		$(DIR_APP_SRC)/websocket-server/session-manager/*.cpp \
+		$(DIR_APP_SRC)/websocket-server/session-manager/internals/*.cpp \
 	)
 
 #
