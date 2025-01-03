@@ -25,7 +25,10 @@ public:
   virtual ~AbstractWebSocketSessionManager() = default;
 
 public:
+  [[nodiscard]]
   static std::shared_ptr<AbstractWebSocketSessionManager> createThreadSafe();
+
+  [[nodiscard]]
   static std::shared_ptr<AbstractWebSocketSessionManager> createThreadUnsafe();
 
 public:
