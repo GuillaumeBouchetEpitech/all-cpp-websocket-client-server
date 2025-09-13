@@ -35,7 +35,7 @@ NAME_LIB=		$(DIR_LIB)/network-wrapper.a
 else ifeq ($(build_platform),web-wasm)
 
 DIR_LIB=		./lib/wasm
-NAME_LIB=		$(DIR_LIB)/network-wrapper.bc
+NAME_LIB=		$(DIR_LIB)/network-wrapper.a
 
 endif
 

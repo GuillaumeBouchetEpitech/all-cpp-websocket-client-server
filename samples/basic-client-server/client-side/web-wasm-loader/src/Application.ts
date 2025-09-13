@@ -18,7 +18,7 @@ interface IModuleArgs {
 
 interface IMyModule extends IModuleArgs {
   cwrap: (name: string, returnVal: string | undefined, args: string[]) => any;
-  allocateUTF8: (value: string) => number;
+  stringToNewUTF8: (value: string) => number;
   _free: (value: number) => void;
 }
 
@@ -157,8 +157,8 @@ export class Application {
     //
     //
 
-    const hostStrPtr = this._module.allocateUTF8(host);
-    const portStrPtr = this._module.allocateUTF8(port);
+    const hostStrPtr = this._module.stringToNewUTF8(host);
+    const portStrPtr = this._module.stringToNewUTF8(port);
 
     this._wasmApplicationStartFunc(hostStrPtr, portStrPtr);
 

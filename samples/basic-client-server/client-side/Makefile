@@ -110,7 +110,7 @@ else ifeq ($(build_platform),web-wasm)
 CXX=em++
 AR=emar
 
-LDFLAGS+=	$(DIR_NETOWRK_WRAPPER_LIB)/lib/wasm/network-wrapper.bc
+LDFLAGS+=	$(DIR_NETOWRK_WRAPPER_LIB)/lib/wasm/network-wrapper.a
 
 LDFLAGS+=	-lwebsocket.js
 LDFLAGS+=	-s TOTAL_MEMORY=128Mb
@@ -119,7 +119,7 @@ LDFLAGS+= -s BINARYEN_IGNORE_IMPLICIT_TRAPS=1
 # LDFLAGS+= -s DISABLE_DEPRECATED_FIND_EVENT_TARGET_BEHAVIOR=0
 LDFLAGS+= -s EXPORTED_FUNCTIONS="['_free']"
 # LDFLAGS+= -s EXPORTED_RUNTIME_METHODS="['cwrap','_malloc','stringToUTF8','lengthBytesUTF8','UTF8ToString','allocateUTF8']"
-LDFLAGS+= -s EXPORTED_RUNTIME_METHODS="['cwrap','stringToUTF8','lengthBytesUTF8','UTF8ToString','allocateUTF8']"
+LDFLAGS+= -s EXPORTED_RUNTIME_METHODS="['cwrap','stringToUTF8','lengthBytesUTF8','UTF8ToString','stringToNewUTF8']"
 
 LDFLAGS+= -s EXPORT_NAME="clientWeb"
 LDFLAGS+= -s MODULARIZE=1

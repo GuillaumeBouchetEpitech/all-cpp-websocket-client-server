@@ -29,7 +29,7 @@ echo "###"
 echo "###"
 echo ""
 
-EMSDK_VERSION=3.1.44
+EMSDK_VERSION=3.1.74
 
 if [ -z "${EMSDK}" ]; then
 
