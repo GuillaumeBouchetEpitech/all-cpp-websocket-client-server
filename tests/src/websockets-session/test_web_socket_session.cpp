@@ -220,7 +220,7 @@ TEST(web_socket_session, simple_session_10000_ping_pong_messages_4_thread_strand
 
   constexpr uint32_t totalMsg = 10000;
   constexpr uint32_t totalThreads = 4;
-  constexpr bool useStrands = false; // must lock manually -> 4  threads
+  constexpr bool useStrands = false; // must lock manually -> 4 threads
 
   _runServer(totalMsg, totalThreads, useStrands);
 }

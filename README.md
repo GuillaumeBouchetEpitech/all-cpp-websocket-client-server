@@ -38,20 +38,6 @@ C++ Client-Server example
 
 ```mermaid
 
-%%{
-  init: {
-    'theme': 'base',
-    'themeVariables': {
-      'primaryColor': '#242424',
-      'primaryTextColor': '#DDD',
-      'primaryBorderColor': '#000',
-      'lineColor': '#A0A0A0',
-      'secondaryColor': '#454545',
-      'tertiaryColor': '#353535'
-    }
-  }
-}%%
-
   flowchart TB
 
     subgraph client-side [Client Side]
@@ -135,20 +121,6 @@ C++ Client-Server example
 
 ```mermaid
 
-%%{
-  init: {
-    'theme': 'base',
-    'themeVariables': {
-      'primaryColor': '#242424',
-      'primaryTextColor': '#DDD',
-      'primaryBorderColor': '#000',
-      'lineColor': '#A0A0A0',
-      'secondaryColor': '#454545',
-      'tertiaryColor': '#353535'
-    }
-  }
-}%%
-
   flowchart TD
 
     subgraph server-side [Server Side]
@@ -196,20 +168,6 @@ C++ Client-Server example
 
 
 ```mermaid
-
-%%{
-  init: {
-    'theme': 'base',
-    'themeVariables': {
-      'primaryColor': '#242424',
-      'primaryTextColor': '#DDD',
-      'primaryBorderColor': '#000',
-      'lineColor': '#A0A0A0',
-      'secondaryColor': '#454545',
-      'tertiaryColor': '#353535'
-    }
-  }
-}%%
 
   flowchart TD
 
@@ -260,8 +218,8 @@ C++ Client-Server example
       * [which is a more efficient way to use multi-threading](https://www.crazygaze.com/blog/2016/03/17/how-strands-work-and-why-you-should-use-them/)
 * benefit(s) of the wrapper
   * easily reusable
-  * make boost (very) slow compilation happens only once
-  * allow the client-side to work in native and wasm with nearly the same code
+  * make boost (very) slow compilation happens only once (thanks to [pimpl](https://en.cppreference.com/w/cpp/language/pimpl.html))
+  * allow the client-side to work in native and wasm with minimal code differences
 
 
 * all of the network code is abstracted and located in the network-wrapper
@@ -272,28 +230,11 @@ C++ Client-Server example
 
 ```mermaid
 
-%%{
-  init: {
-    'theme': 'base',
-    'themeVariables': {
-      'primaryColor': '#242424',
-      'primaryTextColor': '#DDD',
-      'primaryBorderColor': '#000',
-      'lineColor': '#A0A0A0',
-      'secondaryColor': '#454545',
-      'tertiaryColor': '#353535'
-    }
-  }
-}%%
-
 mindmap
   root(("network<br>wrapper"))
     http_server)"http server"(
     ws_server)"websocket<br>server"(
     ws_client)"websocket<br>native/wasm<br>client"(
-
-
-
 
 ```
 
@@ -319,8 +260,7 @@ mindmap
 ## Build Everything (client + server side, also run the server)
 
 ```bash
-chmod +x ./sh_build_everything.sh
-./sh_build_everything.sh
+sh ./scripts/sh_build_with_cmake.sh
 # will:
 # -> build the client C++ application (wasm)
 # -> build the client TypeScript wasm-loader (JavaScript)
@@ -339,10 +279,10 @@ chmod +x ./sh_build_everything.sh
 ```bash
 # the server need to be started from the "./server-side" folder
 # -> mainly since this is where the "files/" folder is located
-cd ./server-side
+cd ./samples/basic-client-server/server-side
 
-#           ip-address  http-port  ws-port  http-threads  ws-threads
-./bin/exec  127.0.0.1   7777       8888     1             1
+#             ip-address  http-port  ws-port  http-threads  ws-threads
+./bin/server  127.0.0.1   7777       8888     1             1
 ```
 
 ## Step 2 - Load The Client

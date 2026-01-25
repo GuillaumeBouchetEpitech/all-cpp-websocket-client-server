@@ -110,5 +110,11 @@
     "source_location": "cpp",
     "numbers": "cpp",
     "__verbose_abort": "cpp"
-  }
+  },
+  "cmake.sourceDirectory": "${workspaceFolder}",
+  "cmake.buildDirectory": "${workspaceFolder}/build.vscode.cache",
+  "cSpell.words": [
+    "emscripten",
+    "emsdk"
+  ]
 }

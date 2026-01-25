@@ -64,7 +64,7 @@ export class Application {
     const fetchStartTime = Date.now();
 
     // this will globally expose the wasm functions
-    await scriptLoadingUtility(`./${wasmFolder}/index.js`);
+    await scriptLoadingUtility(`./${wasmFolder}/client.js`);
 
     const fetchStopTime = Date.now();
     const fetchElapsedTime = ((fetchStopTime - fetchStartTime) / 1000).toFixed(3);

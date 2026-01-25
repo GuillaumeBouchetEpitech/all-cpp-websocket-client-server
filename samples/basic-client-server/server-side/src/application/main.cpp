@@ -26,7 +26,7 @@ main(int argc, char* argv[]) {
   if (argc != 6) {
     std::cerr << "Usage: " << argv[0] << " <ip-address> <http-port> <ws-port> <http-threads> <ws-threads>\n"
               << "Example:\n"
-              << "    " << argv[0] << " 0.0.0.0 7777 8888 1 1\n";
+              << "    " << argv[0] << " 127.0.0.1 7777 8888 1 1\n";
     return EXIT_FAILURE;
   }
 

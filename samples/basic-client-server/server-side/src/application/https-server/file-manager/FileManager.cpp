@@ -1,7 +1,7 @@
 
 #include "FileManager.hpp"
 
-#include "gzip/compress.hpp"
+#include "./gzip/compress.hpp"
 
 #include <chrono>
 #include <filesystem>

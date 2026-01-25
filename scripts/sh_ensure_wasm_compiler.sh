@@ -1,8 +1,8 @@
 #!/bin/bash
 
-clear
+# clear
 
-CURRENT_DIR=$PWD
+INITIAL_CWD=$PWD
 
 #
 #
@@ -12,8 +12,6 @@ CURRENT_DIR=$PWD
 
 DIR_THIRDPARTIES=$PWD/thirdparties
 DIR_DEPENDENCIES=$DIR_THIRDPARTIES/dependencies
-
-mkdir -p "$DIR_DEPENDENCIES"
 
 #
 #
@@ -36,13 +34,14 @@ if [ -z "${EMSDK}" ]; then
   echo " -> not installed"
   echo "   -> installing"
 
-  echo "the env var 'EMSDK' is missing, the web-wasm builds will be skipped"
-  echo " => check the readme if you want to install emscripten"
-  echo " => it emscripten is laready installed, you may just need to run '. ./emsdk_env.sh' in this terminal"
+  # echo "the env var 'EMSDK' is missing, the web-wasm builds will be skipped"
+  # echo " => check the readme if you want to install emscripten"
+  # echo " => if emscripten is already installed, you may just need to run '. ./emsdk_env.sh' in this terminal"
 
+  mkdir -p "$DIR_DEPENDENCIES"
 
   # will not do anything if already present
-  sh sh_install_one_git_thirdparty.sh \
+  sh ./scripts/sh_install_one_git_thirdparty.sh \
     "$DIR_DEPENDENCIES" \
     "EMSDK" \
     "emsdk" \
@@ -63,6 +62,9 @@ fi
 
 echo " -> ensuring the correct version is installed"
 
+# since the ./emsdk command can be a bit chatty
+export EMSDK_QUIET=1
+
 ./emsdk install $EMSDK_VERSION || exit 1
 
 echo " -> activating the correct version"
@@ -74,6 +76,12 @@ echo " -> activating the correct version"
 # sometimes required? (suspected hiccups in emsdk)
 # em++ --clear-cache
 
-cd "$CURRENT_DIR" || exit 1
+cd "$INITIAL_CWD" || exit 1
 
 echo " -> success, the 'C++ to WebAssembly compiler (emsdk)' is ready"
+
+echo ""
+echo "###"
+echo "### DONE!"
+echo "###"
+echo ""
