@@ -55,6 +55,7 @@ echo "#"
 echo ""
 
 tree -Dh ./network-wrapper/lib
+tree -Dh ./tests/bin
 tree -Dh ./samples/basic-client-server/server-side/bin
 tree -Dh ./samples/basic-client-server/client-side/bin
 tree -Dh ./samples/basic-client-server/client-side/dist

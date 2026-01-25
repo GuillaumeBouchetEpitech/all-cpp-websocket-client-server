@@ -32,7 +32,6 @@ _runServer(uint32_t totalMsg = 10000U, const uint32_t totalThreads = 4, const bo
 
   auto _webSocketServer = AbstractWebSocketServer::create(ipAddress, port, totalThreads, useStrands);
   _webSocketServer->setOnConnectionCallback([&_wsSession](std::shared_ptr<IWebSocketSession> newWsSession) {
-    // static_cast<void>(newWsSession); // unused
 
     _wsSession = newWsSession;
 
@@ -42,8 +41,6 @@ _runServer(uint32_t totalMsg = 10000U, const uint32_t totalThreads = 4, const bo
   _webSocketServer->setOnMessageCallback(
     [useStrands, &_serverMutex, &serverReceived](
       std::shared_ptr<IWebSocketSession> wsSession, const char* dataPtr, std::size_t dataLength) {
-      // std::cout << "[SERVER] client messaged -> " <<
-      // std::string_view(dataPtr, dataLength) << std::endl;
 
       std::string_view messageToSend = "pong!";
 

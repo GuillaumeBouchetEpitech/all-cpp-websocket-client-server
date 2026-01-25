@@ -41,3 +41,4 @@ endif()
 
 add_subdirectory(./network-wrapper)
 add_subdirectory(./samples/basic-client-server)
+add_subdirectory(./tests)
