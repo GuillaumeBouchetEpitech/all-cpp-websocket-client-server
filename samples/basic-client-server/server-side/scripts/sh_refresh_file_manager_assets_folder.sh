@@ -1,9 +1,8 @@
 #!/bin/bash
 
 
-echo "pwd -> $PWD"
-
 echo " -> refreshing the server files"
+
 rm -rf ./files
 mkdir -p ./files
 cp -rf ../client-side/dist/* ./files/
