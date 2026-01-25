@@ -2,9 +2,8 @@
 Checks:          'clang-diagnostic-*,clang-analyzer-*'
 WarningsAsErrors: ''
 HeaderFilterRegex: ''
-AnalyzeTemporaryDtors: false
+# AnalyzeTemporaryDtors: false
 FormatStyle:     none
-User:            barbie
 CheckOptions:
   - key:             cert-dcl16-c.NewSuffixes
     value:           'L;LL;LU;LLU'
