@@ -228,15 +228,7 @@ C++ Client-Server example
 
 
 
-```mermaid
-
-mindmap
-  root(("network<br>wrapper"))
-    http_server)"http server"(
-    ws_server)"websocket<br>server"(
-    ws_client)"websocket<br>native/wasm<br>client"(
-
-```
+![diagrams/mindmap.svg](diagrams/mindmap.svg)
 
 
 

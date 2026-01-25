@@ -1,0 +1,69 @@
+digraph {
+
+  // bgcolor="#aaaaaa"
+  bgcolor="transparent"
+
+  compound=true;
+
+  rankdir="LR"
+
+
+  node [
+    shape="box"
+    style=filled
+    fontcolor="#eeeeee"
+    fillcolor="#666644"
+  ]
+
+  edge [
+    fontcolor="#aa0000"
+    color="#aaaaaa"
+
+    penwidth=4.0
+
+    len=0.2
+    // minlen=10.0
+  ]
+
+  network_wrapper [label="network\nwrapper" shape=ellipse]
+
+
+  node [
+    shape="box"
+    style=filled
+    fontcolor="#eeeeee"
+    fillcolor="#666666"
+  ]
+
+  ws_client [label="websocket client\nnative/wasm\nclient"]
+  network_wrapper -> ws_client
+
+  node [
+    shape="box"
+    style=filled
+    fontcolor="#eeeeee"
+    fillcolor="#664444"
+  ]
+
+  edge [
+    color="#aa0000"
+  ]
+
+  ws_server [label="websocket server"]
+  network_wrapper -> ws_server
+
+  node [
+    shape="box"
+    style=filled
+    fontcolor="#eeeeee"
+    fillcolor="#446644"
+  ]
+
+  edge [
+    color="#00aa00"
+  ]
+
+  http_server [label="http server"]
+  network_wrapper -> http_server
+
+}
