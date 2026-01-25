@@ -20,8 +20,7 @@ public:
     const std::string& ipAddress,
     uint16_t port,
     uint32_t totalThreads = 1,
-    bool useStrands = false
-  );
+    bool useStrands = false);
 
   WebSocketServer(const WebSocketServer& other) = delete;
   WebSocketServer(WebSocketServer&& other) = delete;

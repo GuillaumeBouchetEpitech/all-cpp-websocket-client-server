@@ -1,13 +1,10 @@
 
 
-
 #pragma once
 
 #include <functional>
-#include <string_view>
 #include <memory>
-
-
+#include <string_view>
 
 class AbstractWebSocketConnection {
 public:
@@ -45,7 +42,4 @@ public:
 
 public:
   [[nodiscard]] static std::shared_ptr<AbstractWebSocketConnection> create();
-
 };
-
-

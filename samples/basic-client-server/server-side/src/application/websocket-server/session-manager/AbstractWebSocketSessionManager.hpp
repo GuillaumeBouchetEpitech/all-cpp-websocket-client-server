@@ -37,4 +37,3 @@ public:
   virtual void forEachSession(const std::function<void(SessionPtr)>& callback) = 0;
   virtual void forEachSession(const std::function<void(SessionPtr)>& callback) const = 0;
 };
-

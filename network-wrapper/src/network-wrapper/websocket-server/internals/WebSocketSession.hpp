@@ -12,8 +12,9 @@
 
 #include "boostHeaders.hpp"
 
-
-class WebSocketSession : public IWebSocketSession, public std::enable_shared_from_this<WebSocketSession> {
+class WebSocketSession
+  : public IWebSocketSession
+  , public std::enable_shared_from_this<WebSocketSession> {
 
 private:
   struct SendBuffer {
@@ -24,7 +25,6 @@ private:
     ~SendBuffer() = default;
   };
 
-
 public:
   void* userData = nullptr;
 
@@ -34,8 +34,7 @@ public:
     boost::asio::ip::tcp::socket&& socket,
     bool useBoostStrands,
     std::shared_ptr<net::strand<net::any_io_executor>> strand,
-    const ws_callbacks::AllCallbacks& allCallbacks
-    );
+    const ws_callbacks::AllCallbacks& allCallbacks);
 
   WebSocketSession(const WebSocketSession& other) = delete;
   WebSocketSession& operator=(const WebSocketSession& other) = delete;
@@ -70,6 +69,4 @@ private:
   SafeQueue<SendBuffer> _sendBufferSafeQueue;
 
   const ws_callbacks::AllCallbacks& _allCallbacks;
-
-
 };

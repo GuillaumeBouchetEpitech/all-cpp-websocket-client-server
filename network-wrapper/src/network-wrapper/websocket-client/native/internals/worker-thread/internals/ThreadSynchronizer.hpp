@@ -44,4 +44,3 @@ public:
   [[nodiscard]] ScopedLockedNotifier makeScopedLockNotifier();
   [[nodiscard]] bool isNotified() const;
 };
-

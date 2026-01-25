@@ -7,15 +7,13 @@
 
 #include "../../AbstractWebSocketConnection.hpp"
 
-
 #include "../../../utilities/TestAndSetAtomicLock.hpp"
-
 
 #include "worker-thread/AbstractWorkerThread.hpp"
 
+#include <boost/asio/strand.hpp>
 #include <boost/beast/core.hpp>
 #include <boost/beast/websocket.hpp>
-#include <boost/asio/strand.hpp>
 #include <cstdlib>
 #include <functional>
 #include <memory>
@@ -30,16 +28,14 @@ namespace websocket = beast::websocket; // from <boost/beast/websocket.hpp>
 namespace net = boost::asio;            // from <boost/asio.hpp>
 using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
 
-
-
 constexpr std::size_t max_send_buffer_size = 255;
-
 
 //------------------------------------------------------------------------------
 
 // Sends a WebSocket message and prints the response
-class WebSocketConnection : public AbstractWebSocketConnection, public std::enable_shared_from_this<WebSocketConnection>
-{
+class WebSocketConnection
+  : public AbstractWebSocketConnection
+  , public std::enable_shared_from_this<WebSocketConnection> {
 private:
   struct SendBuffer {
     std::size_t size = 0;
@@ -50,34 +46,22 @@ private:
 
 public:
   // Resolver and socket require an io_context
-  explicit
-  WebSocketConnection();
+  explicit WebSocketConnection();
 
   ~WebSocketConnection();
 
 public:
   // Start the asynchronous operation
-  void
-  connect(
-    std::string_view ipAddress,
-    std::string_view port) override;
+  void connect(std::string_view ipAddress, std::string_view port) override;
 
 private:
-  void
-  on_resolve(
-    beast::error_code ec,
-    tcp::resolver::results_type results);
+  void on_resolve(beast::error_code ec, tcp::resolver::results_type results);
 
-  void
-  on_connect(beast::error_code ec, tcp::resolver::results_type::endpoint_type);
+  void on_connect(beast::error_code ec, tcp::resolver::results_type::endpoint_type);
 
-  void
-  on_handshake(beast::error_code ec);
+  void on_handshake(beast::error_code ec);
 
-  void
-  on_read(
-      beast::error_code ec,
-      std::size_t bytes_transferred);
+  void on_read(beast::error_code ec, std::size_t bytes_transferred);
 
 public:
   AbstractWebSocketConnection& setOnOpenCallback(const OnOpenCallback& inOnOpenCallback) override;
@@ -126,7 +110,6 @@ private:
   OnErrorCallback _onErrorCallback = nullptr;
   OnCloseCallback _onCloseCallback = nullptr;
   OnMessageCallback _onMessageCallback = nullptr;
-
 };
 
 //------------------------------------------------------------------------------

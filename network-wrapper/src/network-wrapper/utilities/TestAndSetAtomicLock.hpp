@@ -3,28 +3,24 @@
 
 #include <atomic>
 
-class TestAndSetAtomicLock
-{
+class TestAndSetAtomicLock {
 public:
   void lock();
   void unlock();
 
 private:
   std::atomic<bool> lock_ = {false};
-
 };
 
 //
 //
 //
 
-class ScopedAtomicLock
-{
+class ScopedAtomicLock {
 public:
   ScopedAtomicLock(TestAndSetAtomicLock& atomicLock);
   ~ScopedAtomicLock();
 
 private:
   TestAndSetAtomicLock& _atomicLock;
-
 };

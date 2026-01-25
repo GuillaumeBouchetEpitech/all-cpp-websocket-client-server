@@ -28,6 +28,4 @@ public:
 
 public:
   static std::unique_ptr<AbstractWorkerThread> create();
-
 };
-

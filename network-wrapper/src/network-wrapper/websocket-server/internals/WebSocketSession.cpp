@@ -27,14 +27,8 @@ WebSocketSession::WebSocketSession(
   boost::asio::ip::tcp::socket&& socket,
   bool useBoostStrands,
   std::shared_ptr<net::strand<net::any_io_executor>> strand,
-  const ws_callbacks::AllCallbacks& allCallbacks
-)
-  : _ws(std::move(socket))
-  , _strand(strand)
-  , _useBoostStrands(useBoostStrands)
-  , _allCallbacks(allCallbacks)
-{
-}
+  const ws_callbacks::AllCallbacks& allCallbacks)
+  : _ws(std::move(socket)), _strand(strand), _useBoostStrands(useBoostStrands), _allCallbacks(allCallbacks) {}
 
 WebSocketSession::~WebSocketSession() { disconnect(); }
 
@@ -172,7 +166,6 @@ WebSocketSession::_onWrite(beast::error_code ec, std::size_t bytes_transferred) 
   if (_sendBufferSafeQueue.empty() == false) {
     _doWrite();
   }
-
 }
 
 void

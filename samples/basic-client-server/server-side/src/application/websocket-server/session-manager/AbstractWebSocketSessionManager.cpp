@@ -6,14 +6,11 @@
 
 AbstractWebSocketSessionManager::AbstractWebSocketSessionManager() { _allSessions.reserve(1024); }
 
-std::shared_ptr<AbstractWebSocketSessionManager> AbstractWebSocketSessionManager::createThreadSafe()
-{
+std::shared_ptr<AbstractWebSocketSessionManager>
+AbstractWebSocketSessionManager::createThreadSafe() {
   return std::make_shared<ThreadSafeWebSocketSessionManager>();
 }
-std::shared_ptr<AbstractWebSocketSessionManager> AbstractWebSocketSessionManager::createThreadUnsafe()
-{
+std::shared_ptr<AbstractWebSocketSessionManager>
+AbstractWebSocketSessionManager::createThreadUnsafe() {
   return std::make_shared<ThreadUnsafeWebSocketSessionManager>();
 }
-
-
-

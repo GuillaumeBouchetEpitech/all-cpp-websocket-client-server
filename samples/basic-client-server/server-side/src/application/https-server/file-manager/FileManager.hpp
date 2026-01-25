@@ -36,6 +36,8 @@ private:
   std::shared_ptr<FileCacheEntry> _loadFile(const std::string& filename, const std::string& cacheKey);
 
 private:
-  static void
-  _getLastModifiedTime(const std::string_view& filename, const std::string_view& format, std::string& outLastModified);
+  static void _getLastModifiedTime(
+    const std::string_view& filename,
+    const std::string_view& format,
+    std::string& outLastModified);
 };

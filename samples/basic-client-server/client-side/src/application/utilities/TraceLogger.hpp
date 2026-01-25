@@ -21,9 +21,7 @@ public:
   std::string getData() const;
 
 public:
-  template <typename T>
-  TraceLogger&
-  operator<<(T data) {
+  template <typename T> TraceLogger& operator<<(T data) {
     _sstr << data;
     return *this;
   }
@@ -31,7 +29,6 @@ public:
 private:
   std::mutex _mutex;
   std::stringstream _sstr;
-
 };
 
 template <> TraceLogger& TraceLogger::operator<< <bool>(bool data);

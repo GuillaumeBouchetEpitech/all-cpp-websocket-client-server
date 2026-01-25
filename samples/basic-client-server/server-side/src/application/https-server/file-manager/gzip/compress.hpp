@@ -20,9 +20,7 @@ public:
     std::size_t max_bytes = 2000000000) // by default refuse operation if uncompressed data is > 2GB
     : max_(max_bytes), level_(level) {}
 
-  template <typename InputType>
-  void
-  compress(InputType& output, const char* data, std::size_t size) const {
+  template <typename InputType> void compress(InputType& output, const char* data, std::size_t size) const {
 
 #ifdef DEBUG
     // Verify if size input will fit into unsigned int, type used for zlib's

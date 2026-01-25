@@ -11,8 +11,7 @@ WebSocketMainLogicServer::WebSocketMainLogicServer(
   const std::string& ipAddress,
   uint16_t port,
   uint32_t totalThreads,
-  bool useStrands)
-{
+  bool useStrands) {
   _allPlayersData.reserve(1024);
 
   _webSocketServer = AbstractWebSocketServer::create(ipAddress, port, totalThreads, useStrands);

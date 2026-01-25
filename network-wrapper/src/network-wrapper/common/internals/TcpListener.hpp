@@ -13,7 +13,9 @@ class AbstractWebSocketSession;
 class WebSocketSession;
 
 // Accepts incoming connections and launches the sessions
-class TcpListener : public AbstractTcpListener, public std::enable_shared_from_this<TcpListener> {
+class TcpListener
+  : public AbstractTcpListener
+  , public std::enable_shared_from_this<TcpListener> {
   friend WebSocketSession;
 
 public:

@@ -9,5 +9,4 @@
 
 #include <memory>
 
-[[nodiscard]] std::shared_ptr<AbstractWebSocketConnection>
-createWebSocketConnection();
+[[nodiscard]] std::shared_ptr<AbstractWebSocketConnection> createWebSocketConnection();

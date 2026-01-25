@@ -35,5 +35,3 @@ ThreadUnsafeWebSocketSessionManager::forEachSession(const std::function<void(Ses
     callback(_allSessions[index]);
   }
 }
-
-

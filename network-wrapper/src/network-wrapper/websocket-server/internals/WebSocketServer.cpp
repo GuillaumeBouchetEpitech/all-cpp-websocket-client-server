@@ -57,12 +57,8 @@ WebSocketServer::start() {
     // -> since calling run() will make more shared pointer of the instance
     //    the session will not be deleted when going out of scope here...
     //    ...if anything it's just a bit misleading, hence that comment
-    auto newSession = std::make_shared<WebSocketSession>(
-      std::move(newSocket),
-      useBoostStrands,
-      _sharedStrand,
-      _allCallbacks
-    );
+    auto newSession =
+      std::make_shared<WebSocketSession>(std::move(newSocket), useBoostStrands, _sharedStrand, _allCallbacks);
 
     newSession->run();
   });

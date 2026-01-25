@@ -15,7 +15,9 @@
 
 #include <vector>
 
-class HttpServer : public AbstractHttpServer, public std::enable_shared_from_this<HttpServer> {
+class HttpServer
+  : public AbstractHttpServer
+  , public std::enable_shared_from_this<HttpServer> {
 
 public:
   HttpServer(const std::string& ipAddress, const uint16_t port, const uint32_t totalThreads = 1);

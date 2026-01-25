@@ -2,10 +2,10 @@
 #pragma once
 
 #include <boost/asio/dispatch.hpp>
+#include <boost/asio/execution/executor.hpp>
 #include <boost/asio/strand.hpp>
 #include <boost/beast/core.hpp>
 #include <boost/beast/websocket.hpp>
-#include <boost/asio/execution/executor.hpp>
 
 namespace beast = boost::beast;         // from <boost/beast.hpp>
 namespace http = beast::http;           // from <boost/beast/http.hpp>

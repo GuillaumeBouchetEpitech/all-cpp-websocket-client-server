@@ -33,6 +33,9 @@ public:
   virtual void stop() = 0;
 
 public:
-  [[nodiscard]] static std::shared_ptr<AbstractWebSocketServer>
-  create(const std::string& ipAddress, uint16_t port, uint32_t totalThreads = 1, bool useStrands = false);
+  [[nodiscard]] static std::shared_ptr<AbstractWebSocketServer> create(
+    const std::string& ipAddress,
+    uint16_t port,
+    uint32_t totalThreads = 1,
+    bool useStrands = false);
 };

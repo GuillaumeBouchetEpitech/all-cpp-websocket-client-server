@@ -20,4 +20,3 @@ public:
   void forEachSession(const std::function<void(AbstractWebSocketSessionManager::SessionPtr)>& callback);
   void forEachSession(const std::function<void(AbstractWebSocketSessionManager::SessionPtr)>& callback) const;
 };
-

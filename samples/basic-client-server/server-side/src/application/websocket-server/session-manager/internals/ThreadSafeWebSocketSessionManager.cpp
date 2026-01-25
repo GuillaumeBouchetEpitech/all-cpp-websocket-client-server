@@ -48,10 +48,3 @@ ThreadSafeWebSocketSessionManager::forEachSession(const std::function<void(Sessi
     callback(_allSessions[index]);
   }
 }
-
-
-
-
-
-
-
