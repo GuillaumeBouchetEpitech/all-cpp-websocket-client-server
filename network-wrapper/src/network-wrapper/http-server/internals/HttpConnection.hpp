@@ -38,7 +38,7 @@ private:
 
 private:
   boost::asio::ip::tcp::socket _tcpSocket;
-  beast::flat_buffer _readBuffer{8192};
+  beast::flat_buffer _readBuffer{8 * 1024}; // max of 8kb accepted at once
   http::request<http::dynamic_body> _requestBody;
   http::response<http::dynamic_body> _responseBody;
   net::steady_timer _connectionTimer{_tcpSocket.get_executor(), std::chrono::seconds(60)};

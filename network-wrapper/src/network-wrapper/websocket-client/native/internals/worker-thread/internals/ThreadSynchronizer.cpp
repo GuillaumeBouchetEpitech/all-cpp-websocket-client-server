@@ -25,28 +25,39 @@ ThreadSynchronizer::ScopedLockedNotifier::~ScopedLockedNotifier() {
 //
 //
 
-bool
-ThreadSynchronizer::waitUntilNotified(std::unique_lock<std::mutex>& lock, float seconds /*= 0.0f*/) {
+void
+ThreadSynchronizer::waitUntilNotified(std::unique_lock<std::mutex>& lock) {
   _isNotified = false;
 
-  // no need to wait for a timeout
-  if (seconds <= 0.0f) {
-    while (_isNotified == false) // loop to avoid spurious wakeups
-      _condVar.wait(lock);
+  while (_isNotified == false) { // loop to avoid "spurious wakeups"
+    _condVar.wait(lock);
+  }
+}
 
-    return true;
+ThreadSynchronizer::WaitResult
+ThreadSynchronizer::waitUntilNotified(std::unique_lock<std::mutex>& lock, float seconds) {
+
+  // defensive programming -> invalid input timeout value
+  if (seconds <= 0.0f) {
+    // here assuming the user do not wishes to wait
+    return WaitResult::timeoutWasIgnored;
   }
 
+  _isNotified = false;
+
   // we need to wait for a timeout
+  // -> compute the "future point in time" that must be reached for a timeout
   const int64_t millisecondsToWait = int64_t(seconds * 1000.0f);
-  auto timeoutPoint = std::chrono::system_clock::now();
-  timeoutPoint += std::chrono::milliseconds(millisecondsToWait);
+  auto timeoutTimePoint = std::chrono::system_clock::now();
+  timeoutTimePoint += std::chrono::milliseconds(millisecondsToWait);
 
-  while (_isNotified == false) // loop to avoid spurious wakeups
-    if (_condVar.wait_until(lock, timeoutPoint) == std::cv_status::timeout)
-      return false; // we did time out
+  while (_isNotified == false) { // loop to avoid "spurious wakeups"
+    if (_condVar.wait_until(lock, timeoutTimePoint) == std::cv_status::timeout) {
+      return WaitResult::hasTimedOut;
+    }
+  }
 
-  return true; // we did not time out
+  return WaitResult::didNotTimeout;
 }
 
 void

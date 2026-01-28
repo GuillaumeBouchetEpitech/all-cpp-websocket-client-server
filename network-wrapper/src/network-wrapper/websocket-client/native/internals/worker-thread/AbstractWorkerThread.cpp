@@ -5,5 +5,5 @@
 
 std::unique_ptr<AbstractWorkerThread>
 AbstractWorkerThread::create() {
-  return std::make_unique<WorkerThread>(false);
+  return std::make_unique<WorkerThread>(WorkerThread::LockingModel::lockThreads);
 }

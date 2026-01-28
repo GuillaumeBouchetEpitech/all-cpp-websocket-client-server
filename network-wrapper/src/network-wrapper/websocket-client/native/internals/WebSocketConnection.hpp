@@ -28,7 +28,7 @@ namespace websocket = beast::websocket; // from <boost/beast/websocket.hpp>
 namespace net = boost::asio;            // from <boost/asio.hpp>
 using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
 
-constexpr std::size_t max_send_buffer_size = 255;
+constexpr std::size_t max_send_buffer_size = 1024; // 1kb
 
 //------------------------------------------------------------------------------
 
@@ -39,14 +39,14 @@ class WebSocketConnection
 private:
   struct SendBuffer {
     std::size_t size = 0;
-    char data[max_send_buffer_size];
+    std::unique_ptr<char[]> data;
 
     SendBuffer(const char* data, std::size_t size);
   };
 
 public:
   // Resolver and socket require an io_context
-  explicit WebSocketConnection();
+  WebSocketConnection();
 
   ~WebSocketConnection();
 
@@ -98,7 +98,7 @@ private:
 
   tcp::resolver _resolver;
   websocket::stream<beast::tcp_stream> _ws;
-  beast::flat_buffer _readBuffer;
+  beast::flat_buffer _readBuffer{8 * 1024}; // max of 8kb accepted at once
   std::string _ipAddress;
   std::string _port;
 

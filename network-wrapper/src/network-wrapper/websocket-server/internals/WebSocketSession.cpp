@@ -36,7 +36,7 @@ WebSocketSession::~WebSocketSession() { disconnect(); }
 void
 WebSocketSession::run() {
 
-  // allow shared ownership to net::dispatch callback
+  // allow shared ownership to net::post callback
   auto self = shared_from_this();
 
   // We need to be executing within a strand to perform async operations

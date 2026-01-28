@@ -18,11 +18,14 @@ namespace net = boost::asio;            // from <boost/asio.hpp>
 using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
 
 WebSocketConnection::SendBuffer::SendBuffer(const char* dataToSend, std::size_t dataSize) : size(dataSize) {
-  if (dataSize > max_send_buffer_size) {
-    throw std::runtime_error("send buffer requested size is too big");
+  if (dataSize == 0) {
+    throw std::runtime_error("send buffer requested size cannot be 0");
   }
 
-  std::memcpy(data, dataToSend, dataSize);
+  this->size = dataSize;
+  this->data = std::make_unique<char[]>(dataSize);
+
+  std::memcpy(this->data.get(), dataToSend, dataSize);
 }
 
 //
@@ -212,6 +215,9 @@ WebSocketConnection::sendBinary(const void* inData, std::size_t inSize) {
 
   const bool wasEmpty = _buffersToSend.empty();
   _buffersToSend.push_back(SendBuffer(reinterpret_cast<const char*>(inData), inSize));
+  // _buffersToSend.push_back(beast::flat_buffer(inSize));
+
+  // std::memcpy(_buffersToSend.back().cdata(), reinterpret_cast<const char*>(inData), inSize);
 
   if (wasEmpty == true) {
     _doWrite();
@@ -269,7 +275,7 @@ WebSocketConnection::_doWrite() {
   const SendBuffer& buffer = _buffersToSend.front();
 
   _ws.async_write(
-    boost::asio::buffer(buffer.data, buffer.size),
+    boost::asio::buffer(buffer.data.get(), buffer.size),
     beast::bind_front_handler(&WebSocketConnection::_onWrite, shared_from_this()));
 }
 
@@ -292,6 +298,6 @@ WebSocketConnection::_startThread() {
 
 void
 WebSocketConnection::_stopThread() {
-  _workerThread->quit();
+  _workerThread->shutdown();
   _workerThread.reset(nullptr);
 }

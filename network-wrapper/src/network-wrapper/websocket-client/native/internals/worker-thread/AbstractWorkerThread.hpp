@@ -13,14 +13,17 @@ public:
   AbstractWorkerThread() = default;
   virtual ~AbstractWorkerThread() = default;
 
+  // disable copy
   AbstractWorkerThread(const AbstractWorkerThread& other) = delete;
   AbstractWorkerThread& operator=(const AbstractWorkerThread& other) = delete;
+
+  // disable move
   AbstractWorkerThread(AbstractWorkerThread&& other) = delete;
   AbstractWorkerThread& operator=(AbstractWorkerThread&& other) = delete;
 
 public:
   virtual void execute(const WorkCallback& inWorkCallback) = 0;
-  virtual void quit() = 0;
+  virtual void shutdown() = 0;
 
 public:
   [[nodiscard]] virtual bool isRunning() const = 0;

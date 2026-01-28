@@ -1,7 +1,8 @@
 
 #include "HttpConnection.hpp"
 
-HttpConnection::HttpConnection(boost::asio::ip::tcp::socket&& tcpSocket) : _tcpSocket(std::move(tcpSocket)) {}
+HttpConnection::HttpConnection(boost::asio::ip::tcp::socket&& tcpSocket) : _tcpSocket(std::move(tcpSocket)) {
+}
 
 HttpConnection&
 HttpConnection::setOnConnectionCallback(const http_callbacks::OnConnection& onConnectionCallback) {

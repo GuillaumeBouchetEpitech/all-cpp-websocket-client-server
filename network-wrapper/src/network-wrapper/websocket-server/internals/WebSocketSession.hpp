@@ -64,7 +64,7 @@ private:
   websocket::stream<beast::tcp_stream> _ws;
   std::shared_ptr<net::strand<net::any_io_executor>> _strand;
   bool _useBoostStrands;
-  beast::flat_buffer _readBuffer;
+  beast::flat_buffer _readBuffer{8 * 1024};  // max of 8kb accepted at once
 
   SafeQueue<SendBuffer> _sendBufferSafeQueue;
 

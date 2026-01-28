@@ -10,28 +10,27 @@
 #include <thread>
 
 class WorkerThread : public AbstractWorkerThread {
-private:
-  std::thread _thread;
-  ThreadSynchronizer _setupSynchronizer;
-  ThreadSynchronizer _taskSynchronizer;
-
-  bool _isRunning = false;
-  bool _avoidBlocking = false;
-
-  AbstractWorkerThread::WorkCallback _workCallback;
+public:
+  enum class LockingModel {
+    lockThreads,
+    avoidLocking
+  };
 
 public:
-  explicit WorkerThread(bool inAvoidBlocking);
+  WorkerThread(LockingModel lockingModel);
   ~WorkerThread();
 
+  // disable copy
   WorkerThread(const WorkerThread& other) = delete;
   WorkerThread& operator=(const WorkerThread& other) = delete;
+
+  // disable move
   WorkerThread(WorkerThread&& other) = delete;
   WorkerThread& operator=(WorkerThread&& other) = delete;
 
 public:
   void execute(const AbstractWorkerThread::WorkCallback& inWorkCallback) override;
-  void quit() override;
+  void shutdown() override;
 
 public:
   [[nodiscard]] bool isRunning() const override;
@@ -39,4 +38,14 @@ public:
 
 private:
   void _threadedMethod();
+
+private:
+  std::thread _thread;
+  ThreadSynchronizer _setupSynchronizer;
+  ThreadSynchronizer _taskSynchronizer;
+
+  bool _isRunning = false;
+  LockingModel _lockingModel;
+
+  AbstractWorkerThread::WorkCallback _workCallback;
 };
