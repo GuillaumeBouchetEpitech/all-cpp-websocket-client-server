@@ -68,7 +68,7 @@ WebSocketServer::start() {
   // Run the I/O service on the requested number of threads
   _allThreads.reserve(_totalThreads); // pre-allocate
   for (uint32_t index = 0; index < _totalThreads; ++index) {
-    // emplace_back ensure the thread no move/realloc
+    // emplace_back ensure the thread is not moved/reallocated
     _allThreads.emplace_back([this]() { _ioc.run(); });
   }
 }

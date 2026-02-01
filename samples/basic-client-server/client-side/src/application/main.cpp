@@ -22,13 +22,11 @@ main() {
   auto const host = "127.0.0.1";
   auto const port = "8888";
 
-  Application* _myApplication = nullptr;
-
-  _myApplication = new Application();
-  _myApplication->connect(host, port);
+  Application _myApplication;
+  _myApplication.connect(host, port);
 
   // native dumb "main loop"
-  while (!_myApplication->isDone()) {
+  while (!_myApplication.isDone()) {
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
   }
 

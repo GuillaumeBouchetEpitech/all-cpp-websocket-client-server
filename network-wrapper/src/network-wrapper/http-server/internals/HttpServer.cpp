@@ -42,17 +42,17 @@ HttpServer::start() {
     //    the http-connection will not be deleted when going out of scope
     //    here...
     //    ...if anything it's just a bit misleading, hence that comment
-    auto newClient = std::make_shared<HttpConnection>(std::move(newSocket));
-    newClient->setOnConnectionCallback(self->_onConnectionCallback);
-    newClient->start();
+    auto newConnection = std::make_shared<HttpConnection>(std::move(newSocket));
+    newConnection->start(self->_onConnectionCallback);
   });
 
   _mainTcpListener->start();
 
   // Run the I/O service on the requested number of threads
-  _allThreads.reserve(_totalThreads);
+  _allThreads.reserve(_totalThreads); // pre-allocate
   for (uint32_t index = 0; index < _totalThreads; ++index) {
-    _allThreads.emplace_back([this] { _ioc.run(); });
+    // emplace_back ensure the thread is not moved/reallocated
+    _allThreads.emplace_back([this]() { _ioc.run(); });
   }
 }
 

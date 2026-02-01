@@ -35,7 +35,11 @@ endif()
 
 if (DEFINED EMSCRIPTEN)
 
-    execute_process (COMMAND sh ./scripts/sh_ensure_wasm_compiler.sh WORKING_DIRECTORY .)
+    execute_process(
+        COMMAND
+            sh ./scripts/sh_ensure_wasm_compiler.sh
+        WORKING_DIRECTORY .
+    )
 
 endif()
 

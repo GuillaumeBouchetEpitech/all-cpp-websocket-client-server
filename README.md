@@ -28,7 +28,7 @@ C++ Client-Server example
 * is written in C++ and compiled to WebAssembly
   * which offer the (currently) highest performance possible within a browser
     * `1.7x slower than native speed`
-    * `or ~5-6 times faster than JavaScript` (also devoid of GC slowdown)
+    * `or ~5-6 times faster than JavaScript` (also `devoid of GC slowdown`)
 * will connect to the server with a websocket inside the WebAssembly logic
   * the connection is established using a config fetched from the server-side (easily configured if needed)
 * `a native version` of the client is also available

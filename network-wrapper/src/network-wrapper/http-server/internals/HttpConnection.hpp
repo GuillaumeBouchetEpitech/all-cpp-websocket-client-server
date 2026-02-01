@@ -17,11 +17,8 @@ public:
   HttpConnection(boost::asio::ip::tcp::socket&& tcp_socket);
 
 public:
-  HttpConnection& setOnConnectionCallback(const http_callbacks::OnConnection& on_connection_callback);
-
-public:
   // Initiate the asynchronous operations associated with the connection.
-  void start();
+  void start(const http_callbacks::OnConnection& onConnectionCallback);
 
 private:
   // Asynchronously receive a complete request message.

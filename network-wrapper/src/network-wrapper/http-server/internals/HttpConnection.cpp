@@ -4,15 +4,10 @@
 HttpConnection::HttpConnection(boost::asio::ip::tcp::socket&& tcpSocket) : _tcpSocket(std::move(tcpSocket)) {
 }
 
-HttpConnection&
-HttpConnection::setOnConnectionCallback(const http_callbacks::OnConnection& onConnectionCallback) {
-  _onConnectionCallback = onConnectionCallback;
-  return *this;
-}
-
 // Initiate the asynchronous operations associated with the connection.
 void
-HttpConnection::start() {
+HttpConnection::start(const http_callbacks::OnConnection& onConnectionCallback) {
+  _onConnectionCallback = onConnectionCallback;
   _readRequest();
   _checkConnectionTimeout();
 }

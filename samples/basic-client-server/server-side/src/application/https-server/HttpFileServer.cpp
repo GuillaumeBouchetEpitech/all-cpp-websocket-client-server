@@ -15,19 +15,18 @@ HttpFileServer::HttpFileServer(
   uint32_t totalThreads)
   : _fileManager(basePath) {
   _httpServer = AbstractHttpServer::create(ipAddress, httpPort, totalThreads);
-}
-
-HttpFileServer::~HttpFileServer() { _httpServer->stop(); }
-
-void
-HttpFileServer::start() {
 
   // feels easier to follow than directly using lambdas
   auto onNewConnection =
     std::bind(&HttpFileServer::_onNewConnection, this, std::placeholders::_1, std::placeholders::_2);
 
   _httpServer->setOnConnectionCallback(onNewConnection);
+}
 
+HttpFileServer::~HttpFileServer() { _httpServer->stop(); }
+
+void
+HttpFileServer::start() {
   _httpServer->start();
 }
 

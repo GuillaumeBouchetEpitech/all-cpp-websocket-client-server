@@ -16,11 +16,11 @@ WebSocketMainLogicServer::WebSocketMainLogicServer(
 
   _webSocketServer = AbstractWebSocketServer::create(ipAddress, port, totalThreads, useStrands);
 
-  const bool isLocking = (totalThreads > 1 && useStrands == false);
+  const bool isLocking = (totalThreads > 1);
   if (isLocking) {
     _sessionManager = AbstractWebSocketSessionManager::createThreadSafe();
   } else {
-    // either only one thread or the use of strands will keep it it threadsafe by default
+    // only one thread -> is threadsafe by default
     _sessionManager = AbstractWebSocketSessionManager::createThreadUnsafe();
   }
 
